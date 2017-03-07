@@ -86,6 +86,7 @@ namespace AtelierXNA.Menus
                 {
                     CptCouleurs = 0;
                 }
+                TempsÉcouléDepuisMAJ = 0;
             }
             ArrièrePlan.Update(gameTime);
             base.Update(gameTime);

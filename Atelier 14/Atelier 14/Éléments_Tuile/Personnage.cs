@@ -15,19 +15,27 @@ namespace AtelierXNA
     {
 
         #region Propriétés, constantes et initialisation.
-        protected Keys[] CONTRÔLES = { Keys.D, Keys.A, Keys.LeftShift };
-        protected abstract string[] NomsSprites { get; set; }
+
+        protected Keys[] CONTRÔLES = { Keys.D, Keys.A, Keys.LeftShift, Keys.Space, Keys.P, Keys.J };
+        protected enum ORIENTATION { DROITE, GAUCHE };
+        protected enum ÉTAT { COURRIR, SAUTER, ATTAQUER, LANCER ,BLOQUER, MORT, IMMOBILE};
+
+        protected ÉTAT ÉTAT_PERSO;
+        protected ORIENTATION DIRECTION;
+
+        //Éléments abstraits à définir.
+        public abstract void DéplacerFrame();
+
         protected int NbVies { get; set; }
         int VieEnPourcentage { get; set; }
-
-
+        //Définir la hitbox ici.
 
         protected float VitesseDéplacementGaucheDroite { get; set; } 
         protected float VitesseDéplacementSaut { get; set; } 
         protected float AncienneVitesse { get; set; }
         protected float VitesseMaximaleSaut { get; private set; }
         float Masse { get; set; }
-
+        protected bool EstEnAttaque { get; set; }
 
         //Copies de certains éléments de l'environnement importants pour le personnage.
         Map Carte { get; set; }
@@ -35,40 +43,31 @@ namespace AtelierXNA
         protected List<Vector3> IntervallesPossibles { get; set; }
         protected Vector3 IntervalleCourante { get; set; }
 
-
-
         //Données propres au personnages, qui seront variables.
         protected Vector3 Position { get; set; }
+        public Vector3 GetPositionPersonnage
+        {
+            get { return new Vector3(Position.X, Position.Y, Position.Z); }
+        }
         protected Vector3 PositionSpawn { get; set; }
         protected Vector3 AnciennePosition { get; set; }
-        Rectangle RectangleDeCollision { get; set; }
-        
         
         Vector3 VecteurVitesse { get; set; }
         Vector3 VecteurGauche { get; set; }
         Vector3 VecteurQuantitéeDeMouvement { get; set; }
         protected int CptSaut { get; set; }
         
-        
-
-        protected float Intervalle_StunAnimation { get; set; }
         protected float IntervalleMAJ { get; set; }
         protected float TempsÉcouléDepuisMAJ { get;  set; }
-        
 
-
-        //GestionManette
-        protected InputManager GestionInput { get; set; }
+        protected InputControllerManager GestionInputManette { get; set; }
+        protected InputManager GestionInputClavier { get; set; }
         
         public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ)
             : base(game)
         {
-            //Dans cet ordre: Grimper, Descendre, Droite, Gauche, Sauter, Lancer, Attaquer, Bloquer.
-            Actions = new List<Delegate>();
-            Actions.Add(new Droite(DroiteA));
-            Actions.Add(new Gauche(GaucheA));
-            Actions.Add(new Bloquer(BloquerA));
-
+            ÉTAT_PERSO = ÉTAT.IMMOBILE;
+            DIRECTION = ORIENTATION.DROITE;
 
             IntervalleMAJ = intervalleMAJ;
             VitesseDéplacementGaucheDroite = vitesseDéplacementGaucheDroite;
@@ -78,65 +77,175 @@ namespace AtelierXNA
             PositionSpawn = position;
             NbVies = 3;
         }
+
         public override void Initialize()
         {
-            GestionInput = Game.Services.GetService(typeof(InputManager)) as InputManager;
+            GestionInputClavier = Game.Services.GetService(typeof(InputManager)) as InputManager;
+            GestionInputManette = Game.Services.GetService(typeof(InputControllerManager)) as InputControllerManager;
+
             Carte = Game.Components.First(t => t is Map) as Map;
             IntervallesSurfaces = Carte.IntervallesSurfaces;
+
             VecteurGauche = Vector3.Normalize(Carte.VecteurGauche);
             VecteurVitesse = Vector3.Zero;
             VecteurQuantitéeDeMouvement = Vector3.Zero;
+
             base.Initialize();
         }
         #endregion
 
+        #region Boucle de jeu.
+        public override void Update(GameTime gameTime)
+        {
+            //Changements d'état ne nécessitant pas d'input du joueur.
+            if (VitesseDéplacementSaut == 0 && !GestionInputClavier.EstClavierActivé && ÉTAT_PERSO != ÉTAT.IMMOBILE) //Conditions ici pour gérer l'immobilité.
+            {
+                ÉTAT_PERSO = ÉTAT.IMMOBILE;
+            }
+            else if(VitesseDéplacementSaut < -1)
+            {
+                ÉTAT_PERSO = ÉTAT.SAUTER;
+            }
+            else if(VitesseDéplacementSaut != 0)
+            {
+                ÉTAT_PERSO = ÉTAT.SAUTER;
+            }
+
+            float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            TempsÉcouléDepuisMAJ += tempsÉcoulé;
+
+            NbVies = EstMort() ? --NbVies : NbVies;
+            Position = EstMort() ? PositionSpawn : Position;
+
+            if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
+            {
+                GérerTouchesEnfoncées();
+                GérerAccélérationGravitationnelle();
+                DéplacerFrame();
+                TempsÉcouléDepuisMAJ = 0;
+            }
+            GérerNouvellesTouches();
+            if(!GestionInputClavier.EstClavierActivé)
+            {
+                if (VitesseDéplacementSaut != 0)
+                    ÉTAT_PERSO = ÉTAT.SAUTER;
+                else
+                    ÉTAT_PERSO = ÉTAT.IMMOBILE;
+            }
+        }
+        protected void GérerAccélérationGravitationnelle()
+        {
+            AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
+            AncienneVitesse = VitesseDéplacementSaut;
+            Position += Vector3.Up * VitesseDéplacementSaut * TempsÉcouléDepuisMAJ;
+
+            int redneck = 0;
+            IntervallesPossibles = IntervallesSurfaces.FindAll(t => t.Z <= AnciennePosition.Y && EstDansIntervalleSurface(t, AnciennePosition)) as List<Vector3>;
+            foreach (Vector3 intervalle in IntervallesPossibles)
+            {
+                if (redneck == 0)
+                    IntervalleCourante = intervalle;
+                else if (IntervalleCourante.Z <= intervalle.Z)
+                    IntervalleCourante = intervalle;
+                redneck++;
+            }
+
+            if (EstDansIntervalleSurface(IntervalleCourante, Position) && (IntervalleCourante.Z >= Position.Y) && (IntervalleCourante.Z <= AnciennePosition.Y) && (EstDansIntervalleSurface(IntervalleCourante, AnciennePosition)))
+            {
+                Position = new Vector3(AnciennePosition.X,IntervalleCourante.Z,AnciennePosition.Z);
+                VitesseDéplacementSaut = 0;
+                CptSaut = 0;
+            }
+            else
+            {
+                VitesseDéplacementSaut -= Atelier.ACCÉLÉRATION_GRAVITATIONNELLE * TempsÉcouléDepuisMAJ;
+            }
+        }
 
 
-        #region Autres.
+        #region Méthodes évenementielles.
+        protected void GérerTouchesEnfoncées()
+        {
+            AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
+
+            if (GestionInputClavier.EstEnfoncée(CONTRÔLES[0]) && (!EstEnAttaque || VitesseDéplacementSaut !=0))
+            { 
+                Position -= VecteurGauche * VitesseDéplacementGaucheDroite * TempsÉcouléDepuisMAJ; 
+                DIRECTION = ORIENTATION.DROITE; 
+                if(VitesseDéplacementSaut == 0)
+                {
+                    ÉTAT_PERSO = ÉTAT.COURRIR;
+                }
+            }
+            if (GestionInputClavier.EstEnfoncée(CONTRÔLES[1]) && (!EstEnAttaque || VitesseDéplacementSaut != 0 ))
+            { 
+                Position += VecteurGauche * VitesseDéplacementGaucheDroite * TempsÉcouléDepuisMAJ;
+                DIRECTION = ORIENTATION.GAUCHE;
+                if (VitesseDéplacementSaut == 0)
+                {
+                    ÉTAT_PERSO = ÉTAT.COURRIR;
+                }
+            }
+            if (GestionInputClavier.EstEnfoncée(CONTRÔLES[2]))
+            { 
+                Bloquer();
+                if (VitesseDéplacementSaut == 0)
+                {
+                    ÉTAT_PERSO = ÉTAT.BLOQUER;
+                }
+            }
+        }
+        private void GérerNouvellesTouches()
+        {
+            if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[3]) && CptSaut < 2 && !EstEnAttaque)
+            { 
+                GérerSauts();
+                ÉTAT_PERSO = ÉTAT.SAUTER;
+            }
+            if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]))
+            { 
+                GérerLancer();
+                ÉTAT_PERSO = ÉTAT.LANCER;
+            }
+            if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[5]))
+            { 
+                GérerAttaque();
+                ÉTAT_PERSO = ÉTAT.ATTAQUER;
+            }
+        }
+        protected void GérerSauts()
+        {
+          VitesseDéplacementSaut = VitesseMaximaleSaut;
+         ++CptSaut;
+        }
+        private void GérerLancer()
+        {
+            
+        }
+        private void GérerAttaque()
+        {
+
+        }
+        private void Bloquer()
+        {
+            //À définir plus tard.
+        }
+
+
+        #endregion
+
+        #endregion
+        
+        #region Booléens de la classe.
         protected bool EstMort()
         {
             return Position.X < -100 || Position.X > 100 || Position.Y < -50;
         }//Mettre des constantes en haut.
-        protected virtual void GérerContrôles()
-        {
-            AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
-            for (int i = 0; i < CONTRÔLES.Length; ++i)
-            {
-                if (GestionInput.EstEnfoncée(CONTRÔLES[i]))
-                {
-                    Actions[i].DynamicInvoke();
-                }
-            }
-        }
-        
         protected bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position)
         {
             return (intervalle.X <= position.X) && (intervalle.Y >= position.X);
         }
-        public Vector3 GetPositionPersonnage
-        {
-            get { return new Vector3(Position.X,Position.Y,Position.Z); }
-        }
         #endregion
-       
 
-
-        #region Méthodes évènementielles.
-        protected List<Delegate> Actions { get; set; }
-
-        delegate void Droite();
-        delegate void Gauche();
-        delegate void Bloquer();
-        
-        protected virtual void DroiteA()
-        {
-            Position -= VecteurGauche * VitesseDéplacementGaucheDroite * TempsÉcouléDepuisMAJ;
-        }
-        protected virtual void GaucheA()
-        {
-            Position += VecteurGauche * VitesseDéplacementGaucheDroite * TempsÉcouléDepuisMAJ;
-        }
-        protected virtual void BloquerA(){ }
-        #endregion
     }
 }
