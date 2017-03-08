@@ -178,11 +178,12 @@ namespace AtelierXNA
 
             Components.Add(GestionInput);
             Components.Add(GestionManettes);
+            Components.Add(new Afficheur3D(this));
         }
         void InitialiserJeu()
         {
             Components.Remove(MenuDiff);
-
+            
             AjouterCaméra();
             AjouterCarte();
             AjouterJoueurs();

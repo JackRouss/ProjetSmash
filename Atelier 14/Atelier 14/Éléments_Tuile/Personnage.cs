@@ -28,7 +28,7 @@ namespace AtelierXNA
 
         protected int NbVies { get; set; }
         int VieEnPourcentage { get; set; }
-        //Définir la hitbox ici.
+        protected Vector4 Hitbox { get; set; }
 
         protected float VitesseDéplacementGaucheDroite { get; set; } 
         protected float VitesseDéplacementSaut { get; set; } 
@@ -66,6 +66,9 @@ namespace AtelierXNA
         public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ)
             : base(game)
         {
+            
+
+
             ÉTAT_PERSO = ÉTAT.IMMOBILE;
             DIRECTION = ORIENTATION.DROITE;
 
@@ -122,6 +125,7 @@ namespace AtelierXNA
                 GérerTouchesEnfoncées();
                 GérerAccélérationGravitationnelle();
                 DéplacerFrame();
+                
                 TempsÉcouléDepuisMAJ = 0;
             }
             GérerNouvellesTouches();
@@ -200,7 +204,6 @@ namespace AtelierXNA
             if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[3]) && CptSaut < 2 && !EstEnAttaque)
             { 
                 GérerSauts();
-                ÉTAT_PERSO = ÉTAT.SAUTER;
             }
             if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]))
             { 
@@ -213,10 +216,20 @@ namespace AtelierXNA
                 ÉTAT_PERSO = ÉTAT.ATTAQUER;
             }
         }
-        protected void GérerSauts()
+        protected void GérerSauts()//Il faut éviter que si le personnage n'as pas initialement sauter **************À FIX*****************
         {
-          VitesseDéplacementSaut = VitesseMaximaleSaut;
-         ++CptSaut;
+           if(CptSaut == 0)
+           {
+               ÉTAT_PERSO = ÉTAT.SAUTER;
+               VitesseDéplacementSaut = VitesseMaximaleSaut;
+               ++CptSaut;
+           }
+            else if(CptSaut == 1)
+           {
+               ÉTAT_PERSO = ÉTAT.SAUTER;
+               VitesseDéplacementSaut = VitesseMaximaleSaut;
+               ++CptSaut;
+           }
         }
         private void GérerLancer()
         {
@@ -241,10 +254,11 @@ namespace AtelierXNA
         {
             return Position.X < -100 || Position.X > 100 || Position.Y < -50;
         }//Mettre des constantes en haut.
-        protected bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position)
-        {
-            return (intervalle.X <= position.X) && (intervalle.Y >= position.X);
-        }
+        //protected bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position)
+        //{
+        //    return (intervalle.X <= position.X) && (intervalle.Y >= position.X);
+        //}
+        protected abstract bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position);
         #endregion
 
     }

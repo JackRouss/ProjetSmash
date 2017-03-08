@@ -16,6 +16,8 @@ namespace AtelierXNA
     public class PersonnageAnimé : Personnage
     {
         public const int NB_ANIMATIONS = 11;
+        const float LARGEUR_HITBOX = 3;
+        const float HAUTEUR_HITBOX = 6;
         protected const float ÉCHELLE_PERSONNAGE = 4;
 
         //Données de base.
@@ -48,17 +50,20 @@ namespace AtelierXNA
         string[] NomsSprites { get; set; }
         int[] NbFramesSprites { get; set; }
         TuileTexturéeAnimée Frame { get; set; }
+        Vector2 ZoneAffichageDimensions { get; set; }
+        
 
 
         public PersonnageAnimé(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position,float intervalleMAJ ,float intervalleMAJAnimation,string[] nomSprites, string type, int[] nbFramesSprites)
             : base(game, vitesseDéplacementGaucheDroite, vitesseMaximaleSaut, masse, position,intervalleMAJ)
         {
-            Vector2 zoneAffichageDimensions = new Vector2(5,10);
-            Frame = new TuileTexturéeAnimée(Game,1,Vector3.Zero,position,new Vector2(2,2),"Idle__000",intervalleMAJ,zoneAffichageDimensions,nomSprites,nbFramesSprites,type,intervalleMAJAnimation);
+            ZoneAffichageDimensions = new Vector2(5,10);
+            Frame = new TuileTexturéeAnimée(Game,1,Vector3.Zero,position,new Vector2(2,2),"Idle__000",intervalleMAJ,ZoneAffichageDimensions,nomSprites,nbFramesSprites,type,intervalleMAJAnimation);
             TypePersonnage = type;
             NomsSprites = nomSprites;
             NbFramesSprites = nbFramesSprites;
             État = NomsSprites[4];
+            Hitbox = new Vector4(Position.X - LARGEUR_HITBOX, Position.X + LARGEUR_HITBOX, Position.Y - HAUTEUR_HITBOX, Position.Y + HAUTEUR_HITBOX);
         }
 
         public override void Initialize()
@@ -74,7 +79,15 @@ namespace AtelierXNA
                 ÉTAT_PERSO = ÉTAT.IMMOBILE;
                 EstEnAttaque = false;
             }
+            if (ÉTAT_PERSO == ÉTAT.COURRIR && (GestionInputClavier.EstEnfoncée(Keys.A) && GestionInputClavier.EstEnfoncée(Keys.D))) 
+            {
+                ÉTAT_PERSO = ÉTAT.IMMOBILE;
+            }
             base.Update(gameTime);
+            if(Position.X != AnciennePosition.X || Position.Y != AnciennePosition.Y)
+            {
+                Hitbox = new Vector4(Position.X -LARGEUR_HITBOX,Position.X+LARGEUR_HITBOX,Position.Y-HAUTEUR_HITBOX,Position.Y+HAUTEUR_HITBOX);//xmin,xmax,ymin,ymax.
+            }
             GérerTransitionsAnimations();
             Frame.Update(gameTime);
         }
@@ -150,6 +163,9 @@ namespace AtelierXNA
             Frame.DéplacerTuile(Position);
         }
         #endregion
-
+        protected override bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position)
+        {
+            return (intervalle.X <= position.X) && (intervalle.Y >= position.X);
+        }
     }
 }
