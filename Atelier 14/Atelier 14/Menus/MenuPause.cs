@@ -38,11 +38,12 @@ namespace AtelierXNA.Menus
 
 
 
-
+        int CptChoix { get; set; }
         int CptCouleurs { get; set; }
         float TempsÉcouléDepuisMAJ { get; set; }
         float IntervalleMAJAnimation { get; set; }
         public bool RésumerLaPartie { get; set; }
+        public bool RetournerMenuPrincipale { get; set; }
 
 
 
@@ -96,44 +97,44 @@ namespace AtelierXNA.Menus
         {
             if(GestionInputClavier.EstClavierActivé)
             {
-                if(GestionInputClavier.EstNouvelleTouche(Keys.Up))
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Up) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickUp))
                 {
+                    CptChoix -= 1;
+                }
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Down) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickDown))
+                {
+                    CptChoix += 1;
+                }
+                switch (CptChoix)
+                {
+                    case 0: CHOIX = ÉTAT.RÉSUMER_PARTIE; break;
+                    case 1: CHOIX = ÉTAT.MENU_PRINCIPAL; break;
+                    case 2: CHOIX = ÉTAT.OPTIONS; break;
+                    case 3: CHOIX = ÉTAT.QUITTER;break;
+                }
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Enter) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.A))
+                {
+                    if(CHOIX == ÉTAT.RÉSUMER_PARTIE)
+                    {
+                        RésumerLaPartie = true;
+                    }
+
                     if(CHOIX == ÉTAT.MENU_PRINCIPAL)
                     {
-                        CHOIX = ÉTAT.RÉSUMER_PARTIE;
+                        RetournerMenuPrincipale = true;
                     }
-                    else if(CHOIX == ÉTAT.OPTIONS)
+
+                    if(CHOIX == ÉTAT.OPTIONS)
                     {
-                        CHOIX = ÉTAT.MENU_PRINCIPAL;
+
                     }
-                    else if(CHOIX == ÉTAT.QUITTER)
+
+                    if(CHOIX == ÉTAT.QUITTER)
                     {
-                        CHOIX = ÉTAT.OPTIONS;
+                        Game.Exit();
                     }
                 }
-                if(GestionInputClavier.EstNouvelleTouche(Keys.Down))
-                {
-                    if (CHOIX == ÉTAT.RÉSUMER_PARTIE)
-                    {
-                        CHOIX = ÉTAT.MENU_PRINCIPAL;
-                    }
-                    else if (CHOIX == ÉTAT.MENU_PRINCIPAL)
-                    {
-                        CHOIX = ÉTAT.OPTIONS;
-                    }
-                    else if (CHOIX == ÉTAT.OPTIONS)
-                    {
-                        CHOIX = ÉTAT.QUITTER;
-                    }
-                }
-                if(GestionInputClavier.EstNouvelleTouche(Keys.Enter) && CHOIX == ÉTAT.RÉSUMER_PARTIE)
-                {
-                    RésumerLaPartie = true;
-                }
-                else if(GestionInputClavier.EstNouvelleTouche(Keys.Enter)&&CHOIX == ÉTAT.QUITTER)
-                {
-                    Game.Exit();
-                }
+                
             }
         }
 
@@ -141,37 +142,27 @@ namespace AtelierXNA.Menus
         {
             ArrièrePlan.Draw(gameTime);
             GestionSprites.Begin();
-            if(CHOIX == ÉTAT.RÉSUMER_PARTIE)
-            {
-                GestionSprites.DrawString(ArialFont,RÉSUMER_PARTIE,POSITION_RÉSUMER_PARTIE,COULEURS[CptCouleurs]);
-                GestionSprites.DrawString(ArialFont,MENU_PRINCIPAL,POSITION_MENU_PRINCIPAL,CouleurTexte);
-                GestionSprites.DrawString(ArialFont,OPTIONS,POSITION_OPTIONS, CouleurTexte);
-                GestionSprites.DrawString(ArialFont,QUITTER,POSITION_QUITTER, CouleurTexte);
-            }
-            else if(CHOIX == ÉTAT.MENU_PRINCIPAL)
-            {
-                GestionSprites.DrawString(ArialFont, RÉSUMER_PARTIE, POSITION_RÉSUMER_PARTIE, CouleurTexte);
-                GestionSprites.DrawString(ArialFont, MENU_PRINCIPAL, POSITION_MENU_PRINCIPAL, COULEURS[CptCouleurs]);
-                GestionSprites.DrawString(ArialFont, OPTIONS, POSITION_OPTIONS, CouleurTexte);
-                GestionSprites.DrawString(ArialFont, QUITTER, POSITION_QUITTER, CouleurTexte);
-            }
-            else if(CHOIX == ÉTAT.OPTIONS)
-            {
-                GestionSprites.DrawString(ArialFont, RÉSUMER_PARTIE, POSITION_RÉSUMER_PARTIE, CouleurTexte);
-                GestionSprites.DrawString(ArialFont, MENU_PRINCIPAL, POSITION_MENU_PRINCIPAL, CouleurTexte);
-                GestionSprites.DrawString(ArialFont, OPTIONS, POSITION_OPTIONS, COULEURS[CptCouleurs]);
-                GestionSprites.DrawString(ArialFont, QUITTER, POSITION_QUITTER, CouleurTexte);
-            }
-            else if(CHOIX == ÉTAT.QUITTER)
-            {
-                GestionSprites.DrawString(ArialFont, RÉSUMER_PARTIE, POSITION_RÉSUMER_PARTIE, CouleurTexte);
-                GestionSprites.DrawString(ArialFont, MENU_PRINCIPAL, POSITION_MENU_PRINCIPAL, CouleurTexte);
-                GestionSprites.DrawString(ArialFont, OPTIONS, POSITION_OPTIONS, CouleurTexte);
-                GestionSprites.DrawString(ArialFont, QUITTER, POSITION_QUITTER, COULEURS[CptCouleurs]);
-            }
+           
+            GestionSprites.DrawString(ArialFont, RÉSUMER_PARTIE, POSITION_RÉSUMER_PARTIE, DéterminerCouleur(ÉTAT.RÉSUMER_PARTIE));
+            GestionSprites.DrawString(ArialFont, MENU_PRINCIPAL, POSITION_MENU_PRINCIPAL, DéterminerCouleur(ÉTAT.MENU_PRINCIPAL));
+            GestionSprites.DrawString(ArialFont, OPTIONS, POSITION_OPTIONS, DéterminerCouleur(ÉTAT.OPTIONS));
+            GestionSprites.DrawString(ArialFont, QUITTER, POSITION_QUITTER, DéterminerCouleur(ÉTAT.QUITTER));
+
             GestionSprites.End();
             
             base.Draw(gameTime);
+        }
+
+        Color DéterminerCouleur(ÉTAT unÉtat)
+        {
+            if(unÉtat == CHOIX)
+            {
+                return COULEURS[CptCouleurs];
+            }
+            else
+            {
+                return CouleurTexte;
+            }
         }
     }
 }

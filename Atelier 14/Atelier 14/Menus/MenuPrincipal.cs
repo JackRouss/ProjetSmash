@@ -97,9 +97,10 @@ namespace AtelierXNA
 
         void GérerSelectionOption()
         {
-            if (GestionInputClavier.EstClavierActivé)
+
+            if (GestionInputClavier.EstClavierActivé || GestionInputManette.EstManetteActivée(PlayerIndex.One))
             {
-                if (GestionInputClavier.EstNouvelleTouche(Keys.Down))
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Down) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickDown))
                 {
                     DémarrerSélectionnerVisible = false;
                     DémarrerVisible = true;
@@ -107,54 +108,24 @@ namespace AtelierXNA
                     QuitterVisible = false;
                 }
 
-                if (GestionInputClavier.EstNouvelleTouche(Keys.Up))
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Up) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickUp))
                 {
                     DémarrerSélectionnerVisible = true;
                     DémarrerVisible = false;
                     QuitterSélectionnerVisible = false;
                     QuitterVisible = true;
                 }
-            }
-
-                if (GestionInputManette.EstManetteActivée(PlayerIndex.One))
-                {
-                    if (GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickDown))
-                    {
-                        DémarrerSélectionnerVisible = false;
-                        DémarrerVisible = true;
-                        QuitterSélectionnerVisible = true;
-                        QuitterVisible = false;
-
-                    }
-                    if (GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickUp))
-                    {
-                        DémarrerSélectionnerVisible = true;
-                        DémarrerVisible = false;
-                        QuitterSélectionnerVisible = false;
-                        QuitterVisible = true;
-                    }
-                }
             
+            }
         }
 
         void GérerOptionSélectionnner()
         {
-            if (GestionInputManette.EstManetteActivée(PlayerIndex.One))
+            if (GestionInputClavier.EstClavierActivé || GestionInputManette.EstManetteActivée(PlayerIndex.One))
             {
-                if (GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.A))
+                if (GestionInputClavier.EstEnfoncée(Keys.Enter) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.A))
                 {
-                    if (DémarrerSélectionnerVisible == true)
-                    {
-                        PasserMenuSuivant = true;
-                    }
-                }
-            }
-
-            if (GestionInputClavier.EstClavierActivé)
-            {
-                if (GestionInputClavier.EstEnfoncée(Keys.Enter))
-                {
-                    if (DémarrerSélectionnerVisible == true)
+                    if (DémarrerSélectionnerVisible)
                     {
                         PasserMenuSuivant = true;
                     }

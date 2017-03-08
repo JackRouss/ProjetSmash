@@ -101,19 +101,7 @@ namespace AtelierXNA
         public override void Update(GameTime gameTime)
         {
             //Changements d'état ne nécessitant pas d'input du joueur.
-            if (VitesseDéplacementSaut == 0 && !GestionInputClavier.EstClavierActivé && ÉTAT_PERSO != ÉTAT.IMMOBILE) //Conditions ici pour gérer l'immobilité.
-            {
-                ÉTAT_PERSO = ÉTAT.IMMOBILE;
-            }
-            else if(VitesseDéplacementSaut < -1)
-            {
-                ÉTAT_PERSO = ÉTAT.SAUTER;
-            }
-            else if(VitesseDéplacementSaut != 0)
-            {
-                ÉTAT_PERSO = ÉTAT.SAUTER;
-            }
-
+           
             float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
             TempsÉcouléDepuisMAJ += tempsÉcoulé;
 
@@ -122,6 +110,19 @@ namespace AtelierXNA
 
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
+                if (VitesseDéplacementSaut == 0 && AnciennePosition == Position && ÉTAT_PERSO != ÉTAT.IMMOBILE) //Conditions ici pour gérer l'immobilité.
+                {
+                    ÉTAT_PERSO = ÉTAT.IMMOBILE;
+                }
+                else if (VitesseDéplacementSaut < -1)
+                {
+                    ÉTAT_PERSO = ÉTAT.SAUTER;
+                }
+                else if (VitesseDéplacementSaut != 0)
+                {
+                    ÉTAT_PERSO = ÉTAT.SAUTER;
+                }
+
                 GérerTouchesEnfoncées();
                 GérerAccélérationGravitationnelle();
                 DéplacerFrame();
@@ -129,7 +130,7 @@ namespace AtelierXNA
                 TempsÉcouléDepuisMAJ = 0;
             }
             GérerNouvellesTouches();
-            if(!GestionInputClavier.EstClavierActivé)
+            if(!GestionInputClavier.EstClavierActivé && !GestionInputManette.EstManetteActivée(PlayerIndex.One))
             {
                 if (VitesseDéplacementSaut != 0)
                     ÉTAT_PERSO = ÉTAT.SAUTER;
@@ -172,7 +173,7 @@ namespace AtelierXNA
         {
             AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
 
-            if (GestionInputClavier.EstEnfoncée(CONTRÔLES[0]) && (!EstEnAttaque || VitesseDéplacementSaut !=0))
+            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[0]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.LeftThumbstickRight)) && (!EstEnAttaque || VitesseDéplacementSaut !=0))
             { 
                 Position -= VecteurGauche * VitesseDéplacementGaucheDroite * TempsÉcouléDepuisMAJ; 
                 DIRECTION = ORIENTATION.DROITE; 
@@ -181,7 +182,7 @@ namespace AtelierXNA
                     ÉTAT_PERSO = ÉTAT.COURRIR;
                 }
             }
-            if (GestionInputClavier.EstEnfoncée(CONTRÔLES[1]) && (!EstEnAttaque || VitesseDéplacementSaut != 0 ))
+            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[1]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.LeftThumbstickLeft)) && (!EstEnAttaque || VitesseDéplacementSaut != 0 ))
             { 
                 Position += VecteurGauche * VitesseDéplacementGaucheDroite * TempsÉcouléDepuisMAJ;
                 DIRECTION = ORIENTATION.GAUCHE;
@@ -190,7 +191,7 @@ namespace AtelierXNA
                     ÉTAT_PERSO = ÉTAT.COURRIR;
                 }
             }
-            if (GestionInputClavier.EstEnfoncée(CONTRÔLES[2]))
+            if (GestionInputClavier.EstEnfoncée(CONTRÔLES[2]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.RightShoulder))
             { 
                 Bloquer();
                 if (VitesseDéplacementSaut == 0)
@@ -201,16 +202,16 @@ namespace AtelierXNA
         }
         private void GérerNouvellesTouches()
         {
-            if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[3]) && CptSaut < 2 && !EstEnAttaque)
+            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[3]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.Y)) && CptSaut < 2 && !EstEnAttaque)
             { 
                 GérerSauts();
             }
-            if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]))
+            if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.X))
             { 
                 GérerLancer();
                 ÉTAT_PERSO = ÉTAT.LANCER;
             }
-            if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[5]))
+            if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[5]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.A))
             { 
                 GérerAttaque();
                 ÉTAT_PERSO = ÉTAT.ATTAQUER;

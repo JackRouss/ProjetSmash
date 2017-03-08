@@ -26,6 +26,7 @@ namespace AtelierXNA
         Vector2 POSITION_DIFFICILE { get; set; }
         Vector2 POSITION_DIFFICULTÉ { get; set; }
 
+        int CptChoix { get; set; }
         int CptCouleur { get; set; }
         Color[] COULEURS = { Color.Firebrick, Color.Red, Color.OrangeRed, Color.Orange, Color.Gold, Color.Yellow, Color.YellowGreen, Color.LawnGreen, Color.Green, Color.DarkTurquoise, Color.DeepSkyBlue, Color.Blue, Color.DarkSlateBlue, Color.Indigo, Color.Purple };
 
@@ -65,6 +66,7 @@ namespace AtelierXNA
             ArrièrePlan = new ArrièrePlanDéroulant(this.Game,"Fond4",Atelier.INTERVALLE_MAJ_STANDARD);
             ArrièrePlan.Initialize();
             CouleurTexte = Color.White;
+            CptChoix = 0;
 
 
             POSITION_DIFFICULTÉ = new Vector2((Game.Window.ClientBounds.Width-ArialFont.MeasureString(DIFFICULTÉ).X)/2,0);
@@ -97,31 +99,25 @@ namespace AtelierXNA
 
         private void GérerEntrées()
         {
-            if(GestionInputClavier.EstClavierActivé)
+            if(GestionInputClavier.EstClavierActivé || GestionInputMannette.EstManetteActivée(PlayerIndex.One))
             {
-                if (GestionInputClavier.EstNouvelleTouche(Keys.Up))
+
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Up) || GestionInputMannette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickUp))
                 {
-                    if (CHOIX == ÉTAT.NORMAL)
-                    {
-                        CHOIX = ÉTAT.FACILE;
-                    }
-                    else if (CHOIX == ÉTAT.DIFFICILE)
-                    {
-                        CHOIX = ÉTAT.NORMAL;
-                    }
+                    CptChoix -= 1;
                 }
-                if (GestionInputClavier.EstNouvelleTouche(Keys.Down))
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Down) || GestionInputMannette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickDown))
                 {
-                    if (CHOIX == ÉTAT.FACILE)
-                    {
-                        CHOIX = ÉTAT.NORMAL;
-                    }
-                    else if (CHOIX == ÉTAT.NORMAL)
-                    {
-                        CHOIX = ÉTAT.DIFFICILE;
-                    }
+                    CptChoix += 1;
                 }
-                if (GestionInputClavier.EstNouvelleTouche(Keys.Enter))
+                switch (CptChoix)
+                {
+                    case 0: CHOIX = ÉTAT.FACILE; break;
+                    case 1: CHOIX = ÉTAT.NORMAL; break;
+                    case 2: CHOIX = ÉTAT.DIFFICILE;break;
+                }
+
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Enter) || GestionInputMannette.EstNouvelleTouche(PlayerIndex.One, Buttons.A))
                 {
                     PasserMenuSuivant = true;
                 }
@@ -134,28 +130,25 @@ namespace AtelierXNA
             ArrièrePlan.Draw(gameTime);
             GestionSprites.Begin();
 
-            if(CHOIX == ÉTAT.FACILE)
-            {
-                GestionSprites.DrawString(ArialFont, FACILE, POSITION_FACILE, COULEURS[CptCouleur]);
-                GestionSprites.DrawString(ArialFont, NORMAL, POSITION_NORMAL, CouleurTexte);
-                GestionSprites.DrawString(ArialFont, DIFFICILE, POSITION_DIFFICILE, CouleurTexte);
-            }
-            if(CHOIX == ÉTAT.NORMAL)
-            {
-                GestionSprites.DrawString(ArialFont, FACILE, POSITION_FACILE, CouleurTexte);
-                GestionSprites.DrawString(ArialFont, NORMAL, POSITION_NORMAL, COULEURS[CptCouleur]);
-                GestionSprites.DrawString(ArialFont, DIFFICILE, POSITION_DIFFICILE, CouleurTexte);
-            }
-            if(CHOIX == ÉTAT.DIFFICILE)
-            {
-                GestionSprites.DrawString(ArialFont, FACILE, POSITION_FACILE, CouleurTexte);
-                GestionSprites.DrawString(ArialFont, NORMAL, POSITION_NORMAL, CouleurTexte);
-                GestionSprites.DrawString(ArialFont, DIFFICILE, POSITION_DIFFICILE, COULEURS[CptCouleur]);
-            }
-
+           
+                GestionSprites.DrawString(ArialFont, FACILE, POSITION_FACILE, DéterminerCouleur(ÉTAT.FACILE));
+                GestionSprites.DrawString(ArialFont, NORMAL, POSITION_NORMAL, DéterminerCouleur(ÉTAT.NORMAL));
+                GestionSprites.DrawString(ArialFont, DIFFICILE, POSITION_DIFFICILE, DéterminerCouleur(ÉTAT.DIFFICILE));
+           
             GestionSprites.DrawString(ArialFont, DIFFICULTÉ, POSITION_DIFFICULTÉ, CouleurTexte);
             GestionSprites.End();
             base.Draw(gameTime);
+        }
+        Color DéterminerCouleur(ÉTAT unÉtat)
+        {
+            if (unÉtat == CHOIX)
+            {
+                return COULEURS[CptCouleur];
+            }
+            else
+            {
+                return CouleurTexte;
+            }
         }
     }
 }
