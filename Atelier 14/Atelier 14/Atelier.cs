@@ -320,6 +320,11 @@ namespace AtelierXNA
                         Components.Remove(MenuPau);
                         MediaPlayer.Resume();
                     }
+                    if (MenuPau.RetournerMenuPrincipale)
+                    {
+                        ÉtatJeu = GameState.MENU_PRINCIPAL;
+                        MenuPau.RetournerMenuPrincipale = false;
+                    }
                     break;
             }
             if(AncienÉtatJeu != ÉtatJeu)

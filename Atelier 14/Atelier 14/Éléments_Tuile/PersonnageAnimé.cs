@@ -263,7 +263,7 @@ namespace AtelierXNA
         protected override void GérerContrôles()
         {
             
-            if (VitesseDéplacementSaut < -5)
+            if (VitesseDéplacementSaut < -10)
             {
                 État = NomsSprites[3];
             }
