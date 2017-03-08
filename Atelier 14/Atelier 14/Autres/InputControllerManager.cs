@@ -60,6 +60,11 @@ namespace AtelierXNA
             ÉtatManette = GamePad.GetState(numManette);
             return ÉtatManette.IsButtonDown(touche);
         }
+        // float DeadZOne(PlayerIndex numManette)
+        //{
+        //    ÉtatManette = GamePad.GetState(numManette);
+        //    return ÉtatManette.ThumbSticks;
+        //}
 
 
     }

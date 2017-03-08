@@ -63,6 +63,7 @@ namespace AtelierXNA
         #region Composants de jeu.
         PersonnageAnimé Joueur { get; set; }
         Map Carte { get; set; }
+        TuileTexturée BackGround { get; set; }
         ArrièrePlanDéroulant ArrièrePlan { get; set; }
         #endregion
 
@@ -182,8 +183,11 @@ namespace AtelierXNA
         void InitialiserJeu()
         {
             Components.Remove(MenuDiff);
+          
 
             AjouterCaméra();
+            BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -70, -200), new Vector2(843, 316), "BackGround1", 0);
+            Components.Add(BackGround);
             AjouterCarte();
             AjouterJoueurs();
             
@@ -201,6 +205,7 @@ namespace AtelierXNA
         void AjouterCarte()
         {
             Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero);
+            
             Components.Add(Carte);
         }
         void AjouterJoueurs()

@@ -49,37 +49,12 @@ namespace AtelierXNA
          }
       }
 
-      public void DéplacerTuile(Vector3 nouvellePosition)//très redneck comme approche.
-      {
-          PtsSommets[0, 0] = new Vector3(nouvellePosition.X - HomothétieInitiale * Delta.X/2, nouvellePosition.Y, nouvellePosition.Z);
-          PtsSommets[1, 0] = new Vector3(nouvellePosition.X + HomothétieInitiale*Delta.X/2, nouvellePosition.Y, nouvellePosition.Z);
-          PtsSommets[0, 1] = new Vector3(nouvellePosition.X - HomothétieInitiale*Delta.X/2, nouvellePosition.Y + HomothétieInitiale*Delta.Y, nouvellePosition.Z);
-          PtsSommets[1, 1] = new Vector3(nouvellePosition.X + HomothétieInitiale * Delta.X/2, nouvellePosition.Y + HomothétieInitiale * Delta.Y, nouvellePosition.Z);
-          InitialiserSommets();
-      }
-
-          //PtsSommets[0, 0] = nouvellePosition;
-          //PtsSommets[1, 0] = new Vector3(nouvellePosition.X + HomothétieInitiale*Delta.X, nouvellePosition.Y, nouvellePosition.Z);
-          //PtsSommets[0, 1] = new Vector3(nouvellePosition.X, nouvellePosition.Y + HomothétieInitiale*Delta.Y, nouvellePosition.Z);
-          //PtsSommets[1, 1] = new Vector3(nouvellePosition.X + HomothétieInitiale * Delta.X, nouvellePosition.Y + HomothétieInitiale * Delta.Y, nouvellePosition.Z);
-
       protected override void LoadContent()
       {
 
          gestionnaireDeTextures = Game.Services.GetService(typeof(RessourcesManager<Texture2D>)) as RessourcesManager<Texture2D>;
          textureTuile = gestionnaireDeTextures.Find(NomTextureTuile);
          base.LoadContent();
-      }
-
-      public void Mirroir()
-      {
-          Vector3 buffer = new Vector3(PtsSommets[0, 0].X, PtsSommets[0, 0].Y, PtsSommets[0, 0].Z);
-          PtsSommets[0, 0] = new Vector3(PtsSommets[1, 0].X, PtsSommets[1, 0].Y, PtsSommets[1, 0].Z);
-          PtsSommets[1, 0] = buffer;
-          buffer = new Vector3(PtsSommets[0, 1].X, PtsSommets[0, 1].Y, PtsSommets[0, 1].Z);
-          PtsSommets[0, 1] = new Vector3(PtsSommets[1, 1].X, PtsSommets[1, 1].Y, PtsSommets[1, 1].Z);
-          PtsSommets[1, 1] = buffer;
-          InitialiserSommets();
       }
 
       protected override void InitialiserParamètresEffetDeBase()
@@ -89,18 +64,18 @@ namespace AtelierXNA
          GestionAlpha = BlendState.AlphaBlend;
       }
 
-      public override void Draw(GameTime gameTime)
-      {
-         BlendState oldBlendState = GraphicsDevice.BlendState;
-         RasterizerState oldRasterizerState = GraphicsDevice.RasterizerState;
-         GraphicsDevice.BlendState = GestionAlpha;
-         RasterizerState ÉtatRasterizer = new RasterizerState();
-         ÉtatRasterizer.CullMode = CullMode.None;
-         GraphicsDevice.RasterizerState = ÉtatRasterizer;
-         base.Draw(gameTime);
-         GraphicsDevice.BlendState = oldBlendState;
-         GraphicsDevice.RasterizerState = oldRasterizerState;
-      }
+      //public override void Draw(GameTime gameTime)
+      //{
+      //   BlendState oldBlendState = GraphicsDevice.BlendState;
+      //   RasterizerState oldRasterizerState = GraphicsDevice.RasterizerState;
+      //   GraphicsDevice.BlendState = GestionAlpha;
+      //   RasterizerState ÉtatRasterizer = new RasterizerState();
+      //   ÉtatRasterizer.CullMode = CullMode.None;
+      //   GraphicsDevice.RasterizerState = ÉtatRasterizer;
+      //   base.Draw(gameTime);
+      //   GraphicsDevice.BlendState = oldBlendState;
+      //   GraphicsDevice.RasterizerState = oldRasterizerState;
+      //}
 
       protected override void DessinerTriangleStrip()
       {

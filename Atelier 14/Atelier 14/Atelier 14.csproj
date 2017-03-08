@@ -132,6 +132,7 @@
     <Compile Include="Éléments_Tuile\Tuile.cs" />
     <Compile Include="Éléments_Tuile\TuileColorée.cs" />
     <Compile Include="Éléments_Tuile\TuileTexturée.cs" />
+    <Compile Include="Éléments_Tuile\TuileTexturéeAnimée.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

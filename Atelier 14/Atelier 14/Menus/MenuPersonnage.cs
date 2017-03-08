@@ -140,17 +140,17 @@ namespace AtelierXNA
 
         private void GérerEntrées()//RAJOUTER POUR LA MANETTE.
         {
-            if(GestionInputClavier.EstClavierActivé)
+            if(GestionInputClavier.EstClavierActivé || GestionInputManette.EstManetteActivée(PlayerIndex.One))
             {
-                if (GestionInputClavier.EstNouvelleTouche(Keys.Right))
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Right) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickRight))
                 {
                     État = ÉTAT.ROBOT;
                 }
-                else if (GestionInputClavier.EstNouvelleTouche(Keys.Left))
+                else if (GestionInputClavier.EstNouvelleTouche(Keys.Left) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickLeft))
                 {
                     État = ÉTAT.NINJA;
                 }
-                if (GestionInputClavier.EstNouvelleTouche(Keys.Enter))
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Enter) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.A))
                 {
                     PasserMenuSuivant = true;
                 }
