@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using AtelierXNA.Éléments_Tuile;
 
 namespace AtelierXNA
 {
@@ -16,9 +17,12 @@ namespace AtelierXNA
 
         #region Propriétés, constantes et initialisation.
 
+        const float LARGEUR_HITBOX = 300;
+        const float HAUTEUR_HITBOX = 300;
+        const float PROFONDEUR_HITBOX = 300;
         protected Keys[] CONTRÔLES = { Keys.D, Keys.A, Keys.LeftShift, Keys.Space, Keys.P, Keys.J };
         protected enum ORIENTATION { DROITE, GAUCHE };
-        protected enum ÉTAT { COURRIR, SAUTER, ATTAQUER, LANCER ,BLOQUER, MORT, IMMOBILE};
+        protected enum ÉTAT { COURRIR, SAUTER, ATTAQUER, LANCER, BLOQUER, MORT, IMMOBILE };
 
         protected ÉTAT ÉTAT_PERSO;
         protected ORIENTATION DIRECTION;
@@ -28,7 +32,7 @@ namespace AtelierXNA
 
         protected int NbVies { get; set; }
         int VieEnPourcentage { get; set; }
-        protected Vector4 Hitbox { get; set; }
+        public BoundingBox HitBox { get; private set; }
 
         protected float VitesseDéplacementGaucheDroite { get; set; } 
         protected float VitesseDéplacementSaut { get; set; } 
@@ -66,9 +70,6 @@ namespace AtelierXNA
         public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ)
             : base(game)
         {
-            
-
-
             ÉTAT_PERSO = ÉTAT.IMMOBILE;
             DIRECTION = ORIENTATION.DROITE;
 
@@ -79,6 +80,7 @@ namespace AtelierXNA
             Position = position;
             PositionSpawn = position;
             NbVies = 3;
+            GénérerHitbox();
         }
 
         public override void Initialize()
@@ -126,7 +128,7 @@ namespace AtelierXNA
                 GérerTouchesEnfoncées();
                 GérerAccélérationGravitationnelle();
                 DéplacerFrame();
-                
+                GénérerHitbox();
                 TempsÉcouléDepuisMAJ = 0;
             }
             GérerNouvellesTouches();
@@ -137,6 +139,10 @@ namespace AtelierXNA
                 else
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
             }
+        }
+        private void GénérerHitbox()
+        {
+            HitBox = new BoundingBox(new Vector3(Position.X - LARGEUR_HITBOX / 2, Position.Y, Position.Z - PROFONDEUR_HITBOX), new Vector3(Position.X + LARGEUR_HITBOX / 2, Position.Y + HAUTEUR_HITBOX, Position.Z));
         }
         protected void GérerAccélérationGravitationnelle()
         {
@@ -255,10 +261,14 @@ namespace AtelierXNA
         {
             return Position.X < -100 || Position.X > 100 || Position.Y < -50;
         }//Mettre des constantes en haut.
-        //protected bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position)
-        //{
-        //    return (intervalle.X <= position.X) && (intervalle.Y >= position.X);
-        //}
+        public bool EstEnCollision(Personnage p)
+        {
+            return p.HitBox.Intersects(HitBox);
+        }
+        public bool EstEnCollision(Projectile p)
+        {
+            return p.SphèreDeCollision.Intersects(HitBox);
+        }
         protected abstract bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position);
         #endregion
 

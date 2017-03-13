@@ -129,6 +129,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Autres\Sprite.cs" />
+    <Compile Include="Éléments_Tuile\Projectile.cs" />
     <Compile Include="Éléments_Tuile\Tuile.cs" />
     <Compile Include="Éléments_Tuile\TuileColorée.cs" />
     <Compile Include="Éléments_Tuile\TuileTexturée.cs" />
