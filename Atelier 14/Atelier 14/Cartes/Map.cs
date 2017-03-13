@@ -109,7 +109,7 @@ namespace AtelierXNA
 
         }
         void CalculerPropriétésPourPersonnages()
-        {
+        { 
             IntervallesSurfaces = new List<Vector3>();
             VecteurGauche = PtsSommets[0] - PtsSommets[4];
             
@@ -161,12 +161,5 @@ namespace AtelierXNA
             GraphicsDevice.RasterizerState = ancienÉtat;
 
         }
-        public Vector3 GetNormal()
-        {
-            // retourne l'interrvalle en x de la hauteur de la surface
-            return new Vector3(Origine.X - Longueur / coeff_Surface, Origine.X + Longueur / coeff_Surface, Origine.Y);
-        }
-
-
     }
 }
