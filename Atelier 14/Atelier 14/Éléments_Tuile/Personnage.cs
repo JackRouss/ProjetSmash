@@ -144,6 +144,10 @@ namespace AtelierXNA
         {
             HitBox = new BoundingBox(new Vector3(Position.X - LARGEUR_HITBOX / 2, Position.Y, Position.Z - PROFONDEUR_HITBOX), new Vector3(Position.X + LARGEUR_HITBOX / 2, Position.Y + HAUTEUR_HITBOX, Position.Z));
         }
+        private void GénérerHitbox()
+        {
+            HitBox = new BoundingBox(new Vector3(Position.X - LARGEUR_HITBOX / 2, Position.Y, Position.Z - PROFONDEUR_HITBOX), new Vector3(Position.X + LARGEUR_HITBOX / 2, Position.Y + HAUTEUR_HITBOX, Position.Z));
+        }
         protected void GérerAccélérationGravitationnelle()
         {
             AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
@@ -225,18 +229,18 @@ namespace AtelierXNA
         }
         protected void GérerSauts()//Il faut éviter que si le personnage n'as pas initialement sauter **************À FIX*****************
         {
-            if (CptSaut == 0)
-            {
-                ÉTAT_PERSO = ÉTAT.SAUTER;
-                VitesseDéplacementSaut = VitesseMaximaleSaut;
-                ++CptSaut;
-            }
-            else if (CptSaut == 1)
-            {
-                ÉTAT_PERSO = ÉTAT.SAUTER;
-                VitesseDéplacementSaut = VitesseMaximaleSaut;
-                ++CptSaut;
-            }
+           if(CptSaut == 0)
+           {
+               ÉTAT_PERSO = ÉTAT.SAUTER;
+               VitesseDéplacementSaut = VitesseMaximaleSaut;
+               ++CptSaut;
+           }
+            else if(CptSaut == 1)
+           {
+               ÉTAT_PERSO = ÉTAT.SAUTER;
+               VitesseDéplacementSaut = VitesseMaximaleSaut;
+               ++CptSaut;
+           }
         }
         private void GérerLancer()
         {

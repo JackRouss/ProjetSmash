@@ -9,12 +9,12 @@ namespace AtelierXNA.Éléments_Tuile
     public class Projectile : Microsoft.Xna.Framework.DrawableGameComponent
     {
         public BoundingSphere SphèreDeCollision { get; private set; }
-        public Projectile(Game game)
+        public Projectile(Game game) 
             : base(game)
         {
         }
 
-
+        
 
     }
 }
