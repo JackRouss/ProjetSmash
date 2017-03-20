@@ -14,7 +14,9 @@ namespace AtelierXNA.Éléments_Tuile
         {
         }
 
-        
-
+        public bool EstEnCollision(Personnage personnage)
+        {
+            return SphèreDeCollision.Intersects(personnage.HitBox);
+        }
     }
 }

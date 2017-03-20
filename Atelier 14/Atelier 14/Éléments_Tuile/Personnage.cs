@@ -16,27 +16,26 @@ namespace AtelierXNA
     {
 
         #region Propriétés, constantes et initialisation.
-
         const float LARGEUR_HITBOX = 300;
         const float HAUTEUR_HITBOX = 300;
         const float PROFONDEUR_HITBOX = 300;
-        protected Keys[] CONTRÔLES = { Keys.D, Keys.A, Keys.LeftShift, Keys.Space, Keys.P, Keys.J };
+        protected Keys[] CONTRÔLES  { get; private set; }
         protected enum ORIENTATION { DROITE, GAUCHE };
         protected enum ÉTAT { COURRIR, SAUTER, ATTAQUER, LANCER, BLOQUER, MORT, IMMOBILE };
 
         protected ÉTAT ÉTAT_PERSO;
         protected ORIENTATION DIRECTION;
 
-        //Éléments abstraits à définir.
-        public abstract void DéplacerFrame();
+
 
         protected int NbVies { get; set; }
         int VieEnPourcentage { get; set; }
+
+
+
         public BoundingBox HitBox { get; private set; }
 
         protected float VitesseDéplacementGaucheDroite { get; set; }
-        protected float VitesseDéplacementSaut { get; set; }
-        protected float AncienneVitesse { get; set; }
         protected float VitesseMaximaleSaut { get; private set; }
         float Masse { get; set; }
         protected bool EstEnAttaque { get; set; }
@@ -47,6 +46,8 @@ namespace AtelierXNA
         protected List<Vector3> IntervallesPossibles { get; set; }
         protected Vector3 IntervalleCourante { get; set; }
 
+
+
         //Données propres au personnages, qui seront variables.
         protected Vector3 Position { get; set; }
         public Vector3 GetPositionPersonnage
@@ -55,21 +56,23 @@ namespace AtelierXNA
         }
         protected Vector3 PositionSpawn { get; set; }
         protected Vector3 AnciennePosition { get; set; }
-
-        Vector3 VecteurVitesse { get; set; }
         Vector3 VecteurGauche { get; set; }
-        Vector3 VecteurQuantitéeDeMouvement { get; set; }
+        public Vector3 VecteurVitesse { get; private set; }
+        public abstract void DéplacerFrame();
         protected int CptSaut { get; set; }
+
 
         protected float IntervalleMAJ { get; set; }
         protected float TempsÉcouléDepuisMAJ { get; set; }
 
+
         protected InputControllerManager GestionInputManette { get; set; }
         protected InputManager GestionInputClavier { get; set; }
 
-        public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ)
+        public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles)
             : base(game)
         {
+            CONTRÔLES = contrôles;
             ÉTAT_PERSO = ÉTAT.IMMOBILE;
             DIRECTION = ORIENTATION.DROITE;
 
@@ -93,7 +96,6 @@ namespace AtelierXNA
 
             VecteurGauche = Vector3.Normalize(Carte.VecteurGauche);
             VecteurVitesse = Vector3.Zero;
-            VecteurQuantitéeDeMouvement = Vector3.Zero;
 
             base.Initialize();
         }
@@ -102,48 +104,97 @@ namespace AtelierXNA
         #region Boucle de jeu.
         public override void Update(GameTime gameTime)
         {
-            //Changements d'état ne nécessitant pas d'input du joueur.
-
             float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
             TempsÉcouléDepuisMAJ += tempsÉcoulé;
 
             NbVies = EstMort() ? --NbVies : NbVies;
+            VecteurVitesse = EstMort() ? Vector3.Zero : VecteurVitesse;
             Position = EstMort() ? PositionSpawn : Position;
+            
 
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
-                if (VitesseDéplacementSaut == 0 && AnciennePosition == Position && ÉTAT_PERSO != ÉTAT.IMMOBILE) //Conditions ici pour gérer l'immobilité.
+                if (VecteurVitesse.Y == 0 && VecteurVitesse.X ==0 && ÉTAT_PERSO != ÉTAT.IMMOBILE) //Conditions ici pour gérer l'immobilité.
                 {
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
                 }
-                else if (VitesseDéplacementSaut < -1)
+                else if (VecteurVitesse.Y < -1)
                 {
                     ÉTAT_PERSO = ÉTAT.SAUTER;
                 }
-                else if (VitesseDéplacementSaut != 0)
+                else if (VecteurVitesse.Y != 0)
                 {
                     ÉTAT_PERSO = ÉTAT.SAUTER;
                 }
 
+
+                AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
+
+
+                //Toutes les actions qui peuvent modifier le vecteur vitesse du personnage.
                 GérerTouchesEnfoncées();
                 GérerAccélérationGravitationnelle();
                 DéplacerFrame();
+                GérerCollisions();
+                GérerFriction();
+
+
+
+                Position += VecteurVitesse * TempsÉcouléDepuisMAJ;
                 GénérerHitbox();
+
+
+
                 TempsÉcouléDepuisMAJ = 0;
             }
             GérerNouvellesTouches();
             if (!GestionInputClavier.EstClavierActivé && !GestionInputManette.EstManetteActivée(PlayerIndex.One))
             {
-                if (VitesseDéplacementSaut != 0)
+                if (VecteurVitesse.Y != 0)
                     ÉTAT_PERSO = ÉTAT.SAUTER;
                 else
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
             }
         }
-        private void GénérerHitbox()
+
+        private void GérerFriction()
         {
-            HitBox = new BoundingBox(new Vector3(Position.X - LARGEUR_HITBOX / 2, Position.Y, Position.Z - PROFONDEUR_HITBOX), new Vector3(Position.X + LARGEUR_HITBOX / 2, Position.Y + HAUTEUR_HITBOX, Position.Z));
+            float mu = 0.1f;
+            if(VecteurVitesse.Y == 0 && VecteurVitesse.X !=0)
+            {
+                if (VecteurVitesse.X < 0 && (VecteurVitesse - VecteurGauche * mu * Atelier.ACCÉLÉRATION_GRAVITATIONNELLE).X < 0)
+                    VecteurVitesse -= VecteurGauche * mu * Atelier.ACCÉLÉRATION_GRAVITATIONNELLE;
+                else if (VecteurVitesse.X > 0 && (VecteurVitesse + VecteurGauche * mu * Atelier.ACCÉLÉRATION_GRAVITATIONNELLE).X > 0)
+                    VecteurVitesse += VecteurGauche * mu * Atelier.ACCÉLÉRATION_GRAVITATIONNELLE;
+                else
+                    VecteurVitesse = new Vector3(0,VecteurVitesse.Y,VecteurVitesse.Z);
+            }
         }
+
+
+
+        private void GérerCollisions()//Code à centraliser dans une interface
+        {
+            foreach(GameComponent g in Game.Components)
+            {
+                if(g is PersonnageAnimé)
+                {
+                    if ((g as PersonnageAnimé).EstEnCollision(this))
+                    {
+
+                    }
+                }
+                if (g is Projectile)
+                {
+                    if ((g as Projectile).EstEnCollision(this))
+                    {
+
+                    }
+                }
+            }
+        }
+
+
         private void GénérerHitbox()
         {
             HitBox = new BoundingBox(new Vector3(Position.X - LARGEUR_HITBOX / 2, Position.Y, Position.Z - PROFONDEUR_HITBOX), new Vector3(Position.X + LARGEUR_HITBOX / 2, Position.Y + HAUTEUR_HITBOX, Position.Z));
@@ -151,8 +202,7 @@ namespace AtelierXNA
         protected void GérerAccélérationGravitationnelle()
         {
             AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
-            AncienneVitesse = VitesseDéplacementSaut;
-            Position += Vector3.Up * VitesseDéplacementSaut * TempsÉcouléDepuisMAJ;
+            Position += Vector3.Up * VecteurVitesse.Y * TempsÉcouléDepuisMAJ;
 
             int redneck = 0;
             IntervallesPossibles = IntervallesSurfaces.FindAll(t => t.Z <= AnciennePosition.Y && EstDansIntervalleSurface(t, AnciennePosition)) as List<Vector3>;
@@ -168,35 +218,36 @@ namespace AtelierXNA
             if (EstDansIntervalleSurface(IntervalleCourante, Position) && (IntervalleCourante.Z >= Position.Y) && (IntervalleCourante.Z <= AnciennePosition.Y) && (EstDansIntervalleSurface(IntervalleCourante, AnciennePosition)))
             {
                 Position = new Vector3(AnciennePosition.X, IntervalleCourante.Z, AnciennePosition.Z);
-                VitesseDéplacementSaut = 0;
+               VecteurVitesse = new Vector3(VecteurVitesse.X,0,VecteurVitesse.Z);
                 CptSaut = 0;
             }
             else
             {
-                VitesseDéplacementSaut -= Atelier.ACCÉLÉRATION_GRAVITATIONNELLE * TempsÉcouléDepuisMAJ;
+                VecteurVitesse -= Vector3.Up * Atelier.ACCÉLÉRATION_GRAVITATIONNELLE * TempsÉcouléDepuisMAJ;
             }
+            Position -= Vector3.Up * VecteurVitesse.Y * TempsÉcouléDepuisMAJ;
         }
 
 
         #region Méthodes évenementielles.
         protected void GérerTouchesEnfoncées()
         {
-            AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
 
-            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[0]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.LeftThumbstickRight)) && (!EstEnAttaque || VitesseDéplacementSaut != 0))
+
+            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[0]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.LeftThumbstickRight)) && ((!EstEnAttaque || VecteurVitesse.Y != 0)))
             {
-                Position -= VecteurGauche * VitesseDéplacementGaucheDroite * TempsÉcouléDepuisMAJ;
+                VecteurVitesse -= VecteurGauche * VitesseDéplacementGaucheDroite;
                 DIRECTION = ORIENTATION.DROITE;
-                if (VitesseDéplacementSaut == 0)
+                if (VecteurVitesse.Y == 0)
                 {
                     ÉTAT_PERSO = ÉTAT.COURRIR;
                 }
             }
-            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[1]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.LeftThumbstickLeft)) && (!EstEnAttaque || VitesseDéplacementSaut != 0))
+            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[1]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.LeftThumbstickLeft)) && ((!EstEnAttaque || VecteurVitesse.Y != 0)))
             {
-                Position += VecteurGauche * VitesseDéplacementGaucheDroite * TempsÉcouléDepuisMAJ;
+                VecteurVitesse += VecteurGauche * VitesseDéplacementGaucheDroite;
                 DIRECTION = ORIENTATION.GAUCHE;
-                if (VitesseDéplacementSaut == 0)
+                if (VecteurVitesse.Y == 0)
                 {
                     ÉTAT_PERSO = ÉTAT.COURRIR;
                 }
@@ -204,7 +255,7 @@ namespace AtelierXNA
             if (GestionInputClavier.EstEnfoncée(CONTRÔLES[2]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.RightShoulder))
             {
                 Bloquer();
-                if (VitesseDéplacementSaut == 0)
+                if (VecteurVitesse.Y == 0)
                 {
                     ÉTAT_PERSO = ÉTAT.BLOQUER;
                 }
@@ -232,13 +283,13 @@ namespace AtelierXNA
            if(CptSaut == 0)
            {
                ÉTAT_PERSO = ÉTAT.SAUTER;
-               VitesseDéplacementSaut = VitesseMaximaleSaut;
+               VecteurVitesse += Vector3.Up*VitesseMaximaleSaut;
                ++CptSaut;
            }
             else if(CptSaut == 1)
            {
                ÉTAT_PERSO = ÉTAT.SAUTER;
-               VitesseDéplacementSaut = VitesseMaximaleSaut;
+               VecteurVitesse += Vector3.Up*VitesseMaximaleSaut;
                ++CptSaut;
            }
         }

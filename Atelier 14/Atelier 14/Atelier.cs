@@ -28,6 +28,8 @@ namespace AtelierXNA
         public string[] NOMS_SPRITES_ROBOT = { "Melee ", "RunShoot ", "Dead ", "Jump ", "Idle ", "Jump ", "JumpMelee ", "JumpShoot ", "Run ", "Slide ", "Shoot " };
         public int[] NB_FRAMES_SPRITES_ROBOT = { 8, 9, 10, 10, 10, 10, 8, 5, 8, 10, 4 };
         public int[] NB_FRAMES_SPRITES_NINJA = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
+
+
         enum GameState { MENU_PRINCIPAL,MENU_PERSONNAGE,MENU_DIFFICULTÉ,MENU_CARTE,MENU_PAUSE,JEU}
 
 
@@ -62,6 +64,7 @@ namespace AtelierXNA
 
         #region Composants de jeu.
         PersonnageAnimé Joueur { get; set; }
+        PersonnageAnimé Bot { get; set; }
         Map Carte { get; set; }
         TuileTexturée BackGround { get; set; }
         ArrièrePlanDéroulant ArrièrePlan { get; set; }
@@ -150,10 +153,6 @@ namespace AtelierXNA
         }
 
         #endregion
-
-
-
-
         private void InitialiserServices()
         {
             GestionnaireDeFonts = new RessourcesManager<SpriteFont>(this, "Fonts");
@@ -197,7 +196,6 @@ namespace AtelierXNA
 
             base.Initialize();
         }
-
         void AjouterCaméra()
         {
             CaméraJeu = new CaméraDePoursuite(this, new Vector3(1, -10, 100), new Vector3(0,-30,0), Vector3.Up, INTERVALLE_MAJ_STANDARD);
@@ -212,28 +210,31 @@ namespace AtelierXNA
         }
         void AjouterJoueurs()
         {
+            Keys[] CONTRÔLES_JOUEUR = { Keys.D, Keys.A, Keys.LeftShift, Keys.Space, Keys.P, Keys.J };
+            Keys[] CONTRÔLES_BOT = { Keys.H, Keys.F, Keys.RightShift, Keys.Enter, Keys.L, Keys.N };
             if (MenuPerso.État == MenuPersonnage.ÉTAT.NINJA)
             {
-                Joueur = new PersonnageAnimé(this, 25f, 35f, 100, Vector3.Zero, INTERVALLE_MAJ_STANDARD, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA);
+                Joueur = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD,CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA);
             }
             if (MenuPerso.État == MenuPersonnage.ÉTAT.ROBOT)
             {
-                Joueur = new PersonnageAnimé(this, 20f, 35f, 100, Vector3.Zero, INTERVALLE_MAJ_STANDARD, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Joueur = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR,INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
             if(MenuDiff.CHOIX == MenuDifficulté.ÉTAT.FACILE)
             {
-                //Ajouter un BOT facile.
+                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT,INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
             if(MenuDiff.CHOIX == MenuDifficulté.ÉTAT.NORMAL)
             {
-                //Ajouter un BOT normal.
+                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT,INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
             if(MenuDiff.CHOIX == MenuDifficulté.ÉTAT.DIFFICILE)
             {
-                //Ajouter un BOT difficile.
+                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(15,0,0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT,INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
+            Components.Add(Bot);
             Components.Add(Joueur);
-          //Components.Add(Bot);
+            
         }
         void InitialiserMenuPersonnages()
         {
@@ -243,21 +244,18 @@ namespace AtelierXNA
             Components.Add(MenuPerso);
             base.Initialize();
         }
-
         void InitialiserMenuDifficulté()
         {
             Components.Remove(MenuPerso);
             MenuDiff = new MenuDifficulté(this, INTERVALLE_MAJ_ANIMATION);
             Components.Add(MenuDiff);
         }
-
         void InitialiserMenuPause()
         {
             ToggleComponentsUpdate();
             MenuPau = new MenuPause(this,INTERVALLE_MAJ_ANIMATION);
             Components.Add(MenuPau);
         }
-
         void ToggleComponentsUpdate()
         {
             for (int i = 0; i < Components.Count; ++i)
