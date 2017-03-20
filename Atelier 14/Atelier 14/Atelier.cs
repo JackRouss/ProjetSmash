@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Menus;
+using System.IO;
+
 
 namespace AtelierXNA
 {
@@ -23,6 +25,7 @@ namespace AtelierXNA
         public Vector3 CIBLE_INITIALE_CAMÉRA = new Vector3(1, 0, -1);
         public Vector3 POSITION_INITIALE_CAMÉRA = Vector3.Zero;
         public const float ACCÉLÉRATION_GRAVITATIONNELLE = 40f;
+        public int NombreJoueur { get; private set; }
 
         public string[] NOMS_SPRITES_NINJA = { "Attack__00", "Climb_00", "Dead__00", "Glide_00", "Idle__00", "Jump__00", "Jump_Attack__00", "Jump_Throw__00", "Run__00", "Slide__00", "Throw__00" };
         public string[] NOMS_SPRITES_ROBOT = { "Melee ", "RunShoot ", "Dead ", "Jump ", "Idle ", "Jump ", "JumpMelee ", "JumpShoot ", "Run ", "Slide ", "Shoot " };
@@ -64,6 +67,7 @@ namespace AtelierXNA
         PersonnageAnimé Joueur { get; set; }
         Map Carte { get; set; }
         TuileTexturée BackGround { get; set; }
+        TuileTexturée BackGroundEasterEgg { get; set; }
         ArrièrePlanDéroulant ArrièrePlan { get; set; }
         #endregion
 
@@ -84,9 +88,21 @@ namespace AtelierXNA
             Menu = new MenuPrincipal(this);
             Components.Add(Menu);
             base.Initialize();
-            MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
+            ManetteConnectées();
+            //MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
         }
 
+        void ManetteConnectées()
+        {
+            if(GestionManettes.EstManetteActivée(PlayerIndex.One))
+            {
+                NombreJoueur += 1;
+            }
+            if (GestionManettes.EstManetteActivée(PlayerIndex.Two))
+            {
+                NombreJoueur += 1;
+            }
+        }
 
 
         #region Chargement des ressources.
@@ -187,11 +203,14 @@ namespace AtelierXNA
 
             AjouterCaméra();
             BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -70, -200), new Vector2(843, 316), "BackGround1", 0);
+            BackGroundEasterEgg = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -70, 300), new Vector2(843, 316), "wwe_profiles_hero_cena_3", 0);
             Components.Add(BackGround);
+            Components.Add(BackGroundEasterEgg);
             AjouterCarte();
             AjouterJoueurs();
             
-            
+
+
 
             base.Initialize();
         }
@@ -253,7 +272,9 @@ namespace AtelierXNA
         {
             ToggleComponentsUpdate();
             MenuPau = new MenuPause(this,INTERVALLE_MAJ_ANIMATION);
+            MenuPau.Initialize();
             Components.Add(MenuPau);
+           
         }
 
         void ToggleComponentsUpdate()
@@ -263,8 +284,26 @@ namespace AtelierXNA
                 if(Components[i] is IPause)
                 {
                     (Components[i] as GameComponent).Enabled = !(Components[i] as GameComponent).Enabled;
+                    if (Components[i] is TuileTexturée)
+                    {
+                        (Components[i] as TuileTexturée).Enabled = !(Components[i] as TuileTexturée).Enabled;
+                    }
                 }
             }
+        }
+
+        void RetourMenuPrincipale()
+        {
+            Components.Remove(MenuPau);
+            Components.Remove(CaméraJeu);
+            Components.Remove(BackGround);
+            Components.Remove(Carte);
+            Components.Remove(Joueur);
+            Services.RemoveService(typeof(Caméra));
+            Menu.Initialize();
+            Components.Add(Menu);
+            Menu.PasserMenuSuivant = false;
+                
         }
         #endregion
 
@@ -304,6 +343,7 @@ namespace AtelierXNA
                         ÉtatJeu = GameState.MENU_PAUSE;
                         InitialiserMenuPause();
                         MediaPlayer.Pause();
+
                     }
                     break;
                 case GameState.MENU_DIFFICULTÉ:
@@ -328,6 +368,7 @@ namespace AtelierXNA
                     if (MenuPau.RetournerMenuPrincipale)
                     {
                         ÉtatJeu = GameState.MENU_PRINCIPAL;
+                        RetourMenuPrincipale();
                         MenuPau.RetournerMenuPrincipale = false;
                     }
                     break;
@@ -347,15 +388,15 @@ namespace AtelierXNA
             if(ÉtatJeu == GameState.JEU && AChangéÉtat)
             {
                 MediaPlayer.Stop();
-                MediaPlayer.Play(GestionnaireDeChansons.Find("Cyborg Ninja"));
+                //MediaPlayer.Play(GestionnaireDeChansons.Find("Cyborg Ninja"));
             }
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
             base.Draw(gameTime);
         }
+       
         #endregion
     }
 }

@@ -34,6 +34,7 @@ namespace AtelierXNA
         protected float VitesseDéplacementSaut { get; set; } 
         protected float AncienneVitesse { get; set; }
         protected float VitesseMaximaleSaut { get; private set; }
+        PlayerIndex numManette { get; set; }
         float Masse { get; set; }
         protected bool EstEnAttaque { get; set; }
 
@@ -76,6 +77,7 @@ namespace AtelierXNA
             Position = position;
             PositionSpawn = position;
             NbVies = 3;
+
         }
 
         public override void Initialize()
