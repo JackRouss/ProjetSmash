@@ -199,7 +199,7 @@ namespace AtelierXNA
         void InitialiserJeu()
         {
             Components.Remove(MenuDiff);
-          
+
 
             AjouterCaméra();
             BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -70, -200), new Vector2(843, 316), "BackGround1", 0);
@@ -217,7 +217,7 @@ namespace AtelierXNA
 
         void AjouterCaméra()
         {
-            CaméraJeu = new CaméraDePoursuite(this, new Vector3(1, 30, 100), new Vector3(-2, -2, -10), Vector3.Up, INTERVALLE_MAJ_STANDARD);
+            CaméraJeu = new CaméraDePoursuite(this, new Vector3(1, -10, 100), new Vector3(0,-30,0), Vector3.Up, INTERVALLE_MAJ_STANDARD);
             Services.AddService(typeof(Caméra), CaméraJeu);
             Components.Add(CaméraJeu);
         }
@@ -231,11 +231,11 @@ namespace AtelierXNA
         {
             if (MenuPerso.État == MenuPersonnage.ÉTAT.NINJA)
             {
-                Joueur = new PersonnageAnimé(this, 20f, 40f, 100, Vector3.Zero, INTERVALLE_MAJ_STANDARD, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA);
+                Joueur = new PersonnageAnimé(this, 25f, 35f, 100, Vector3.Zero, INTERVALLE_MAJ_STANDARD, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA);
             }
             if (MenuPerso.État == MenuPersonnage.ÉTAT.ROBOT)
             {
-                Joueur = new PersonnageAnimé(this, 20f, 40f, 100, Vector3.Zero, INTERVALLE_MAJ_STANDARD, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Joueur = new PersonnageAnimé(this, 20f, 35f, 100, Vector3.Zero, INTERVALLE_MAJ_STANDARD, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
             if(MenuDiff.CHOIX == MenuDifficulté.ÉTAT.FACILE)
             {

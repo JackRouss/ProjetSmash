@@ -66,6 +66,7 @@ namespace AtelierXNA
             base.Initialize();
             Frame.Initialize();
         }
+
         #region Boucle de jeu.
         public override void Update(GameTime gameTime)
         {
@@ -149,7 +150,15 @@ namespace AtelierXNA
         {
             Frame.DéplacerTuile(Position);
         }
-        #endregion
 
+        protected override bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position)
+        {
+            return (intervalle.X <= position.X) && (intervalle.Y >= position.X);
+        }
+        #endregion
+        protected override bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position)
+        {
+            return (intervalle.X <= position.X) && (intervalle.Y >= position.X);
+        }
     }
 }
