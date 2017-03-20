@@ -144,10 +144,6 @@ namespace AtelierXNA
         {
             HitBox = new BoundingBox(new Vector3(Position.X - LARGEUR_HITBOX / 2, Position.Y, Position.Z - PROFONDEUR_HITBOX), new Vector3(Position.X + LARGEUR_HITBOX / 2, Position.Y + HAUTEUR_HITBOX, Position.Z));
         }
-        private void GénérerHitbox()
-        {
-            HitBox = new BoundingBox(new Vector3(Position.X - LARGEUR_HITBOX / 2, Position.Y, Position.Z - PROFONDEUR_HITBOX), new Vector3(Position.X + LARGEUR_HITBOX / 2, Position.Y + HAUTEUR_HITBOX, Position.Z));
-        }
         protected void GérerAccélérationGravitationnelle()
         {
             AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);

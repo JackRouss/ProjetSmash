@@ -94,7 +94,7 @@ namespace AtelierXNA
                     if (VitesseDéplacementSaut != 0)
                     {
                         État = NomsSprites[6];
-                    }
+                    }          
                     else
                     {
                         État = NomsSprites[0];
@@ -156,9 +156,6 @@ namespace AtelierXNA
             return (intervalle.X <= position.X) && (intervalle.Y >= position.X);
         }
         #endregion
-        protected override bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position)
-        {
-            return (intervalle.X <= position.X) && (intervalle.Y >= position.X);
-        }
+
     }
 }

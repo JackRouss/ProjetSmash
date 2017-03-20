@@ -154,6 +154,7 @@ namespace AtelierXNA
             {
                 Position = new Vector3(Position.X, MathHelper.Max(moyennePosY, 10), Position.Z);
             }
+            Position = new Vector3(Position.X, Position.Y, MathHelper.Min(moyennePosX,Position.Z));
         }
 
         private void GérerRotation()
