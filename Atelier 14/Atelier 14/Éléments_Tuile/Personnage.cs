@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Éléments_Tuile;
+using System.Linq;
 
 namespace AtelierXNA
 {
@@ -20,7 +21,7 @@ namespace AtelierXNA
         const float HAUTEUR_HITBOX = 3f;
         const float PROFONDEUR_HITBOX = 3f;
         protected Keys[] CONTRÔLES { get; private set; }
-        protected enum ORIENTATION { DROITE, GAUCHE };
+        public enum ORIENTATION { DROITE, GAUCHE };
         protected enum ÉTAT { COURRIR, SAUTER, ATTAQUER, LANCER, BLOQUER, MORT, IMMOBILE };
 
         protected ÉTAT ÉTAT_PERSO;
@@ -274,8 +275,9 @@ namespace AtelierXNA
             }
         }
         private void GérerLancer()
-        {
-
+        {      
+            Projectile p = new Projectile(Game, 1f, new Vector3(0,0, -MathHelper.Pi / 2), Position, new Vector2(2, 4), "Ninja/Kunai", AtelierXNA.Atelier.INTERVALLE_MAJ_STANDARD, DIRECTION);
+            Game.Components.Add(p);
         }
         private void GérerAttaque()
         {
