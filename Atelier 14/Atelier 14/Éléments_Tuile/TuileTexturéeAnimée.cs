@@ -44,7 +44,7 @@ namespace AtelierXNA.Éléments_Tuile
         string TypePersonnage { get; set; }
         int[] NbFramesSprites { get; set; }
         Vector2 DimensionsZoneAffichage { get; set; }
-        RessourcesManager<Texture2D> GestionnaireDeTextures { get; set; } 
+        RessourcesManager<Texture2D> GestionnaireDeTextures { get; set; }
         List<List<Texture2D>> Textures { get; set; }
         Texture2D TextureCourante { get; set; }
         VertexPositionTexture[] Sommets { get; set; }
@@ -73,8 +73,8 @@ namespace AtelierXNA.Éléments_Tuile
         float IntervalleMAJAnimation { get; set; }
         float TempsÉcouléDepuisMAJ { get; set; }
 
-        public TuileTexturéeAnimée(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, Vector2 étendue, string nomTextureTuile, float intervalleMAJ,Vector2 dimensionsZoneAffichage, string[] nomsSprites, int[] nbFramesSprites, string typePersonnage, float intervalleMAJAnimation)
-            :base(jeu,homothétieInitiale,rotationInitiale,positionInitiale,étendue,nomTextureTuile,intervalleMAJ)
+        public TuileTexturéeAnimée(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, Vector2 étendue, string nomTextureTuile, float intervalleMAJ, Vector2 dimensionsZoneAffichage, string[] nomsSprites, int[] nbFramesSprites, string typePersonnage, float intervalleMAJAnimation)
+            : base(jeu, homothétieInitiale, rotationInitiale, positionInitiale, étendue, nomTextureTuile, intervalleMAJ)
         {
             PositionÀModifier = positionInitiale;
             DimensionsZoneAffichage = dimensionsZoneAffichage;
@@ -91,10 +91,10 @@ namespace AtelierXNA.Éléments_Tuile
             float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
             TempsÉcouléDepuisMAJ += tempsÉcoulé;
 
-            if(TempsÉcouléDepuisMAJ >= IntervalleMAJAnimation)
+            if (TempsÉcouléDepuisMAJ >= IntervalleMAJAnimation)
             {
                 ++CptFrame;
-                if(CptFrame == NbFramesSprites[ÉtatNum])
+                if (CptFrame == NbFramesSprites[ÉtatNum])
                 {
                     CptFrame = 0;
                 }
@@ -106,7 +106,7 @@ namespace AtelierXNA.Éléments_Tuile
 
         public void ChangerÉtat(string état)
         {
-            if(état != État)
+            if (état != État)
             {
                 État = état;
                 CptFrame = 0;
@@ -166,11 +166,11 @@ namespace AtelierXNA.Éléments_Tuile
         {
             Textures = new List<List<Texture2D>>();
             GestionnaireDeTextures = Game.Services.GetService(typeof(RessourcesManager<Texture2D>)) as RessourcesManager<Texture2D>;
-            if(TypePersonnage == "Ninja")
+            if (TypePersonnage == "Ninja")
             {
                 LoadContentNinja();
             }
-            else if(TypePersonnage == "Robot")
+            else if (TypePersonnage == "Robot")
             {
                 LoadContentRobot();
             }

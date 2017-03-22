@@ -16,10 +16,10 @@ namespace AtelierXNA
     {
 
         #region Propriétés, constantes et initialisation.
-        const float LARGEUR_HITBOX = 300;
-        const float HAUTEUR_HITBOX = 300;
-        const float PROFONDEUR_HITBOX = 300;
-        protected Keys[] CONTRÔLES  { get; private set; }
+        const float LARGEUR_HITBOX = 3f;
+        const float HAUTEUR_HITBOX = 3f;
+        const float PROFONDEUR_HITBOX = 3f;
+        protected Keys[] CONTRÔLES { get; private set; }
         protected enum ORIENTATION { DROITE, GAUCHE };
         protected enum ÉTAT { COURRIR, SAUTER, ATTAQUER, LANCER, BLOQUER, MORT, IMMOBILE };
 
@@ -33,13 +33,15 @@ namespace AtelierXNA
 
 
 
-        public BoundingBox HitBox { get; private set; }
+        public BoundingSphere HitBox { get; private set; }
 
         protected float VitesseDéplacementGaucheDroite { get; set; }
         protected float VitesseMaximaleSaut { get; private set; }
-        PlayerIndex numManette { get; set; }
-        float Masse { get; set; }
-        protected bool EstEnAttaque { get; set; }
+        public float Masse { get; private set; }
+        public float Force { get; set; }
+        public int DommageAttaque { get; private set; }
+        public bool EstEnAttaque { get; protected set; }
+        bool EstBouclierActif { get; set; }
 
         //Copies de certains éléments de l'environnement importants pour le personnage.
         Map Carte { get; set; }
@@ -58,7 +60,7 @@ namespace AtelierXNA
         protected Vector3 PositionSpawn { get; set; }
         protected Vector3 AnciennePosition { get; set; }
         Vector3 VecteurGauche { get; set; }
-        public Vector3 VecteurVitesse { get; private set; }
+        public Vector3 VecteurVitesse { get; set; }
         public abstract void DéplacerFrame();
         protected int CptSaut { get; set; }
 
@@ -73,6 +75,14 @@ namespace AtelierXNA
         public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles)
             : base(game)
         {
+            //Propriétés pour le combat (à définir dans le constructeur)
+            DommageAttaque = 20;
+            Force = 1000000;
+
+
+
+
+
             CONTRÔLES = contrôles;
             ÉTAT_PERSO = ÉTAT.IMMOBILE;
             DIRECTION = ORIENTATION.DROITE;
@@ -111,11 +121,11 @@ namespace AtelierXNA
             NbVies = EstMort() ? --NbVies : NbVies;
             VecteurVitesse = EstMort() ? Vector3.Zero : VecteurVitesse;
             Position = EstMort() ? PositionSpawn : Position;
-            
+
 
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
-                if (VecteurVitesse.Y == 0 && VecteurVitesse.X ==0 && ÉTAT_PERSO != ÉTAT.IMMOBILE) //Conditions ici pour gérer l'immobilité.
+                if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE) //Conditions ici pour gérer l'immobilité.
                 {
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
                 }
@@ -128,23 +138,15 @@ namespace AtelierXNA
                     ÉTAT_PERSO = ÉTAT.SAUTER;
                 }
 
-
                 AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
-
 
                 //Toutes les actions qui peuvent modifier le vecteur vitesse du personnage.
                 GérerTouchesEnfoncées();
                 GérerAccélérationGravitationnelle();
-                DéplacerFrame();
-                GérerCollisions();
                 GérerFriction();
-
-
 
                 Position += VecteurVitesse * TempsÉcouléDepuisMAJ;
                 GénérerHitbox();
-
-
 
                 TempsÉcouléDepuisMAJ = 0;
             }
@@ -161,44 +163,21 @@ namespace AtelierXNA
         private void GérerFriction()
         {
             float mu = 0.1f;
-            if(VecteurVitesse.Y == 0 && VecteurVitesse.X !=0)
+            if (VecteurVitesse.Y == 0 && VecteurVitesse.X != 0)
             {
                 if (VecteurVitesse.X < 0 && (VecteurVitesse - VecteurGauche * mu * Atelier.ACCÉLÉRATION_GRAVITATIONNELLE).X < 0)
                     VecteurVitesse -= VecteurGauche * mu * Atelier.ACCÉLÉRATION_GRAVITATIONNELLE;
                 else if (VecteurVitesse.X > 0 && (VecteurVitesse + VecteurGauche * mu * Atelier.ACCÉLÉRATION_GRAVITATIONNELLE).X > 0)
                     VecteurVitesse += VecteurGauche * mu * Atelier.ACCÉLÉRATION_GRAVITATIONNELLE;
                 else
-                    VecteurVitesse = new Vector3(0,VecteurVitesse.Y,VecteurVitesse.Z);
-            }
-        }
-
-
-
-        private void GérerCollisions()//Code à centraliser dans une interface
-        {
-            foreach(GameComponent g in Game.Components)
-            {
-                if(g is PersonnageAnimé)
-                {
-                    if ((g as PersonnageAnimé).EstEnCollision(this))
-                    {
-
-                    }
-                }
-                if (g is Projectile)
-                {
-                    if ((g as Projectile).EstEnCollision(this))
-                    {
-
-                    }
-                }
+                    VecteurVitesse = new Vector3(0, VecteurVitesse.Y, VecteurVitesse.Z);
             }
         }
 
 
         private void GénérerHitbox()
         {
-            HitBox = new BoundingBox(new Vector3(Position.X - LARGEUR_HITBOX / 2, Position.Y, Position.Z - PROFONDEUR_HITBOX), new Vector3(Position.X + LARGEUR_HITBOX / 2, Position.Y + HAUTEUR_HITBOX, Position.Z));
+            HitBox = new BoundingSphere(new Vector3(Position.X, Position.Y + HAUTEUR_HITBOX / 2, Position.Z), HAUTEUR_HITBOX / 2);
         }
         protected void GérerAccélérationGravitationnelle()
         {
@@ -219,7 +198,7 @@ namespace AtelierXNA
             if (EstDansIntervalleSurface(IntervalleCourante, Position) && (IntervalleCourante.Z >= Position.Y) && (IntervalleCourante.Z <= AnciennePosition.Y) && (EstDansIntervalleSurface(IntervalleCourante, AnciennePosition)))
             {
                 Position = new Vector3(AnciennePosition.X, IntervalleCourante.Z, AnciennePosition.Z);
-               VecteurVitesse = new Vector3(VecteurVitesse.X,0,VecteurVitesse.Z);
+                VecteurVitesse = new Vector3(VecteurVitesse.X, 0, VecteurVitesse.Z);
                 CptSaut = 0;
             }
             else
@@ -281,18 +260,18 @@ namespace AtelierXNA
         }
         protected void GérerSauts()//Il faut éviter que si le personnage n'as pas initialement sauter **************À FIX*****************
         {
-           if(CptSaut == 0)
-           {
-               ÉTAT_PERSO = ÉTAT.SAUTER;
-               VecteurVitesse += Vector3.Up*VitesseMaximaleSaut;
-               ++CptSaut;
-           }
-            else if(CptSaut == 1)
-           {
-               ÉTAT_PERSO = ÉTAT.SAUTER;
-               VecteurVitesse += Vector3.Up*VitesseMaximaleSaut;
-               ++CptSaut;
-           }
+            if (CptSaut == 0)
+            {
+                ÉTAT_PERSO = ÉTAT.SAUTER;
+                VecteurVitesse += Vector3.Up * VitesseMaximaleSaut;
+                ++CptSaut;
+            }
+            else if (CptSaut == 1)
+            {
+                ÉTAT_PERSO = ÉTAT.SAUTER;
+                VecteurVitesse += Vector3.Up * VitesseMaximaleSaut;
+                ++CptSaut;
+            }
         }
         private void GérerLancer()
         {
@@ -304,10 +283,24 @@ namespace AtelierXNA
         }
         private void Bloquer()
         {
-            //À définir plus tard.
+            EstBouclierActif = true;
         }
 
-
+        public void EncaisserDégâts(Personnage p)
+        {
+            if (!EstBouclierActif)
+            {
+                    if (p.DIRECTION == ORIENTATION.DROITE)
+                    {
+                        VecteurVitesse += TempsÉcouléDepuisMAJ * Force * Vector3.Right / Masse;
+                    }
+                    else
+                    {
+                        VecteurVitesse += TempsÉcouléDepuisMAJ * Force * Vector3.Left / Masse;
+                    }
+                VieEnPourcentage += p.DommageAttaque;
+            }
+        }
         #endregion
 
         #endregion
