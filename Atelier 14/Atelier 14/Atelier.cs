@@ -9,7 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Menus;
-using AtelierXNA.Éléments_Tuile;
+using System.IO;
+
 
 namespace AtelierXNA
 {
@@ -24,6 +25,7 @@ namespace AtelierXNA
         public Vector3 CIBLE_INITIALE_CAMÉRA = new Vector3(1, 0, -1);
         public Vector3 POSITION_INITIALE_CAMÉRA = Vector3.Zero;
         public const float ACCÉLÉRATION_GRAVITATIONNELLE = 40f;
+        public int NombreJoueur { get; private set; }
 
         public string[] NOMS_SPRITES_NINJA = { "Attack__00", "Climb_00", "Dead__00", "Glide_00", "Idle__00", "Jump__00", "Jump_Attack__00", "Jump_Throw__00", "Run__00", "Slide__00", "Throw__00" };
         public string[] NOMS_SPRITES_ROBOT = { "Melee ", "RunShoot ", "Dead ", "Jump ", "Idle ", "Jump ", "JumpMelee ", "JumpShoot ", "Run ", "Slide ", "Shoot " };
@@ -68,8 +70,8 @@ namespace AtelierXNA
         PersonnageAnimé Bot { get; set; }
         Map Carte { get; set; }
         TuileTexturée BackGround { get; set; }
+        TuileTexturée BackGroundEasterEgg { get; set; }
         ArrièrePlanDéroulant ArrièrePlan { get; set; }
-        bool VieilÉtatCollisionPerso { get; set; }
         #endregion
 
         #region Initialisation.
@@ -89,9 +91,21 @@ namespace AtelierXNA
             Menu = new MenuPrincipal(this);
             Components.Add(Menu);
             base.Initialize();
-            MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
+            ManetteConnectées();
+            //MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
         }
 
+        void ManetteConnectées()
+        {
+            if(GestionManettes.EstManetteActivée(PlayerIndex.One))
+            {
+                NombreJoueur += 1;
+            }
+            if (GestionManettes.EstManetteActivée(PlayerIndex.Two))
+            {
+                NombreJoueur += 1;
+            }
+        }
 
 
         #region Chargement des ressources.
@@ -187,13 +201,15 @@ namespace AtelierXNA
 
 
             AjouterCaméra();
-            BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), new Vector2(843, 316), "BackGround1", 0);
+            BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -70, -200), new Vector2(843, 316), "BackGround1", 0);
+            BackGroundEasterEgg = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -70, 300), new Vector2(843, 316), "wwe_profiles_hero_cena_3", 0);
             Components.Add(BackGround);
-
-            
-            
+            Components.Add(BackGroundEasterEgg);
             AjouterCarte();
             AjouterJoueurs();
+            
+
+
 
             base.Initialize();
         }
@@ -215,23 +231,23 @@ namespace AtelierXNA
             Keys[] CONTRÔLES_BOT = { Keys.H, Keys.F, Keys.RightShift, Keys.Enter, Keys.L, Keys.N };
             if (MenuPerso.État == MenuPersonnage.ÉTAT.NINJA)
             {
-                Joueur = new PersonnageAnimé(this, 5f, 35f, 50, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD,CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA);
+                Joueur = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD,CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA);
             }
             if (MenuPerso.État == MenuPersonnage.ÉTAT.ROBOT)
             {
-                Joueur = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR,INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Joueur = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR,INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
             if(MenuDiff.CHOIX == MenuDifficulté.ÉTAT.FACILE)
             {
-                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT,INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT,INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
             if(MenuDiff.CHOIX == MenuDifficulté.ÉTAT.NORMAL)
             {
-                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT,INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT,INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
             if(MenuDiff.CHOIX == MenuDifficulté.ÉTAT.DIFFICILE)
             {
-                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0,0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT,INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(15,0,0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT,INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
             Components.Add(Bot);
             Components.Add(Joueur);
@@ -255,7 +271,9 @@ namespace AtelierXNA
         {
             ToggleComponentsUpdate();
             MenuPau = new MenuPause(this,INTERVALLE_MAJ_ANIMATION);
+            MenuPau.Initialize();
             Components.Add(MenuPau);
+           
         }
         void ToggleComponentsUpdate()
         {
@@ -264,8 +282,26 @@ namespace AtelierXNA
                 if(Components[i] is IPause)
                 {
                     (Components[i] as GameComponent).Enabled = !(Components[i] as GameComponent).Enabled;
+                    if (Components[i] is TuileTexturée)
+                    {
+                        (Components[i] as TuileTexturée).Enabled = !(Components[i] as TuileTexturée).Enabled;
+                    }
                 }
             }
+        }
+
+        void RetourMenuPrincipale()
+        {
+            Components.Remove(MenuPau);
+            Components.Remove(CaméraJeu);
+            Components.Remove(BackGround);
+            Components.Remove(Carte);
+            Components.Remove(Joueur);
+            Services.RemoveService(typeof(Caméra));
+            Menu.Initialize();
+            Components.Add(Menu);
+            Menu.PasserMenuSuivant = false;
+                
         }
         #endregion
 
@@ -275,10 +311,6 @@ namespace AtelierXNA
             GérerTransition();
             GérerMusique();
             base.Update(gameTime);
-            if(ÉtatJeu == GameState.JEU)
-            {
-                GérerCollisions();
-            }
         }
 
         void GérerTransition()
@@ -309,6 +341,7 @@ namespace AtelierXNA
                         ÉtatJeu = GameState.MENU_PAUSE;
                         InitialiserMenuPause();
                         MediaPlayer.Pause();
+
                     }
                     break;
                 case GameState.MENU_DIFFICULTÉ:
@@ -333,6 +366,7 @@ namespace AtelierXNA
                     if (MenuPau.RetournerMenuPrincipale)
                     {
                         ÉtatJeu = GameState.MENU_PRINCIPAL;
+                        RetourMenuPrincipale();
                         MenuPau.RetournerMenuPrincipale = false;
                     }
                     break;
@@ -356,48 +390,11 @@ namespace AtelierXNA
             }
         }
 
-        void GérerCollisions()
-        {
-            if(Joueur.EstEnCollision(Bot) && VieilÉtatCollisionPerso != Joueur.EstEnCollision(Bot))
-            {
-                Joueur.VecteurVitesse += Bot.VecteurVitesse * Bot.Masse / Joueur.Masse;
-                Bot.VecteurVitesse += Joueur.VecteurVitesse * Joueur.Masse / Bot.Masse;
-            }
-            if(Joueur.EstEnCollision(Bot))
-            {
-                if (Joueur.EstEnAttaque)
-                {
-                    Bot.EncaisserDégâts(Joueur);
-                }
-                if (Bot.EstEnAttaque)
-                {
-                    Joueur.EncaisserDégâts(Bot);
-                }
-            }
-           
-            foreach (GameComponent g in Components)
-            {
-                if(g is Projectile)
-                {
-                    if((g as Projectile).EstEnCollision(Joueur))
-                    {
-
-                    }
-                    if((g as Projectile).EstEnCollision(Bot))
-                    {
-
-                    }
-                }
-            }
-
-            VieilÉtatCollisionPerso = Joueur.EstEnCollision(Bot);
-        }
-
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
             base.Draw(gameTime);
         }
+       
         #endregion
     }
 }
