@@ -77,7 +77,10 @@ namespace AtelierXNA
             }
             base.Update(gameTime);
             GérerTransitionsAnimations();
+            
             Frame.Update(gameTime);
+            DéplacerFrame();
+            
         }
         private void GérerTransitionsAnimations()//"Attack__00", "Climb_00", "Dead__00", "Glide_00", "Idle__00", "Jump__00", "Jump_Attack__00", "Jump_Throw__00", "Run__00", "Slide__00", "Throw__00"
         {

@@ -50,6 +50,25 @@ namespace AtelierXNA.Éléments_Tuile
         VertexPositionTexture[] Sommets { get; set; }
         Vector2[,] PtsTexture { get; set; }
         BlendState GestionAlpha { get; set; }
+        Vector3 p;
+        public Vector3 PositionÀModifier
+        {
+            get { return p; }
+
+            set
+            {
+                p = value;
+                CalculerMatriceMonde();
+            }
+        }
+        protected override void CalculerMatriceMonde()
+        {
+
+            Monde = Matrix.Identity;
+            Monde *= Matrix.CreateScale(1);
+            Monde *= Matrix.CreateFromYawPitchRoll(0, 0, 0);
+            Monde *= Matrix.CreateTranslation(PositionÀModifier);
+        }
 
         float IntervalleMAJAnimation { get; set; }
         float TempsÉcouléDepuisMAJ { get; set; }
@@ -57,7 +76,7 @@ namespace AtelierXNA.Éléments_Tuile
         public TuileTexturéeAnimée(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, Vector2 étendue, string nomTextureTuile, float intervalleMAJ,Vector2 dimensionsZoneAffichage, string[] nomsSprites, int[] nbFramesSprites, string typePersonnage, float intervalleMAJAnimation)
             :base(jeu,homothétieInitiale,rotationInitiale,positionInitiale,étendue,nomTextureTuile,intervalleMAJ)
         {
-            
+            PositionÀModifier = positionInitiale;
             DimensionsZoneAffichage = dimensionsZoneAffichage;
             NomsSprites = nomsSprites;
             TypePersonnage = typePersonnage;
@@ -126,15 +145,20 @@ namespace AtelierXNA.Éléments_Tuile
 
         protected override void CréerTableauPoints()
         {
-            DéplacerTuile(Origine);
+            InitialiserShit();
         }
 
         public void DéplacerTuile(Vector3 nouvellePosition)
         {
-            PtsSommets[0, 0] = new Vector3(nouvellePosition.X -  DimensionsZoneAffichage.X/ 2, nouvellePosition.Y, nouvellePosition.Z);
-            PtsSommets[1, 0] = new Vector3(nouvellePosition.X + DimensionsZoneAffichage.X / 2, nouvellePosition.Y, nouvellePosition.Z);
-            PtsSommets[0, 1] = new Vector3(nouvellePosition.X - DimensionsZoneAffichage.X / 2, nouvellePosition.Y + DimensionsZoneAffichage.Y, nouvellePosition.Z);
-            PtsSommets[1, 1] = new Vector3(nouvellePosition.X + DimensionsZoneAffichage.X / 2, nouvellePosition.Y + DimensionsZoneAffichage.Y, nouvellePosition.Z);
+            PositionÀModifier = nouvellePosition;
+        }
+
+        private void InitialiserShit()
+        {
+            PtsSommets[0, 0] = new Vector3(0 - DimensionsZoneAffichage.X / 2, 0, 0);
+            PtsSommets[1, 0] = new Vector3(0 + DimensionsZoneAffichage.X / 2, 0, 0);
+            PtsSommets[0, 1] = new Vector3(0 - DimensionsZoneAffichage.X / 2, 0 + DimensionsZoneAffichage.Y, 0);
+            PtsSommets[1, 1] = new Vector3(0 + DimensionsZoneAffichage.X / 2, 0 + DimensionsZoneAffichage.Y, 0);
             InitialiserSommets();
         }
 
