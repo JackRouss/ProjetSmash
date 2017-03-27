@@ -139,6 +139,7 @@ namespace AtelierXNA
                 {
                     ÉTAT_PERSO = ÉTAT.SAUTER;
                 }
+                
 
                 AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
 
