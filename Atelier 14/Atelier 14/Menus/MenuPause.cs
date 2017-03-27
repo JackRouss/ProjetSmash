@@ -17,7 +17,7 @@ namespace AtelierXNA.Menus
     public class MenuPause : Microsoft.Xna.Framework.DrawableGameComponent
     {
         const string RÉSUMER_PARTIE = "Résumer la partie";
-        const string MENU_PRINCIPAL = "Retour au menu principal";
+        const string MENU_PRINCIPAL = "Recommencer";
         const string QUITTER = "Quitter le jeu";
         const string OPTIONS = "Options";
         const float ESPACE_ENTRE_OPTIONS = 40;

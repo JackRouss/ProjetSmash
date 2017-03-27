@@ -19,6 +19,9 @@ namespace AtelierXNA
         public const float INTERVALLE_CALCUL_FPS = 1f;
         public const float INTERVALLE_MAJ_STANDARD = 1f / 60f;
         const float INTERVALLE_MAJ_ANIMATION = 1f / 25f;
+        readonly string[] NomCartes = { "BackGround1", "BackGround2", "BackGround3", "BackGround4" };
+        readonly Vector2[] DimensionCarte = { new Vector2(843, 316),new Vector2(844, 358), new Vector2(844, 364), new Vector2(844, 362) };
+        readonly Color[] CouleurCartes = { Color.ForestGreen, Color.DeepSkyBlue, Color.Beige, Color.YellowGreen };
 
         public Vector3 VECTEUR_ACCÉLÉRATION_GRAVITATIONNELLE = ACCÉLÉRATION_GRAVITATIONNELLE * (Vector3.Down);
         public Vector3 CIBLE_INITIALE_CAMÉRA = new Vector3(1, 0, -1);
@@ -188,7 +191,7 @@ namespace AtelierXNA
 
 
             AjouterCaméra();
-            BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), new Vector2(843, 316), "BackGround1", 0);
+            BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], NomCartes[MenuCa.ChoixCarte], 0);
             Components.Add(BackGround);
 
 
@@ -206,7 +209,7 @@ namespace AtelierXNA
         }
         void AjouterCarte()
         {
-            Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero);
+            Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero, CouleurCartes[MenuCa.ChoixCarte]);
 
             Components.Add(Carte);
         }
@@ -249,7 +252,7 @@ namespace AtelierXNA
         void InitialiserMenuCartes()
         {
             Components.Remove(MenuPerso);
-            MenuCa = new MenuCartes(this, new string[] { "BackGround1", "wwe_profiles_hero_cena_3", "CielÉtoilé" , "DrapeauQuébec"});
+            MenuCa = new MenuCartes(this, NomCartes);
             Components.Add(MenuCa);
         }
         void InitialiserMenuDifficulté()
@@ -354,6 +357,9 @@ namespace AtelierXNA
                     if (MenuPau.RetournerMenuPrincipale)
                     {
                         ÉtatJeu = GameState.MENU_PRINCIPAL;
+                        Components.Clear();
+                        EnleverServices();
+                        Initialize();
                         MenuPau.RetournerMenuPrincipale = false;
                     }
                     break;
@@ -366,6 +372,19 @@ namespace AtelierXNA
             {
                 AChangéÉtat = false;
             }
+        }
+
+        void EnleverServices()
+        {
+            Services.RemoveService(typeof(RessourcesManager<SoundEffect>));
+            Services.RemoveService(typeof(RessourcesManager<Song>));
+            Services.RemoveService(typeof(RessourcesManager<SpriteFont>));
+            Services.RemoveService(typeof(RessourcesManager<Texture2D>));
+            Services.RemoveService(typeof(RessourcesManager<Model>));
+            Services.RemoveService(typeof(InputControllerManager));
+            Services.RemoveService(typeof(InputManager));
+            Services.RemoveService(typeof(SpriteBatch));
+            Services.RemoveService(typeof(Caméra));
         }
 
         void GérerMusique()

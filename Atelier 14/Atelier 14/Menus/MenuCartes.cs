@@ -24,9 +24,16 @@ namespace AtelierXNA.Menus
         float LongueurRectangle { get; set; }
         int nbCarte { get; set; }
         int redneck { get; set; }
+        public int ChoixCarte { get; private set; }
+        int NumChoixCarte { get; set; }
+        float IntervalleMAJAnimation { get; set; }
+        float Temps…coulÈDepuisMAJ { get; set; }
+        int CptCouleur { get; set; }
+
 
         String[] NomDesCartes { get; set; }
         Texture2D[] Cartes { get; set; }
+        Texture2D BackGroundChoix { get; set; }
         Vector2[,] PositionsCartes { get; set; }
         Rectangle[,] EmplacementDesCartres { get; set; }
         Vector2 POSITION_TITRE { get; set; }
@@ -64,7 +71,7 @@ namespace AtelierXNA.Menus
             EmplacementDesCartres = new Rectangle[nbCarte/2, 2];
             Fond…cran = new ArriËrePlanDÈroulant(Game, "Fond4", Atelier.INTERVALLE_MAJ_STANDARD);
             Fond…cran.Initialize();
-
+            NumChoixCarte = 0;
 
             ChargerCartes();
 
@@ -85,8 +92,8 @@ namespace AtelierXNA.Menus
         {
             nbCarte = DivisionDuMenuSelonLeNombreDeCarte();
 
-            LongueurRectangle = (Game.Window.ClientBounds.X - marge * (nbCarte / 2 + 1)) / (nbCarte / 2);
-            HauteurRectangle = (Game.Window.ClientBounds.Y - marge * 2) / 2;
+            LongueurRectangle = (Game.Window.ClientBounds.Width - marge * (nbCarte / 2 + 1)) / (nbCarte / 2);
+            HauteurRectangle = (Game.Window.ClientBounds.Height - marge * 4) / 2;
         }
 
         int DivisionDuMenuSelonLeNombreDeCarte()
@@ -107,6 +114,7 @@ namespace AtelierXNA.Menus
             {
                 Cartes[i] = GestionnaireDeTextures.Find(NomDesCartes[i]);
             }
+            BackGroundChoix = GestionnaireDeTextures.Find("Fond_blanc.svg");
         }
 
         void CalculerPositionCartes()
@@ -115,8 +123,9 @@ namespace AtelierXNA.Menus
             {
                 for (int j = 0; j < PositionsCartes.GetLength(0); j++)
                 {
-                    PositionsCartes[j, i] = new Vector2(marge * (j + 1) + LongueurRectangle * j, marge * 4+ i*marge+ HauteurRectangle*i);
+                    PositionsCartes[j, i] = new Vector2(marge * (j + 1) + LongueurRectangle * j, marge *(i+3) + HauteurRectangle * i);
                 }
+
             }
            
 
@@ -143,6 +152,17 @@ namespace AtelierXNA.Menus
             // TODO: Add your update code here
             Fond…cran.Update(gameTime);
             GÈrerEntrÈes();
+            float temps…coulÈe = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Temps…coulÈDepuisMAJ += temps…coulÈe;
+            if (Temps…coulÈDepuisMAJ >= MenuPersonnage.INTERVALLE_MAJ_COULEUR)
+            {
+                ++CptCouleur;
+                if (CptCouleur == COULEURS.Length)
+                {
+                    CptCouleur = 0;
+                }
+                Temps…coulÈDepuisMAJ = 0;
+            }
             base.Update(gameTime);
         }
 
@@ -152,16 +172,38 @@ namespace AtelierXNA.Menus
             {
                 if (GestionInputClavier.EstNouvelleTouche(Keys.Right) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickRight))
                 {
-                    //…tat = …TAT.ROBOT;
+                    NumChoixCarte += 1;
                 }
-                else if (GestionInputClavier.EstNouvelleTouche(Keys.Left) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickLeft))
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Left) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickLeft))
                 {
-                    //…tat = …TAT.NINJA;
+                    NumChoixCarte -= 1;
+                }
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Down) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickDown))
+                {
+                    NumChoixCarte += nbCarte / 2;
+                }
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Up) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickUp))
+                {
+                    NumChoixCarte -= nbCarte / 2;
                 }
                 if (GestionInputClavier.EstNouvelleTouche(Keys.Enter) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.A))
                 {
                     PasserMenuSuivant = true;
                 }
+            }
+            TestMaximunCpt();
+            ChoixCarte = NumChoixCarte;
+        }
+
+        private void TestMaximunCpt()
+        {
+            if(NumChoixCarte >= nbCarte - 1)
+            {
+                NumChoixCarte = nbCarte - 1;
+            }
+            if(NumChoixCarte < 0)
+            {
+                NumChoixCarte = 0;
             }
         }
 
@@ -169,6 +211,7 @@ namespace AtelierXNA.Menus
         {
             Fond…cran.Draw(gameTime);
             GestionSprites.Begin();
+            GestionSprites.Draw(BackGroundChoix, new Rectangle((int)PositionsCartes[TranspositionTableau(), autre()].X-4, (int)PositionsCartes[TranspositionTableau(), autre()].Y-4, (int)LongueurRectangle + 8, (int)HauteurRectangle + 8), COULEURS[CptCouleur]);
             for (int i = 0; i < EmplacementDesCartres.GetLength(1); i++)
             {
                 for (int j = 0; j < EmplacementDesCartres.GetLength(0); j++)
@@ -177,11 +220,30 @@ namespace AtelierXNA.Menus
                     redneck++;
                 }
             }
+            
+
             redneck = 0;
            
             GestionSprites.DrawString(ArialFont, TITRE, POSITION_TITRE, Color.White);
             GestionSprites.End();
             base.Draw(gameTime);
+        }
+        int TranspositionTableau()
+        {
+            if((NumChoixCarte - nbCarte/2) >= 0)
+            {
+                return NumChoixCarte - nbCarte / 2;
+            }
+            else
+            {
+                return NumChoixCarte;
+            }
+                
+        }
+
+        int autre()
+        {
+            return (int)Math.Round((double)NumChoixCarte / nbCarte + 0.05);
         }
     }
 }
