@@ -113,14 +113,10 @@ namespace AtelierXNA
             GérerDéplacement();
 
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
-            {
-
-                if (true)
-                {
-                    GérerAccélération();
-                    GérerRotation();
-                    CréerPointDeVue();
-                }
+            {              
+                GérerAccélération();
+                GérerRotation();
+                CréerPointDeVue();             
                 TempsÉcouléDepuisMAJ = 0;
             }
             base.Update(gameTime);
@@ -154,7 +150,6 @@ namespace AtelierXNA
             {
                 Position = new Vector3(Position.X, MathHelper.Max(moyennePosY, 10), Position.Z);
             }
-            Position = new Vector3(Position.X, Position.Y, MathHelper.Min(moyennePosX,Position.Z));
         }
 
         private void GérerRotation()

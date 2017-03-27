@@ -7,7 +7,7 @@ namespace AtelierXNA
 {
    public class TuileTexturée : Tuile
    {
-      const int NB_TRIANGLES = 2;
+      //const int NB_TRIANGLES = 2;
       RessourcesManager<Texture2D> gestionnaireDeTextures;
       Texture2D textureTuile;
         private Game game;

@@ -19,7 +19,6 @@ namespace AtelierXNA
         protected const float ÉCHELLE_PERSONNAGE = 4;
 
         //Données de base.
-        string TypePersonnage { get; set; }
         string état;
         protected string État
         {
