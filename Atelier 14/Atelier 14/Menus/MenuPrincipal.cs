@@ -123,11 +123,15 @@ namespace AtelierXNA
         {
             if (GestionInputClavier.EstClavierActivé || GestionInputManette.EstManetteActivée(PlayerIndex.One))
             {
-                if (GestionInputClavier.EstEnfoncée(Keys.Enter) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.A))
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Enter) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.A))
                 {
                     if (DémarrerSélectionnerVisible)
                     {
                         PasserMenuSuivant = true;
+                    }
+                    if (QuitterSélectionnerVisible)
+                    {
+                        Game.Exit();
                     }
                 }
             }

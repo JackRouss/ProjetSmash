@@ -50,8 +50,8 @@ namespace AtelierXNA
         TuileTexturéeAnimée Frame { get; set; }
 
 
-        public PersonnageAnimé(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, float intervalleMAJAnimation, string[] nomSprites, string type, int[] nbFramesSprites)
-            : base(game, vitesseDéplacementGaucheDroite, vitesseMaximaleSaut, masse, position, intervalleMAJ)
+        public PersonnageAnimé(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles, float intervalleMAJAnimation, string[] nomSprites, string type, int[] nbFramesSprites)
+            : base(game, vitesseDéplacementGaucheDroite, vitesseMaximaleSaut, masse, position, intervalleMAJ,contrôles)
         {
             Vector2 zoneAffichageDimensions = new Vector2(5, 10);
             Frame = new TuileTexturéeAnimée(Game, 1, Vector3.Zero, position, new Vector2(2, 2), "Idle__000", intervalleMAJ, zoneAffichageDimensions, nomSprites, nbFramesSprites, type, intervalleMAJAnimation);
@@ -91,13 +91,17 @@ namespace AtelierXNA
                 { }
                 else if (ÉTAT_PERSO == ÉTAT.ATTAQUER)
                 {
-                    if (VitesseDéplacementSaut != 0)
+                    if (VecteurVitesse.Y != 0)
                     {
                         État = NomsSprites[6];
                     }          
                     else
                     {
                         État = NomsSprites[0];
+                        if (VecteurVitesse.X != 0)
+                        {
+                            État = NomsSprites[9];
+                        }
                     }
                     EstEnAttaque = true;
                 }
@@ -107,7 +111,7 @@ namespace AtelierXNA
                 }
                 else if (ÉTAT_PERSO == ÉTAT.LANCER)
                 {
-                    if (VitesseDéplacementSaut != 0)
+                    if (VecteurVitesse.Y != 0)
                     {
                         État = NomsSprites[7];
                     }
@@ -123,7 +127,7 @@ namespace AtelierXNA
                 }
                 else if (ÉTAT_PERSO == ÉTAT.SAUTER)
                 {
-                    if (VitesseDéplacementSaut < -1)
+                    if (VecteurVitesse.Y < -1)
                         État = NomsSprites[3];
                     else
                         État = NomsSprites[5];
@@ -156,6 +160,5 @@ namespace AtelierXNA
             return (intervalle.X <= position.X) && (intervalle.Y >= position.X);
         }
         #endregion
-
     }
 }
