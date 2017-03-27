@@ -21,7 +21,6 @@ namespace AtelierXNA.Menus
         const string QUITTER = "Quitter le jeu";
         const string OPTIONS = "Options";
         const float ESPACE_ENTRE_OPTIONS = 40;
-        const string CHEMIN = @"../../../../Atelier 14Content\Textures\BackGround.png";
         public enum ÉTAT { RÉSUMER_PARTIE,MENU_PRINCIPAL, OPTIONS, QUITTER};
         public ÉTAT CHOIX;
         Color[] COULEURS = { Color.Firebrick, Color.Red, Color.OrangeRed, Color.Orange, Color.Gold, Color.Yellow, Color.YellowGreen, Color.LawnGreen, Color.Green, Color.DarkTurquoise, Color.DeepSkyBlue, Color.Blue, Color.DarkSlateBlue, Color.Indigo, Color.Purple };

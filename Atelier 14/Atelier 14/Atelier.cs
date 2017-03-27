@@ -60,6 +60,7 @@ namespace AtelierXNA
         MenuPersonnage MenuPerso { get; set; }
         MenuDifficulté MenuDiff { get; set; }
         MenuPause MenuPau { get; set; }
+        MenuCarte MenuDesCartes { get; set; }
 
 
 
@@ -202,7 +203,7 @@ namespace AtelierXNA
 
             AjouterCaméra();
             BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -70, -200), new Vector2(843, 316), "BackGround1", 0);
-            BackGroundEasterEgg = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -70, 300), new Vector2(843, 316), "wwe_profiles_hero_cena_3", 0);
+            BackGroundEasterEgg = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -70, 300), new Vector2(843, 316), "wwe_profiles_hero_cena_3", 0); // on verra
             Components.Add(BackGround);
             Components.Add(BackGroundEasterEgg);
             AjouterCarte();
@@ -261,12 +262,19 @@ namespace AtelierXNA
             Components.Add(MenuPerso);
             base.Initialize();
         }
-        void InitialiserMenuDifficulté()
+        void InitialiserMenuCarte()
         {
             Components.Remove(MenuPerso);
+            MenuDesCartes = new MenuCarte(this);
+            Components.Add(MenuDesCartes);
+        }
+        void InitialiserMenuDifficulté()
+        {
+            Components.Remove(MenuDesCartes);
             MenuDiff = new MenuDifficulté(this, INTERVALLE_MAJ_ANIMATION);
             Components.Add(MenuDiff);
         }
+       
         void InitialiserMenuPause()
         {
             ToggleComponentsUpdate();
@@ -330,9 +338,25 @@ namespace AtelierXNA
                 case GameState.MENU_PERSONNAGE:
                     if (MenuPerso.PasserMenuSuivant)
                     {
+                        ÉtatJeu = GameState.MENU_CARTE;
+                        MenuPerso.PasserMenuSuivant = false;
+                        InitialiserMenuCarte();
+                    }
+                    break;
+                case GameState.MENU_CARTE:
+                    if (MenuPerso.PasserMenuSuivant)
+                    {
                         ÉtatJeu = GameState.MENU_DIFFICULTÉ;
                         MenuPerso.PasserMenuSuivant = false;
                         InitialiserMenuDifficulté();
+                    }
+                    break;
+                case GameState.MENU_DIFFICULTÉ:
+                    if (MenuDiff.PasserMenuSuivant)
+                    {
+                        ÉtatJeu = GameState.JEU;
+                        MenuDiff.PasserMenuSuivant = false;
+                        InitialiserJeu();
                     }
                     break;
                 case GameState.JEU:
@@ -344,16 +368,8 @@ namespace AtelierXNA
 
                     }
                     break;
-                case GameState.MENU_DIFFICULTÉ:
-                    if (MenuDiff.PasserMenuSuivant)
-                    {
-                        ÉtatJeu = GameState.JEU;
-                        MenuDiff.PasserMenuSuivant = false;
-                        InitialiserJeu();
-                    }
-                    break;
-                case GameState.MENU_CARTE:
-                    break;
+                
+               
                 case GameState.MENU_PAUSE:
                     if(MenuPau.RésumerLaPartie)
                     {
