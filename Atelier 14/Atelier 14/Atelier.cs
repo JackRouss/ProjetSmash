@@ -58,6 +58,7 @@ namespace AtelierXNA
         MenuPersonnage MenuPerso { get; set; }
         MenuDifficulté MenuDiff { get; set; }
         MenuPause MenuPau { get; set; }
+        MenuCartes MenuCa { get; set; }
 
 
 
@@ -89,7 +90,7 @@ namespace AtelierXNA
             Menu = new MenuPrincipal(this);
             Components.Add(Menu);
             base.Initialize();
-            MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
+            //MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
         }
 
 
@@ -245,9 +246,15 @@ namespace AtelierXNA
             Components.Add(MenuPerso);
             base.Initialize();
         }
-        void InitialiserMenuDifficulté()
+        void InitialiserMenuCartes()
         {
             Components.Remove(MenuPerso);
+            MenuCa = new MenuCartes(this, new string[] { "BackGround1", "wwe_profiles_hero_cena_3", "CielÉtoilé" , "DrapeauQuébec"});
+            Components.Add(MenuCa);
+        }
+        void InitialiserMenuDifficulté()
+        {
+            Components.Remove(MenuCa);
             MenuDiff = new MenuDifficulté(this, INTERVALLE_MAJ_ANIMATION);
             Components.Add(MenuDiff);
         }
@@ -264,6 +271,10 @@ namespace AtelierXNA
                 if (Components[i] is IPause)
                 {
                     (Components[i] as GameComponent).Enabled = !(Components[i] as GameComponent).Enabled;
+                    if(Components[i] is TuileTexturée)
+                    {
+                        (Components[i] as TuileTexturée).Enabled = !(Components[i] as TuileTexturée).Enabled;
+                    }
                 }
             }
         }
@@ -298,17 +309,17 @@ namespace AtelierXNA
                 case GameState.MENU_PERSONNAGE:
                     if (MenuPerso.PasserMenuSuivant)
                     {
+                        ÉtatJeu = GameState.MENU_CARTE;
+                        MenuPerso.PasserMenuSuivant = false;
+                        InitialiserMenuCartes();
+                    }
+                    break;
+                case GameState.MENU_CARTE:
+                    if (MenuCa.PasserMenuSuivant)
+                    {
                         ÉtatJeu = GameState.MENU_DIFFICULTÉ;
                         MenuPerso.PasserMenuSuivant = false;
                         InitialiserMenuDifficulté();
-                    }
-                    break;
-                case GameState.JEU:
-                    if (GestionInput.EstNouvelleTouche(Keys.Escape))
-                    {
-                        ÉtatJeu = GameState.MENU_PAUSE;
-                        InitialiserMenuPause();
-                        MediaPlayer.Pause();
                     }
                     break;
                 case GameState.MENU_DIFFICULTÉ:
@@ -319,8 +330,17 @@ namespace AtelierXNA
                         InitialiserJeu();
                     }
                     break;
-                case GameState.MENU_CARTE:
+                
+                case GameState.JEU:
+                    if (GestionInput.EstNouvelleTouche(Keys.Escape))
+                    {
+                        ÉtatJeu = GameState.MENU_PAUSE;
+                        InitialiserMenuPause();
+                        MediaPlayer.Pause();
+                    }
                     break;
+                
+               
                 case GameState.MENU_PAUSE:
                     if (MenuPau.RésumerLaPartie)
                     {
