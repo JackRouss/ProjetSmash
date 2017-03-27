@@ -23,10 +23,11 @@ namespace AtelierXNA
         readonly Vector2[] DimensionCarte = { new Vector2(843, 316),new Vector2(844, 358), new Vector2(844, 364), new Vector2(844, 362) };
         readonly Color[] CouleurCartes = { Color.ForestGreen, Color.DeepSkyBlue, Color.Beige, Color.YellowGreen };
 
-        public Vector3 VECTEUR_ACCÉLÉRATION_GRAVITATIONNELLE = ACCÉLÉRATION_GRAVITATIONNELLE * (Vector3.Down);
+        public Vector3 VECTEUR_ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE * (Vector3.Down);
         public Vector3 CIBLE_INITIALE_CAMÉRA = new Vector3(1, 0, -1);
         public Vector3 POSITION_INITIALE_CAMÉRA = Vector3.Zero;
-        public const float ACCÉLÉRATION_GRAVITATIONNELLE = 40f;
+        public const float ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = 40f;
+        public const float ACCÉLÉRATION_GRAVITATIONNELLE_PROJECTILE = 0.5f; 
 
         public string[] NOMS_SPRITES_NINJA = { "Attack__00", "Climb_00", "Dead__00", "Glide_00", "Idle__00", "Jump__00", "Jump_Attack__00", "Jump_Throw__00", "Run__00", "Slide__00", "Throw__00" };
         public string[] NOMS_SPRITES_ROBOT = { "Melee ", "RunShoot ", "Dead ", "Jump ", "Idle ", "Jump ", "JumpMelee ", "JumpShoot ", "Run ", "Slide ", "Shoot " };
@@ -275,10 +276,6 @@ namespace AtelierXNA
                 if (Components[i] is IPause)
                 {
                     (Components[i] as GameComponent).Enabled = !(Components[i] as GameComponent).Enabled;
-                    if(Components[i] is TuileTexturée)
-                    {
-                        (Components[i] as TuileTexturée).Enabled = !(Components[i] as TuileTexturée).Enabled;
-                    }
                 }
             }
         }
@@ -414,18 +411,18 @@ namespace AtelierXNA
                     Joueur.EncaisserDégâts(Bot);
                 }
             }
-
+        
             foreach (GameComponent g in Components)
             {
                 if (g is Projectile)
                 {
                     if ((g as Projectile).EstEnCollision(Joueur))
                     {
-
+                        Joueur.EncaisserDégâts(g as Projectile);
                     }
-                    if ((g as Projectile).EstEnCollision(Bot))
+                    else if ((g as Projectile).EstEnCollision(Bot))
                     {
-
+                        Bot.EncaisserDégâts(g as Projectile);
                     }
                 }
             }

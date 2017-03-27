@@ -19,7 +19,6 @@ namespace AtelierXNA
         protected const float ÉCHELLE_PERSONNAGE = 4;
 
         //Données de base.
-        string TypePersonnage { get; set; }
         string état;
         protected string État
         {
@@ -98,7 +97,7 @@ namespace AtelierXNA
                     if (VecteurVitesse.Y != 0)
                     {
                         État = NomsSprites[6];
-                    }
+                    }          
                     else
                     {
                         État = NomsSprites[0];

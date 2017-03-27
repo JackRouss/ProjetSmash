@@ -113,14 +113,10 @@ namespace AtelierXNA
             GérerDéplacement();
 
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
-            {
-
-                if (true)
-                {
-                    GérerAccélération();
-                    GérerRotation();
-                    CréerPointDeVue();
-                }
+            {              
+                GérerAccélération();
+                GérerRotation();
+                CréerPointDeVue();             
                 TempsÉcouléDepuisMAJ = 0;
             }
             base.Update(gameTime);
