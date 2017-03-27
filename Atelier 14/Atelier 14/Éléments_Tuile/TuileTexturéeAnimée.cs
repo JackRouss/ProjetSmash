@@ -44,20 +44,39 @@ namespace AtelierXNA.Éléments_Tuile
         string TypePersonnage { get; set; }
         int[] NbFramesSprites { get; set; }
         Vector2 DimensionsZoneAffichage { get; set; }
-        RessourcesManager<Texture2D> GestionnaireDeTextures { get; set; } 
+        RessourcesManager<Texture2D> GestionnaireDeTextures { get; set; }
         List<List<Texture2D>> Textures { get; set; }
         Texture2D TextureCourante { get; set; }
         VertexPositionTexture[] Sommets { get; set; }
         Vector2[,] PtsTexture { get; set; }
         BlendState GestionAlpha { get; set; }
+        Vector3 p;
+        public Vector3 PositionÀModifier
+        {
+            get { return p; }
+
+            set
+            {
+                p = value;
+                CalculerMatriceMonde();
+            }
+        }
+        protected override void CalculerMatriceMonde()
+        {
+
+            Monde = Matrix.Identity;
+            Monde *= Matrix.CreateScale(1);
+            Monde *= Matrix.CreateFromYawPitchRoll(0, 0, 0);
+            Monde *= Matrix.CreateTranslation(PositionÀModifier);
+        }
 
         float IntervalleMAJAnimation { get; set; }
         float TempsÉcouléDepuisMAJ { get; set; }
 
-        public TuileTexturéeAnimée(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, Vector2 étendue, string nomTextureTuile, float intervalleMAJ,Vector2 dimensionsZoneAffichage, string[] nomsSprites, int[] nbFramesSprites, string typePersonnage, float intervalleMAJAnimation)
-            :base(jeu,homothétieInitiale,rotationInitiale,positionInitiale,étendue,nomTextureTuile,intervalleMAJ)
+        public TuileTexturéeAnimée(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, Vector2 étendue, string nomTextureTuile, float intervalleMAJ, Vector2 dimensionsZoneAffichage, string[] nomsSprites, int[] nbFramesSprites, string typePersonnage, float intervalleMAJAnimation)
+            : base(jeu, homothétieInitiale, rotationInitiale, positionInitiale, étendue, nomTextureTuile, intervalleMAJ)
         {
-            
+            PositionÀModifier = positionInitiale;
             DimensionsZoneAffichage = dimensionsZoneAffichage;
             NomsSprites = nomsSprites;
             TypePersonnage = typePersonnage;
@@ -72,10 +91,10 @@ namespace AtelierXNA.Éléments_Tuile
             float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
             TempsÉcouléDepuisMAJ += tempsÉcoulé;
 
-            if(TempsÉcouléDepuisMAJ >= IntervalleMAJAnimation)
+            if (TempsÉcouléDepuisMAJ >= IntervalleMAJAnimation)
             {
                 ++CptFrame;
-                if(CptFrame == NbFramesSprites[ÉtatNum])
+                if (CptFrame == NbFramesSprites[ÉtatNum])
                 {
                     CptFrame = 0;
                 }
@@ -87,7 +106,7 @@ namespace AtelierXNA.Éléments_Tuile
 
         public void ChangerÉtat(string état)
         {
-            if(état != État)
+            if (état != État)
             {
                 État = état;
                 CptFrame = 0;
@@ -126,15 +145,20 @@ namespace AtelierXNA.Éléments_Tuile
 
         protected override void CréerTableauPoints()
         {
-            DéplacerTuile(Origine);
+            InitialiserShit();
         }
 
         public void DéplacerTuile(Vector3 nouvellePosition)
         {
-            PtsSommets[0, 0] = new Vector3(nouvellePosition.X -  DimensionsZoneAffichage.X/ 2, nouvellePosition.Y, nouvellePosition.Z);
-            PtsSommets[1, 0] = new Vector3(nouvellePosition.X + DimensionsZoneAffichage.X / 2, nouvellePosition.Y, nouvellePosition.Z);
-            PtsSommets[0, 1] = new Vector3(nouvellePosition.X - DimensionsZoneAffichage.X / 2, nouvellePosition.Y + DimensionsZoneAffichage.Y, nouvellePosition.Z);
-            PtsSommets[1, 1] = new Vector3(nouvellePosition.X + DimensionsZoneAffichage.X / 2, nouvellePosition.Y + DimensionsZoneAffichage.Y, nouvellePosition.Z);
+            PositionÀModifier = nouvellePosition;
+        }
+
+        private void InitialiserShit()
+        {
+            PtsSommets[0, 0] = new Vector3(0 - DimensionsZoneAffichage.X / 2, 0, 0);
+            PtsSommets[1, 0] = new Vector3(0 + DimensionsZoneAffichage.X / 2, 0, 0);
+            PtsSommets[0, 1] = new Vector3(0 - DimensionsZoneAffichage.X / 2, 0 + DimensionsZoneAffichage.Y, 0);
+            PtsSommets[1, 1] = new Vector3(0 + DimensionsZoneAffichage.X / 2, 0 + DimensionsZoneAffichage.Y, 0);
             InitialiserSommets();
         }
 
@@ -142,11 +166,11 @@ namespace AtelierXNA.Éléments_Tuile
         {
             Textures = new List<List<Texture2D>>();
             GestionnaireDeTextures = Game.Services.GetService(typeof(RessourcesManager<Texture2D>)) as RessourcesManager<Texture2D>;
-            if(TypePersonnage == "Ninja")
+            if (TypePersonnage == "Ninja")
             {
                 LoadContentNinja();
             }
-            else if(TypePersonnage == "Robot")
+            else if (TypePersonnage == "Robot")
             {
                 LoadContentRobot();
             }
@@ -188,15 +212,9 @@ namespace AtelierXNA.Éléments_Tuile
             TextureCourante = Textures[4][0];
         }
 
-        public void Mirroir()
+        public override void Mirroir()
         {
-            Vector3 buffer = new Vector3(PtsSommets[0, 0].X, PtsSommets[0, 0].Y, PtsSommets[0, 0].Z);
-            PtsSommets[0, 0] = new Vector3(PtsSommets[1, 0].X, PtsSommets[1, 0].Y, PtsSommets[1, 0].Z);
-            PtsSommets[1, 0] = buffer;
-            buffer = new Vector3(PtsSommets[0, 1].X, PtsSommets[0, 1].Y, PtsSommets[0, 1].Z);
-            PtsSommets[0, 1] = new Vector3(PtsSommets[1, 1].X, PtsSommets[1, 1].Y, PtsSommets[1, 1].Z);
-            PtsSommets[1, 1] = buffer;
-            InitialiserSommets();
+            base.Mirroir();
         }
 
         protected override void InitialiserParamètresEffetDeBase()
