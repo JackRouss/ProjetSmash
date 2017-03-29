@@ -16,6 +16,8 @@ namespace AtelierXNA
     public class Map : PrimitiveDeBase, IPause
     {
 
+        public Vector4 LIMITE_MAP { get; private set; }// (x a droite, x a gauche, y en haut, y en bas)
+        public Vector4 LIMITE_PLAQUETTE { get; private set; }
         const int NB_TRIANGLE_SURFACE = 2;
         const int NB_TRIANGLE_BASE = 8;
         const int NB_SOMMETS_LIST = 3;
@@ -50,6 +52,9 @@ namespace AtelierXNA
         {
             Longueur = 100f;
             Largeur = 50;
+
+            LIMITE_MAP = new Vector4(150, -150, 100, -100);
+            LIMITE_PLAQUETTE = new Vector4(Origine.X + Longueur / 2, Origine.X - Longueur / 2,(Origine.Y + LIMITE_MAP.Z)/3, 0);
             Plateformes = new List<Plaquette>();
             InitialiserPtsSommets();
             InitialiserSommets();
