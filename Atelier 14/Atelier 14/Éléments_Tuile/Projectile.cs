@@ -18,6 +18,7 @@ namespace AtelierXNA.Éléments_Tuile
         bool Atombé { get; set; }
         public int Dégat { get; private set; }
         public BoundingSphere SphèreDeCollision { get; private set; }
+        Map Carte { get; set; }
 
         public Projectile(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, Vector2 étendue, string nomTextureTuile, float intervalleMAJ,Personnage.ORIENTATION direction, float vitesse, bool atombé,int dégat) 
             : base(jeu,homothétieInitiale,rotationInitiale,positionInitiale,étendue,nomTextureTuile,intervalleMAJ)
@@ -40,6 +41,7 @@ namespace AtelierXNA.Éléments_Tuile
         {
             CalculerMatriceMonde();
             base.Initialize();
+            Carte = Game.Components.First(t => t is Map) as Map;
             if (Direction == Personnage.ORIENTATION.GAUCHE)
             {
                 Mirroir();
@@ -84,7 +86,7 @@ namespace AtelierXNA.Éléments_Tuile
         }
         bool ADelete()
         {
-            return Position.X > 100 || Position.X < -100;
+            return Position.X >  Carte.LIMITE_MAP.X || Position.X < Carte.LIMITE_MAP.Y;
         }
         void GérerDéplacement()
         {

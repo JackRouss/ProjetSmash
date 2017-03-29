@@ -16,6 +16,7 @@ namespace AtelierXNA
     public class Atelier : Microsoft.Xna.Framework.Game
     {
         #region Constantes.
+   
         public const float INTERVALLE_CALCUL_FPS = 1f;
         public const float INTERVALLE_MAJ_STANDARD = 1f / 60f;
         const float INTERVALLE_MAJ_ANIMATION = 1f / 25f;

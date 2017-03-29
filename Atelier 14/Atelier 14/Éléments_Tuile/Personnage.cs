@@ -250,7 +250,7 @@ namespace AtelierXNA
             {
                 GérerSauts();
             }
-            if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.X))
+            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.X)) && TempsEntreProjectile <= 0)
             {
                 GérerLancer();
                 ÉTAT_PERSO = ÉTAT.LANCER;
@@ -341,7 +341,7 @@ namespace AtelierXNA
         #region Booléens de la classe.
         protected bool EstMort()
         {
-            return Position.X < -100 || Position.X > 100 || Position.Y < -50 || Position.Y > 100;
+            return Position.X > Carte.LIMITE_MAP.X || Position.X < Carte.LIMITE_MAP.Y || Position.Y > Carte.LIMITE_MAP.Z || Position.Y < Carte.LIMITE_MAP.W;
         }//Mettre des constantes en haut.
         public bool EstEnCollision(Personnage p)
         {
