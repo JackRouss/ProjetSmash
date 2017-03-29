@@ -48,21 +48,27 @@ namespace AtelierXNA
          PtsSommets[0, 1] = new Vector3(Origine.X, Origine.Y + Delta.Y, Origine.Z);
          PtsSommets[1, 1] = new Vector3(Origine.X + Delta.X, Origine.Y + Delta.Y, Origine.Z);
       }
-
-      public override void Draw(GameTime gameTime)
-      {
-         EffetDeBase.World = GetMonde();
-         EffetDeBase.View = CaméraJeu.Vue;
-         EffetDeBase.Projection = CaméraJeu.Projection;
-         foreach (EffectPass passeEffet in EffetDeBase.CurrentTechnique.Passes)
-         {
-            passeEffet.Apply();
-            DessinerTriangleStrip();
-         }
-         base.Draw(gameTime);
-      }
-
-      protected abstract void DessinerTriangleStrip();
+        public override void Draw(GameTime gameTime)
+        {
+            //BlendState oldBlendState = GraphicsDevice.BlendState;
+            RasterizerState oldRasterizerState = GraphicsDevice.RasterizerState;
+            //GraphicsDevice.BlendState = GestionAlpha;
+            RasterizerState ÉtatRasterizer = new RasterizerState();
+            ÉtatRasterizer.CullMode = CullMode.None;
+            GraphicsDevice.RasterizerState = ÉtatRasterizer;
+            EffetDeBase.World = GetMonde();
+            EffetDeBase.View = CaméraJeu.Vue;
+            EffetDeBase.Projection = CaméraJeu.Projection;
+            foreach (EffectPass passeEffet in EffetDeBase.CurrentTechnique.Passes)
+            {
+                passeEffet.Apply();
+                DessinerTriangleStrip();
+            }
+            base.Draw(gameTime);
+            //GraphicsDevice.BlendState = oldBlendState;
+            GraphicsDevice.RasterizerState = oldRasterizerState;
+        }
+        protected abstract void DessinerTriangleStrip();
    }
 }
 

@@ -8,13 +8,16 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Storage;
+using Microsoft.Xna.Framework.Net;
+using System.IO;
 
 namespace AtelierXNA.Menus
 {
     public class MenuPause : Microsoft.Xna.Framework.DrawableGameComponent
     {
         const string RÉSUMER_PARTIE = "Résumer la partie";
-        const string MENU_PRINCIPAL = "Retour au menu principal";
+        const string MENU_PRINCIPAL = "Recommencer";
         const string QUITTER = "Quitter le jeu";
         const string OPTIONS = "Options";
         const float ESPACE_ENTRE_OPTIONS = 40;
@@ -32,7 +35,6 @@ namespace AtelierXNA.Menus
         SpriteBatch GestionSprites { get; set; }
         InputManager GestionInputClavier { get; set; }
         InputControllerManager GestionInputManette { get; set; }
-        ArrièrePlanDéroulant ArrièrePlan { get; set; }
         SpriteFont ArialFont { get; set; }
         Color CouleurTexte { get; set; }
 
@@ -61,10 +63,7 @@ namespace AtelierXNA.Menus
             GestionInputClavier = Game.Services.GetService(typeof(InputManager)) as InputManager;
             GestionInputManette = Game.Services.GetService(typeof(InputControllerManager)) as InputControllerManager;
             ArialFont = GestionnaireFonts.Find("Arial");
-            ArrièrePlan = new ArrièrePlanDéroulant(Game,"Fond4",Atelier.INTERVALLE_MAJ_STANDARD);
-            ArrièrePlan.Initialize();
             CouleurTexte = Color.White;
-
 
             POSITION_RÉSUMER_PARTIE = new Vector2((Game.Window.ClientBounds.Width - ArialFont.MeasureString(RÉSUMER_PARTIE).X) / 2, 0);
             POSITION_MENU_PRINCIPAL = new Vector2((Game.Window.ClientBounds.Width - ArialFont.MeasureString(MENU_PRINCIPAL).X) / 2, ArialFont.MeasureString(MENU_PRINCIPAL).Y + ESPACE_ENTRE_OPTIONS);
@@ -89,13 +88,13 @@ namespace AtelierXNA.Menus
                 }
                 TempsÉcouléDepuisMAJ = 0;
             }
-            ArrièrePlan.Update(gameTime);
+
             base.Update(gameTime);
         }
 
         void GérerEntrées()
         {
-            if(GestionInputClavier.EstClavierActivé)
+            if(GestionInputClavier.EstClavierActivé || GestionInputManette.EstManetteActivée(PlayerIndex.One))
             {
                 if (GestionInputClavier.EstNouvelleTouche(Keys.Up) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickUp))
                 {
@@ -140,7 +139,6 @@ namespace AtelierXNA.Menus
 
         public override void Draw(GameTime gameTime)
         {
-            ArrièrePlan.Draw(gameTime);
             GestionSprites.Begin();
            
             GestionSprites.DrawString(ArialFont, RÉSUMER_PARTIE, POSITION_RÉSUMER_PARTIE, DéterminerCouleur(ÉTAT.RÉSUMER_PARTIE));
@@ -164,5 +162,8 @@ namespace AtelierXNA.Menus
                 return CouleurTexte;
             }
         }
+
     }
+
+       
 }

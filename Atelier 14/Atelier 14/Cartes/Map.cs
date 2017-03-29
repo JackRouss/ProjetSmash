@@ -36,12 +36,14 @@ namespace AtelierXNA
         VertexPositionColor[] Sommets { get; set; }
         VertexPositionColor[] SommetsBase { get; set; }
         BasicEffect EffetDeBase { get; set; }
+        Color Couleur { get; set; }
 
 
-        public Map(Game game, float homothetie, Vector3 rotationInitiale, Vector3 position)
+        public Map(Game game, float homothetie, Vector3 rotationInitiale, Vector3 position, Color couleur)
             : base(game, homothetie, rotationInitiale, position)
         {
             Origine = position;
+            Couleur = couleur;
         }
 
         public override void Initialize()
@@ -51,8 +53,8 @@ namespace AtelierXNA
             Plateformes = new List<Plaquette>();
             InitialiserPtsSommets();
             InitialiserSommets();
-            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 4, Origine.Y + hauteur, Origine.Z)));
-            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 4, Origine.Y + hauteur, Origine.Z)));
+            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
+            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
             foreach(Plaquette p in Plateformes)
             {
                 p.Initialize();
@@ -109,7 +111,7 @@ namespace AtelierXNA
 
         }
         void CalculerPropriétésPourPersonnages()
-        {
+        { 
             IntervallesSurfaces = new List<Vector3>();
             VecteurGauche = PtsSommets[0] - PtsSommets[4];
             
@@ -126,7 +128,7 @@ namespace AtelierXNA
                 if (i > Sommets.Length - 1) // est rendu a la base                
                     SommetsBase[i - Sommets.Length] = new VertexPositionColor(PtsSommets[i], Color.SaddleBrown);
                 else
-                    Sommets[i] = new VertexPositionColor(PtsSommets[i], Color.ForestGreen);
+                    Sommets[i] = new VertexPositionColor(PtsSommets[i], Couleur);
             }
         }
         protected override void LoadContent()

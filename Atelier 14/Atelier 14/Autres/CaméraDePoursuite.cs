@@ -26,6 +26,7 @@ namespace AtelierXNA
         float IntervalleMAJ { get; set; }
         float TempsÉcouléDepuisMAJ { get; set; }
         InputManager GestionInput { get; set; }
+        List<PersonnageAnimé> ListesPerso { get; set; }
 
         bool estEnZoom;
         bool EstEnZoom
@@ -63,6 +64,7 @@ namespace AtelierXNA
             base.Initialize();
             GestionInput = Game.Services.GetService(typeof(InputManager)) as InputManager;
             Angle = Vector3.Zero;
+            ListesPerso = new List<PersonnageAnimé>();
         }
 
         protected override void CréerPointDeVue()
@@ -94,19 +96,27 @@ namespace AtelierXNA
 
         public override void Update(GameTime gameTime)
         {
+            if(ListesPerso.Count == 0)
+            {
+                foreach (GameComponent perso in Game.Components)
+                {
+                    if (perso is Personnage)
+                    {
+                        ListesPerso.Add(perso as PersonnageAnimé);
+                    }
+                }
+            }
             float TempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
             TempsÉcouléDepuisMAJ += TempsÉcoulé;
             GestionClavier();
-            if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
-            {
 
-                if (true)
-                {
-                    GérerAccélération();
-                    GérerDéplacement();
-                    GérerRotation();
-                    CréerPointDeVue();
-                }
+            GérerDéplacement();
+
+            if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
+            {              
+                GérerAccélération();
+                GérerRotation();
+                CréerPointDeVue();             
                 TempsÉcouléDepuisMAJ = 0;
             }
             base.Update(gameTime);
@@ -129,11 +139,17 @@ namespace AtelierXNA
 
         private void GérerDéplacement()
         {
-            List<PersonnageAnimé> ListesPerso = new List<PersonnageAnimé>();
-            PersonnageAnimé joueur = Game.Components.First(t => t is PersonnageAnimé) as PersonnageAnimé;
-            ListesPerso.Add(joueur); 
-            PersonnageAnimé p = ListesPerso[0] as PersonnageAnimé;
-            Position = new Vector3(p.GetPositionPersonnage.X, Position.Y, Position.Z);
+            float moyennePosX = ListesPerso.Average(x => x.GetPositionPersonnage.X);
+            float moyennePosY = ListesPerso.Average(x => x.GetPositionPersonnage.Y) + 20;
+            Position = new Vector3(MathHelper.Min(moyennePosX,40), MathHelper.Min(moyennePosY,30), Position.Z);
+            if(moyennePosX < 0)
+            {
+                Position = new Vector3(MathHelper.Max(moyennePosX, -40), Position.Y, Position.Z);
+            }
+            if(moyennePosY < 0)
+            {
+                Position = new Vector3(Position.X, MathHelper.Max(moyennePosY, 10), Position.Z);
+            }
         }
 
         private void GérerRotation()

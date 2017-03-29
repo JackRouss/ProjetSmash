@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Menus;
+using AtelierXNA.Éléments_Tuile;
 
 namespace AtelierXNA
 {
@@ -18,17 +19,23 @@ namespace AtelierXNA
         public const float INTERVALLE_CALCUL_FPS = 1f;
         public const float INTERVALLE_MAJ_STANDARD = 1f / 60f;
         const float INTERVALLE_MAJ_ANIMATION = 1f / 25f;
+        readonly string[] NomCartes = { "BackGround1", "BackGround2", "BackGround3", "BackGround4" };
+        readonly Vector2[] DimensionCarte = { new Vector2(843, 316),new Vector2(844, 358), new Vector2(844, 364), new Vector2(844, 362) };
+        readonly Color[] CouleurCartes = { Color.ForestGreen, Color.DeepSkyBlue, Color.Beige, Color.YellowGreen };
 
-        public Vector3 VECTEUR_ACCÉLÉRATION_GRAVITATIONNELLE = ACCÉLÉRATION_GRAVITATIONNELLE * (Vector3.Down);
+        public Vector3 VECTEUR_ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE * (Vector3.Down);
         public Vector3 CIBLE_INITIALE_CAMÉRA = new Vector3(1, 0, -1);
         public Vector3 POSITION_INITIALE_CAMÉRA = Vector3.Zero;
-        public const float ACCÉLÉRATION_GRAVITATIONNELLE = 40f;
+        public const float ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = 40f;
+        public const float ACCÉLÉRATION_GRAVITATIONNELLE_PROJECTILE = 0.5f; 
 
         public string[] NOMS_SPRITES_NINJA = { "Attack__00", "Climb_00", "Dead__00", "Glide_00", "Idle__00", "Jump__00", "Jump_Attack__00", "Jump_Throw__00", "Run__00", "Slide__00", "Throw__00" };
         public string[] NOMS_SPRITES_ROBOT = { "Melee ", "RunShoot ", "Dead ", "Jump ", "Idle ", "Jump ", "JumpMelee ", "JumpShoot ", "Run ", "Slide ", "Shoot " };
         public int[] NB_FRAMES_SPRITES_ROBOT = { 8, 9, 10, 10, 10, 10, 8, 5, 8, 10, 4 };
         public int[] NB_FRAMES_SPRITES_NINJA = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
-        enum GameState { MENU_PRINCIPAL,MENU_PERSONNAGE,MENU_DIFFICULTÉ,MENU_CARTE,MENU_PAUSE,JEU}
+
+
+        enum GameState { MENU_PRINCIPAL, MENU_PERSONNAGE, MENU_DIFFICULTÉ, MENU_CARTE, MENU_PAUSE, JEU }
 
 
         #endregion
@@ -55,6 +62,7 @@ namespace AtelierXNA
         MenuPersonnage MenuPerso { get; set; }
         MenuDifficulté MenuDiff { get; set; }
         MenuPause MenuPau { get; set; }
+        MenuCartes MenuCa { get; set; }
 
 
 
@@ -62,9 +70,11 @@ namespace AtelierXNA
 
         #region Composants de jeu.
         PersonnageAnimé Joueur { get; set; }
+        PersonnageAnimé Bot { get; set; }
         Map Carte { get; set; }
         TuileTexturée BackGround { get; set; }
         ArrièrePlanDéroulant ArrièrePlan { get; set; }
+        bool VieilÉtatCollisionPerso { get; set; }
         #endregion
 
         #region Initialisation.
@@ -84,7 +94,7 @@ namespace AtelierXNA
             Menu = new MenuPrincipal(this);
             Components.Add(Menu);
             base.Initialize();
-            MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
+            //MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
         }
 
 
@@ -105,7 +115,7 @@ namespace AtelierXNA
         }
         private void ChargerSons()
         {
-            GestionnaireDeChansons.Add("Cyborg Ninja",this.Content.Load<Song>("Sounds/Songs/Cyborg Ninja"));
+            GestionnaireDeChansons.Add("Cyborg Ninja", this.Content.Load<Song>("Sounds/Songs/Cyborg Ninja"));
             GestionnaireDeChansons.Add("Decisions", this.Content.Load<Song>("Sounds/Songs/Decisions"));
             GestionnaireDeChansons.Add("Pinball Spring 160", this.Content.Load<Song>("Sounds/Songs/Pinball Spring 160"));
             GestionnaireDeChansons.Add("Pixelland", this.Content.Load<Song>("Sounds/Songs/Pixelland"));
@@ -151,10 +161,6 @@ namespace AtelierXNA
         }
 
         #endregion
-
-
-
-
         private void InitialiserServices()
         {
             GestionnaireDeFonts = new RessourcesManager<SpriteFont>(this, "Fonts");
@@ -164,7 +170,7 @@ namespace AtelierXNA
             GestionSprites = new SpriteBatch(GraphicsDevice);
             GestionManettes = new InputControllerManager(this);
             GestionnaireDeChansons = new RessourcesManager<Song>(this, "Songs");
-            GestionnaireDeSons =  new RessourcesManager<SoundEffect>(this, "Sounds");
+            GestionnaireDeSons = new RessourcesManager<SoundEffect>(this, "Sounds");
 
 
             Services.AddService(typeof(RessourcesManager<SoundEffect>), GestionnaireDeSons);
@@ -184,55 +190,58 @@ namespace AtelierXNA
         void InitialiserJeu()
         {
             Components.Remove(MenuDiff);
-          
+
 
             AjouterCaméra();
-            BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -70, -200), new Vector2(843, 316), "BackGround1", 0);
+            BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], NomCartes[MenuCa.ChoixCarte], 0);
             Components.Add(BackGround);
+
+
+
             AjouterCarte();
             AjouterJoueurs();
-            
-            
 
             base.Initialize();
         }
-
         void AjouterCaméra()
         {
-            CaméraJeu = new CaméraDePoursuite(this, new Vector3(1, 30, 100), new Vector3(-2, -2, -10), Vector3.Up, INTERVALLE_MAJ_STANDARD);
+            CaméraJeu = new CaméraDePoursuite(this, new Vector3(1, -10, 100), new Vector3(0, -30, 0), Vector3.Up, INTERVALLE_MAJ_STANDARD);
             Services.AddService(typeof(Caméra), CaméraJeu);
             Components.Add(CaméraJeu);
         }
         void AjouterCarte()
         {
-            Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero);
-            
+            Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero, CouleurCartes[MenuCa.ChoixCarte]);
+
             Components.Add(Carte);
         }
         void AjouterJoueurs()
         {
+            Keys[] CONTRÔLES_JOUEUR = { Keys.D, Keys.A, Keys.LeftShift, Keys.Space, Keys.P, Keys.J };
+            Keys[] CONTRÔLES_BOT = { Keys.H, Keys.F, Keys.RightShift, Keys.Enter, Keys.L, Keys.N };
             if (MenuPerso.État == MenuPersonnage.ÉTAT.NINJA)
             {
-                Joueur = new PersonnageAnimé(this, 20f, 40f, 100, Vector3.Zero, INTERVALLE_MAJ_STANDARD, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA);
+                Joueur = new PersonnageAnimé(this, 5f, 35f, 50, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA);
             }
             if (MenuPerso.État == MenuPersonnage.ÉTAT.ROBOT)
             {
-                Joueur = new PersonnageAnimé(this, 20f, 40f, 100, Vector3.Zero, INTERVALLE_MAJ_STANDARD, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Joueur = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
-            if(MenuDiff.CHOIX == MenuDifficulté.ÉTAT.FACILE)
+            if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.FACILE)
             {
-                //Ajouter un BOT facile.
+                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
-            if(MenuDiff.CHOIX == MenuDifficulté.ÉTAT.NORMAL)
+            if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.NORMAL)
             {
-                //Ajouter un BOT normal.
+                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
-            if(MenuDiff.CHOIX == MenuDifficulté.ÉTAT.DIFFICILE)
+            if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.DIFFICILE)
             {
-                //Ajouter un BOT difficile.
+                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
+            Components.Add(Bot);
             Components.Add(Joueur);
-          //Components.Add(Bot);
+
         }
         void InitialiserMenuPersonnages()
         {
@@ -242,26 +251,30 @@ namespace AtelierXNA
             Components.Add(MenuPerso);
             base.Initialize();
         }
-
-        void InitialiserMenuDifficulté()
+        void InitialiserMenuCartes()
         {
             Components.Remove(MenuPerso);
+            MenuCa = new MenuCartes(this, NomCartes);
+            Components.Add(MenuCa);
+        }
+        void InitialiserMenuDifficulté()
+        {
+            Components.Remove(MenuCa);
             MenuDiff = new MenuDifficulté(this, INTERVALLE_MAJ_ANIMATION);
             Components.Add(MenuDiff);
         }
-
+       
         void InitialiserMenuPause()
         {
             ToggleComponentsUpdate();
-            MenuPau = new MenuPause(this,INTERVALLE_MAJ_ANIMATION);
+            MenuPau = new MenuPause(this, INTERVALLE_MAJ_ANIMATION);
             Components.Add(MenuPau);
         }
-
         void ToggleComponentsUpdate()
         {
             for (int i = 0; i < Components.Count; ++i)
             {
-                if(Components[i] is IPause)
+                if (Components[i] is IPause)
                 {
                     (Components[i] as GameComponent).Enabled = !(Components[i] as GameComponent).Enabled;
                 }
@@ -275,6 +288,10 @@ namespace AtelierXNA
             GérerTransition();
             GérerMusique();
             base.Update(gameTime);
+            if (ÉtatJeu == GameState.JEU)
+            {
+                GérerCollisions();
+            }
         }
 
         void GérerTransition()
@@ -294,17 +311,17 @@ namespace AtelierXNA
                 case GameState.MENU_PERSONNAGE:
                     if (MenuPerso.PasserMenuSuivant)
                     {
+                        ÉtatJeu = GameState.MENU_CARTE;
+                        MenuPerso.PasserMenuSuivant = false;
+                        InitialiserMenuCartes();
+                    }
+                    break;
+                case GameState.MENU_CARTE:
+                    if (MenuCa.PasserMenuSuivant)
+                    {
                         ÉtatJeu = GameState.MENU_DIFFICULTÉ;
                         MenuPerso.PasserMenuSuivant = false;
                         InitialiserMenuDifficulté();
-                    }
-                    break;
-                case GameState.JEU:
-                    if(GestionInput.EstNouvelleTouche(Keys.Escape))
-                    {
-                        ÉtatJeu = GameState.MENU_PAUSE;
-                        InitialiserMenuPause();
-                        MediaPlayer.Pause();
                     }
                     break;
                 case GameState.MENU_DIFFICULTÉ:
@@ -315,10 +332,19 @@ namespace AtelierXNA
                         InitialiserJeu();
                     }
                     break;
-                case GameState.MENU_CARTE:
+                
+                case GameState.JEU:
+                    if (GestionInput.EstNouvelleTouche(Keys.Escape))
+                    {
+                        ÉtatJeu = GameState.MENU_PAUSE;
+                        InitialiserMenuPause();
+                        MediaPlayer.Pause();
+                    }
                     break;
+                
+               
                 case GameState.MENU_PAUSE:
-                    if(MenuPau.RésumerLaPartie)
+                    if (MenuPau.RésumerLaPartie)
                     {
                         ÉtatJeu = GameState.JEU;
                         MenuPau.RésumerLaPartie = false;
@@ -329,11 +355,14 @@ namespace AtelierXNA
                     if (MenuPau.RetournerMenuPrincipale)
                     {
                         ÉtatJeu = GameState.MENU_PRINCIPAL;
+                        Components.Clear();
+                        EnleverServices();
+                        Initialize();
                         MenuPau.RetournerMenuPrincipale = false;
                     }
                     break;
             }
-            if(AncienÉtatJeu != ÉtatJeu)
+            if (AncienÉtatJeu != ÉtatJeu)
             {
                 AChangéÉtat = true;
             }
@@ -343,13 +372,63 @@ namespace AtelierXNA
             }
         }
 
+        void EnleverServices()
+        {
+            Services.RemoveService(typeof(RessourcesManager<SoundEffect>));
+            Services.RemoveService(typeof(RessourcesManager<Song>));
+            Services.RemoveService(typeof(RessourcesManager<SpriteFont>));
+            Services.RemoveService(typeof(RessourcesManager<Texture2D>));
+            Services.RemoveService(typeof(RessourcesManager<Model>));
+            Services.RemoveService(typeof(InputControllerManager));
+            Services.RemoveService(typeof(InputManager));
+            Services.RemoveService(typeof(SpriteBatch));
+            Services.RemoveService(typeof(Caméra));
+        }
+
         void GérerMusique()
         {
-            if(ÉtatJeu == GameState.JEU && AChangéÉtat)
+            if (ÉtatJeu == GameState.JEU && AChangéÉtat)
             {
                 MediaPlayer.Stop();
-                MediaPlayer.Play(GestionnaireDeChansons.Find("MEME"));
+                //MediaPlayer.Play(GestionnaireDeChansons.Find("Cyborg Ninja"));
             }
+        }
+
+        void GérerCollisions()
+        {
+            if (Joueur.EstEnCollision(Bot) && VieilÉtatCollisionPerso != Joueur.EstEnCollision(Bot))
+            {
+                Joueur.VecteurVitesse += Bot.VecteurVitesse * Bot.Masse / Joueur.Masse;
+                Bot.VecteurVitesse += Joueur.VecteurVitesse * Joueur.Masse / Bot.Masse;
+            }
+            if (Joueur.EstEnCollision(Bot))
+            {
+                if (Joueur.EstEnAttaque)
+                {
+                    Bot.EncaisserDégâts(Joueur);
+                }
+                if (Bot.EstEnAttaque)
+                {
+                    Joueur.EncaisserDégâts(Bot);
+                }
+            }
+        
+            foreach (GameComponent g in Components)
+            {
+                if (g is Projectile)
+                {
+                    if ((g as Projectile).EstEnCollision(Joueur))
+                    {
+                        Joueur.EncaisserDégâts(g as Projectile);
+                    }
+                    else if ((g as Projectile).EstEnCollision(Bot))
+                    {
+                        Bot.EncaisserDégâts(g as Projectile);
+                    }
+                }
+            }
+
+            VieilÉtatCollisionPerso = Joueur.EstEnCollision(Bot);
         }
 
         protected override void Draw(GameTime gameTime)
@@ -360,4 +439,3 @@ namespace AtelierXNA
         #endregion
     }
 }
-
