@@ -15,7 +15,6 @@ namespace AtelierXNA
 
     public class Plaquette : PrimitiveDeBase
     {
-
         const int NB_TRIANGLE_SURFACE = 2;
         const int NB_TRIANGLE_BASE = 8;
         const int NB_SOMMETS_LIST = 3;
@@ -92,8 +91,6 @@ namespace AtelierXNA
             PtsSommets[27] = PtsSommets[2];
             PtsSommets[28] = PtsSommets[6];
             PtsSommets[29] = PtsSommets[0];
-
-
         }
         void CalculerPropriétésPourPersonnages()//PROBLÈME ICI.
         {
@@ -137,7 +134,6 @@ namespace AtelierXNA
                 GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, SommetsBase, 0, NB_TRIANGLE_BASE);
             }
             GraphicsDevice.RasterizerState = ancienÉtat;
-
         }
     }
 }

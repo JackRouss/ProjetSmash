@@ -152,7 +152,6 @@ namespace AtelierXNA
                 Frame.Draw(gameTime);
             }
         }
-
         public override void DéplacerFrame()
         {
             Frame.DéplacerTuile(Position);

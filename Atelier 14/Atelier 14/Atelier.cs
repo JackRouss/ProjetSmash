@@ -119,6 +119,7 @@ namespace AtelierXNA
             GestionnaireDeChansons.Add("Decisions", this.Content.Load<Song>("Sounds/Songs/Decisions"));
             GestionnaireDeChansons.Add("Pinball Spring 160", this.Content.Load<Song>("Sounds/Songs/Pinball Spring 160"));
             GestionnaireDeChansons.Add("Pixelland", this.Content.Load<Song>("Sounds/Songs/Pixelland"));
+            GestionnaireDeChansons.Add("MEME", this.Content.Load<Song>("Sounds/Songs/MEME"));
 
             //GestionnaireDeSons.Add("gameover", this.Content.Load<SoundEffect>("Sounds/SoundEffects/gameover"));
             //GestionnaireDeSons.Add("punch", this.Content.Load<SoundEffect>("Sounds/SoundEffects/punch"));

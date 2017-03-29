@@ -1120,6 +1120,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Sounds\Songs\MEME.mp3">
+      <Name>MEME</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SongProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Textures\BackGround1.png">
       <Name>BackGround1</Name>
       <Importer>TextureImporter</Importer>
