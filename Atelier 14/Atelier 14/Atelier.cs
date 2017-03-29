@@ -280,7 +280,6 @@ namespace AtelierXNA
             }
         }
         #endregion
-
         #region Boucle de jeu.
         protected override void Update(GameTime gameTime)
         {

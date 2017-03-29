@@ -119,6 +119,7 @@
     <Compile Include="IPause.cs" />
     <Compile Include="Menus\MenuCartes.cs" />
     <Compile Include="Menus\MenuDifficulté.cs" />
+    <Compile Include="Menus\MenuOption.cs" />
     <Compile Include="Menus\MenuPause.cs" />
     <Compile Include="Menus\MenuPersonnage.cs" />
     <Compile Include="Menus\MenuPrincipal.cs" />
