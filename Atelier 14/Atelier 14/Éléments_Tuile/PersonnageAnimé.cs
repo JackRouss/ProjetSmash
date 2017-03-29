@@ -50,11 +50,11 @@ namespace AtelierXNA
         TuileTexturéeAnimée Frame { get; set; }
 
 
-        public PersonnageAnimé(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position,float intervalleMAJ ,float intervalleMAJAnimation,string[] nomSprites, string type, int[] nbFramesSprites)
-            : base(game, vitesseDéplacementGaucheDroite, vitesseMaximaleSaut, masse, position,intervalleMAJ)
+        public PersonnageAnimé(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, float intervalleMAJAnimation, string[] nomSprites, string type, int[] nbFramesSprites)
+            : base(game, vitesseDéplacementGaucheDroite, vitesseMaximaleSaut, masse, position, intervalleMAJ)
         {
-            Vector2 zoneAffichageDimensions = new Vector2(5,10);
-            Frame = new TuileTexturéeAnimée(Game,1,Vector3.Zero,position,new Vector2(2,2),"Idle__000",intervalleMAJ,zoneAffichageDimensions,nomSprites,nbFramesSprites,type,intervalleMAJAnimation);
+            Vector2 zoneAffichageDimensions = new Vector2(5, 10);
+            Frame = new TuileTexturéeAnimée(Game, 1, Vector3.Zero, position, new Vector2(2, 2), "Idle__000", intervalleMAJ, zoneAffichageDimensions, nomSprites, nbFramesSprites, type, intervalleMAJAnimation);
             TypePersonnage = type;
             NomsSprites = nomSprites;
             NbFramesSprites = nbFramesSprites;
@@ -69,7 +69,7 @@ namespace AtelierXNA
         #region Boucle de jeu.
         public override void Update(GameTime gameTime)
         {
-            if(Frame.CptFrame == NbFramesSprites[ÉtatNum] - 1 && EstEnAttaque)
+            if (Frame.CptFrame == NbFramesSprites[ÉtatNum] - 1 && EstEnAttaque)
             {
                 ÉTAT_PERSO = ÉTAT.IMMOBILE;
                 EstEnAttaque = false;
@@ -80,7 +80,7 @@ namespace AtelierXNA
         }
         private void GérerTransitionsAnimations()//"Attack__00", "Climb_00", "Dead__00", "Glide_00", "Idle__00", "Jump__00", "Jump_Attack__00", "Jump_Throw__00", "Run__00", "Slide__00", "Throw__00"
         {
-            if(!EstEnAttaque)
+            if (!EstEnAttaque)
             {
                 if (ÉTAT_PERSO == ÉTAT.COURRIR)
                 {
@@ -133,16 +133,16 @@ namespace AtelierXNA
 
         public override void Draw(GameTime gameTime)
         {
-                if (DIRECTION == ORIENTATION.GAUCHE)
-                {
-                    Frame.Mirroir();
-                    Frame.Draw(gameTime);
-                    Frame.Mirroir();
-                }
-                else
-                {
-                    Frame.Draw(gameTime);
-                }
+            if (DIRECTION == ORIENTATION.GAUCHE)
+            {
+                Frame.Mirroir();
+                Frame.Draw(gameTime);
+                Frame.Mirroir();
+            }
+            else
+            {
+                Frame.Draw(gameTime);
+            }
         }
         public override void DéplacerFrame()
         {
