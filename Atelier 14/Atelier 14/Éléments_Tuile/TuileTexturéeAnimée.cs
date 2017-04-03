@@ -145,7 +145,7 @@ namespace AtelierXNA.Éléments_Tuile
 
         protected override void CréerTableauPoints()
         {
-            InitialiserShit();
+            InitialiserPtsSommets();
         }
 
         public void DéplacerTuile(Vector3 nouvellePosition)
@@ -153,7 +153,7 @@ namespace AtelierXNA.Éléments_Tuile
             PositionÀModifier = nouvellePosition;
         }
 
-        private void InitialiserShit()
+        private void InitialiserPtsSommets()
         {
             PtsSommets[0, 0] = new Vector3(0 - DimensionsZoneAffichage.X / 2, 0, 0);
             PtsSommets[1, 0] = new Vector3(0 + DimensionsZoneAffichage.X / 2, 0, 0);
