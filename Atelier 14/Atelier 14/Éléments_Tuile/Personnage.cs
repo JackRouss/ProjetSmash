@@ -34,15 +34,15 @@ namespace AtelierXNA
 
 
         protected Keys[] CONTR‘LES { get; private set; }
-        protected enum ORIENTATION { DROITE, GAUCHE };
+        public enum ORIENTATION { DROITE, GAUCHE };
         protected enum …TAT { COURRIR, SAUTER, ATTAQUER, LANCER, BLOQUER, MORT, IMMOBILE };
 
         protected …TAT …TAT_PERSO;
         protected ORIENTATION DIRECTION;
 
 
-
-        protected int NbVies { get; set; }
+        protected string TypePersonnage { get; set; }
+        public int NbVies { get; private set; }
         int VieEnPourcentage { get; set; }
 
 
@@ -50,6 +50,7 @@ namespace AtelierXNA
         public BoundingSphere HitBox { get; private set; }
         Bouclier BouclierPersonnage { get; set; }
 
+        float TempsEntreProjectile { get; set; }
         protected float VitesseDÈplacementGaucheDroite { get; set; }
         protected float VitesseMaximaleSaut { get; private set; }
         public float Masse { get; private set; }
@@ -144,6 +145,7 @@ namespace AtelierXNA
 
             if (Temps…coulÈDepuisMAJ >= IntervalleMAJ)
             {
+                TempsEntreProjectile--;
                 if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && …TAT_PERSO != …TAT.IMMOBILE) //Conditions ici pour gÈrer l'immobilitÈ.
                 {
                     …TAT_PERSO = …TAT.IMMOBILE;
@@ -156,6 +158,7 @@ namespace AtelierXNA
                 {
                     …TAT_PERSO = …TAT.SAUTER;
                 }
+                
 
                 AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
 
@@ -184,12 +187,11 @@ namespace AtelierXNA
             float mu = 0.9f;
             if (VecteurVitesse.Y == 0 && VecteurVitesse.X != 0)
             {
-                Vector3 AncienVecteurVitesse = VecteurVitesse;
-                if (VecteurVitesse.X < 0)
-                    VecteurVitesse -= VecteurGauche * mu * Atelier.ACC…L…RATION_GRAVITATIONNELLE;
-                else if (VecteurVitesse.X > 0)
-                    VecteurVitesse += VecteurGauche * mu * Atelier.ACC…L…RATION_GRAVITATIONNELLE;
-                if (Math.Sign(VecteurVitesse.X) != Math.Sign(AncienVecteurVitesse.X))
+                if (VecteurVitesse.X < 0 && (VecteurVitesse - VecteurGauche * mu * Atelier.ACC…L…RATION_GRAVITATIONNELLE_PERSONNAGE).X < 0)
+                    VecteurVitesse -= VecteurGauche * mu * Atelier.ACC…L…RATION_GRAVITATIONNELLE_PERSONNAGE;
+                else if (VecteurVitesse.X > 0 && (VecteurVitesse + VecteurGauche * mu * Atelier.ACC…L…RATION_GRAVITATIONNELLE_PERSONNAGE).X > 0)
+                    VecteurVitesse += VecteurGauche * mu * Atelier.ACC…L…RATION_GRAVITATIONNELLE_PERSONNAGE;
+                else
                     VecteurVitesse = new Vector3(0, VecteurVitesse.Y, VecteurVitesse.Z);
             }
             if (VecteurVitesseGaucheDroite.X != 0 && VecteurVitesse.Y == 0)
@@ -233,7 +235,7 @@ namespace AtelierXNA
             }
             else
             {
-                VecteurVitesse -= Vector3.Up * Atelier.ACC…L…RATION_GRAVITATIONNELLE * Temps…coulÈDepuisMAJ;
+                VecteurVitesse -= Vector3.Up * Atelier.ACC…L…RATION_GRAVITATIONNELLE_PERSONNAGE * Temps…coulÈDepuisMAJ;
             }
             Position -= Vector3.Up * VecteurVitesse.Y * Temps…coulÈDepuisMAJ;
         }
@@ -300,7 +302,7 @@ namespace AtelierXNA
             {
                 GÈrerSauts();
             }
-            if (GestionInputClavier.EstNouvelleTouche(CONTR‘LES[4]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.X)&&!EstBouclierActif)
+            if (GestionInputClavier.EstNouvelleTouche(CONTR‘LES[4]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.X))
             {
                 GÈrerLancer();
                 …TAT_PERSO = …TAT.LANCER;
@@ -332,7 +334,22 @@ namespace AtelierXNA
         }
         private void GÈrerLancer()
         {
-
+          
+            if(TempsEntreProjectile <= 0)
+            {
+                if(this.TypePersonnage == "Ninja")
+                {
+                    Projectile p = new Projectile(Game, 1f, new Vector3(0, 0, -MathHelper.Pi / 2), Position, new Vector2(2, 4), "Ninja/Kunai", AtelierXNA.Atelier.INTERVALLE_MAJ_STANDARD, DIRECTION, 0.75f,true,4);
+                    Game.Components.Add(p);
+                    TempsEntreProjectile = 30;
+                }
+                if(this.TypePersonnage == "Robot")
+                {
+                    Projectile p = new Projectile(Game, 1f, new Vector3(0, 0, 0), Position, new Vector2(4,2), "Robot/laser", AtelierXNA.Atelier.INTERVALLE_MAJ_STANDARD, DIRECTION, 1f,false,3);
+                    Game.Components.Add(p);
+                    TempsEntreProjectile = 40; 
+                }
+            }           
         }
         private void GÈrerAttaque()
         {
@@ -367,6 +384,21 @@ namespace AtelierXNA
             if(!EstBouclierActif)
                 VecteurVitesse += (p.VecteurVitesseGaucheDroite + p.VecteurVitesse) * p.Masse / Masse;
         }
+        public void EncaisserDÈg‚ts(Projectile p)
+        {
+            if (!EstBouclierActif)
+            {
+                VieEnPourcentage += p.DÈgat;
+                if (p.Direction == ORIENTATION.DROITE)
+                {
+                    VecteurVitesse += Temps…coulÈDepuisMAJ * Force * Vector3.Right / Masse * VieEnPourcentage/100;
+                }
+                else
+                {
+                    VecteurVitesse += Temps…coulÈDepuisMAJ * Force * Vector3.Left / Masse * VieEnPourcentage/100;
+                }
+            }
+        }
         #endregion
 
         #endregion
@@ -374,7 +406,7 @@ namespace AtelierXNA
         #region BoolÈens de la classe.
         protected bool EstMort()
         {
-            return Position.X < -100 || Position.X > 100 || Position.Y < -50;
+            return Position.X > Carte.LIMITE_MAP.X || Position.X < Carte.LIMITE_MAP.Y || Position.Y > Carte.LIMITE_MAP.Z || Position.Y < Carte.LIMITE_MAP.W;
         }//Mettre des constantes en haut.
         public bool EstEnCollision(Personnage p)
         {

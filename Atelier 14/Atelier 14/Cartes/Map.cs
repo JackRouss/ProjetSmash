@@ -16,6 +16,8 @@ namespace AtelierXNA
     public class Map : PrimitiveDeBase, IPause
     {
 
+        public Vector4 LIMITE_MAP { get; private set; }// (x a droite, x a gauche, y en haut, y en bas)
+        public Vector4 LIMITE_PLAQUETTE { get; private set; }
         const int NB_TRIANGLE_SURFACE = 2;
         const int NB_TRIANGLE_BASE = 8;
         const int NB_SOMMETS_LIST = 3;
@@ -36,23 +38,28 @@ namespace AtelierXNA
         VertexPositionColor[] Sommets { get; set; }
         VertexPositionColor[] SommetsBase { get; set; }
         BasicEffect EffetDeBase { get; set; }
+        Color Couleur { get; set; }
 
 
-        public Map(Game game, float homothetie, Vector3 rotationInitiale, Vector3 position)
+        public Map(Game game, float homothetie, Vector3 rotationInitiale, Vector3 position, Color couleur)
             : base(game, homothetie, rotationInitiale, position)
         {
             Origine = position;
+            Couleur = couleur;
         }
 
         public override void Initialize()
         {
             Longueur = 100f;
             Largeur = 50;
+
+            LIMITE_MAP = new Vector4(150, -150, 100, -100);
+            LIMITE_PLAQUETTE = new Vector4(Origine.X + Longueur / 2, Origine.X - Longueur / 2,(Origine.Y + LIMITE_MAP.Z)/3, 0);
             Plateformes = new List<Plaquette>();
             InitialiserPtsSommets();
             InitialiserSommets();
-            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 4, Origine.Y + hauteur, Origine.Z)));
-            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 4, Origine.Y + hauteur, Origine.Z)));
+            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
+            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
             foreach(Plaquette p in Plateformes)
             {
                 p.Initialize();
@@ -126,7 +133,7 @@ namespace AtelierXNA
                 if (i > Sommets.Length - 1) // est rendu a la base                
                     SommetsBase[i - Sommets.Length] = new VertexPositionColor(PtsSommets[i], Color.SaddleBrown);
                 else
-                    Sommets[i] = new VertexPositionColor(PtsSommets[i], Color.ForestGreen);
+                    Sommets[i] = new VertexPositionColor(PtsSommets[i], Couleur);
             }
         }
         protected override void LoadContent()

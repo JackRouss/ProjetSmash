@@ -19,7 +19,6 @@ namespace AtelierXNA
         protected const float ÉCHELLE_PERSONNAGE = 4;
 
         //Données de base.
-        string TypePersonnage { get; set; }
         string état;
         protected string État
         {
@@ -48,13 +47,14 @@ namespace AtelierXNA
         string[] NomsSprites { get; set; }
         int[] NbFramesSprites { get; set; }
         TuileTexturéeAnimée Frame { get; set; }
+        public Vector2 ZoneAffichageDimensions { get; private set; }
 
 
         public PersonnageAnimé(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles, float intervalleMAJAnimation, string[] nomSprites, string type, int[] nbFramesSprites)
             : base(game, vitesseDéplacementGaucheDroite, vitesseMaximaleSaut, masse, position, intervalleMAJ, contrôles)
         {
-            Vector2 zoneAffichageDimensions = new Vector2(5, 10);
-            Frame = new TuileTexturéeAnimée(Game, 1, Vector3.Zero, position, new Vector2(2, 2), "Idle__000", intervalleMAJ, zoneAffichageDimensions, nomSprites, nbFramesSprites, type, intervalleMAJAnimation);
+            ZoneAffichageDimensions = new Vector2(5, 10);
+            Frame = new TuileTexturéeAnimée(Game, 1, Vector3.Zero, position, new Vector2(2, 2), "Idle__000", intervalleMAJ, ZoneAffichageDimensions, nomSprites, nbFramesSprites, type, intervalleMAJAnimation);
             TypePersonnage = type;
             NomsSprites = nomSprites;
             NbFramesSprites = nbFramesSprites;
@@ -97,7 +97,7 @@ namespace AtelierXNA
                     if (VecteurVitesse.Y != 0)
                     {
                         État = NomsSprites[6];
-                    }
+                    }          
                     else
                     {
                         État = NomsSprites[0];
@@ -152,7 +152,6 @@ namespace AtelierXNA
                 Frame.Draw(gameTime);
             }
         }
-
         public override void DéplacerFrame()
         {
             Frame.DéplacerTuile(Position);

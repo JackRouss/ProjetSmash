@@ -15,7 +15,6 @@ namespace AtelierXNA
 
     public class Plaquette : PrimitiveDeBase
     {
-
         const int NB_TRIANGLE_SURFACE = 2;
         const int NB_TRIANGLE_BASE = 8;
         const int NB_SOMMETS_LIST = 3;
@@ -31,10 +30,11 @@ namespace AtelierXNA
         VertexPositionColor[] Sommets { get; set; }
         VertexPositionColor[] SommetsBase { get; set; }
         BasicEffect EffetDeBase { get; set; }
+        Color Couleur { get; set; }
 
 
-        public Plaquette(Game game, float homothetie, Vector3 rotationInitiale, Vector3 position)
-            : base(game, homothetie, rotationInitiale, position) { Position = position; }
+        public Plaquette(Game game, float homothetie, Vector3 rotationInitiale, Vector3 position, Color couleur)
+            : base(game, homothetie, rotationInitiale, position) { Position = position; Couleur = couleur; }
 
         public override void Initialize()
         {
@@ -91,8 +91,6 @@ namespace AtelierXNA
             PtsSommets[27] = PtsSommets[2];
             PtsSommets[28] = PtsSommets[6];
             PtsSommets[29] = PtsSommets[0];
-
-
         }
         void CalculerPropriétésPourPersonnages()//PROBLÈME ICI.
         {
@@ -107,7 +105,7 @@ namespace AtelierXNA
                 if (i > Sommets.Length - 1) // est rendu a la base                
                     SommetsBase[i - Sommets.Length] = new VertexPositionColor(PtsSommets[i], Color.SaddleBrown);
                 else
-                    Sommets[i] = new VertexPositionColor(PtsSommets[i], Color.ForestGreen);
+                    Sommets[i] = new VertexPositionColor(PtsSommets[i], Couleur);
             }
         }
         protected override void LoadContent()
@@ -136,7 +134,6 @@ namespace AtelierXNA
                 GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, SommetsBase, 0, NB_TRIANGLE_BASE);
             }
             GraphicsDevice.RasterizerState = ancienÉtat;
-
         }
     }
 }

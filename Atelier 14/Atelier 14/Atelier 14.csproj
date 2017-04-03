@@ -118,6 +118,7 @@
     <Compile Include="Autres\InputControllerManager.cs" />
     <Compile Include="Cartes\Map.cs" />
     <Compile Include="IPause.cs" />
+    <Compile Include="Menus\MenuCartes.cs" />
     <Compile Include="Menus\MenuDifficulté.cs" />
     <Compile Include="Menus\MenuOption.cs" />
     <Compile Include="Menus\MenuPause.cs" />
