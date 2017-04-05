@@ -16,7 +16,7 @@ namespace AtelierXNA
         const int NB_FRAMES_PERSONNAGE = 10;
         const float ÉCHELLE_ROBOT = 492;
         const float ÉCHELLE_NINJA = 400;
-        const float INTERVALLE_MAJ_COULEUR = 1f / 10;
+        public const float INTERVALLE_MAJ_COULEUR = 1f / 10;
         const int BORDURE_HAUT = 50;
         const string TITRE = "Choix du personnage :";
         public enum ÉTAT { NINJA, ROBOT}
@@ -115,18 +115,18 @@ namespace AtelierXNA
             TempsÉcouléDepuisMAJCouleurs += tempsÉcoulée;
 
             GérerEntrées();
-            if(TempsÉcouléDepuisMAJ>=IntervalleMAJAnimation)
+            if (TempsÉcouléDepuisMAJ >= IntervalleMAJAnimation)
             {
-                
+
                 ++CptFrame;
-                if(CptFrame == NB_FRAMES_PERSONNAGE)
+                if (CptFrame == NB_FRAMES_PERSONNAGE)
                 {
                     CptFrame = 0;
                 }
 
                 TempsÉcouléDepuisMAJ = 0;
             }
-            if(TempsÉcouléDepuisMAJCouleurs >= INTERVALLE_MAJ_COULEUR)
+            if (TempsÉcouléDepuisMAJCouleurs >= INTERVALLE_MAJ_COULEUR)
             {
                 ++CptCouleurs;
                 if (CptCouleurs == COULEURS.Length)

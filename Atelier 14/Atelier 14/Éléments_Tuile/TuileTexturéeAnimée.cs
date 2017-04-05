@@ -212,15 +212,9 @@ namespace AtelierXNA.Éléments_Tuile
             TextureCourante = Textures[4][0];
         }
 
-        public void Mirroir()
+        public override void Mirroir()
         {
-            Vector3 buffer = new Vector3(PtsSommets[0, 0].X, PtsSommets[0, 0].Y, PtsSommets[0, 0].Z);
-            PtsSommets[0, 0] = new Vector3(PtsSommets[1, 0].X, PtsSommets[1, 0].Y, PtsSommets[1, 0].Z);
-            PtsSommets[1, 0] = buffer;
-            buffer = new Vector3(PtsSommets[0, 1].X, PtsSommets[0, 1].Y, PtsSommets[0, 1].Z);
-            PtsSommets[0, 1] = new Vector3(PtsSommets[1, 1].X, PtsSommets[1, 1].Y, PtsSommets[1, 1].Z);
-            PtsSommets[1, 1] = buffer;
-            InitialiserSommets();
+            base.Mirroir();
         }
 
         protected override void InitialiserParamètresEffetDeBase()

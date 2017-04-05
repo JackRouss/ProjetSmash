@@ -7,10 +7,12 @@ namespace AtelierXNA
 {
    public class TuileTexturée : Tuile
    {
-      const int NB_TRIANGLES = 2;
+      //const int NB_TRIANGLES = 2;
       RessourcesManager<Texture2D> gestionnaireDeTextures;
       Texture2D textureTuile;
-      VertexPositionTexture[] Sommets { get; set; }
+        private Game game;
+
+        VertexPositionTexture[] Sommets { get; set; }
       Vector2[,] PtsTexture { get; set; }
       string NomTextureTuile { get; set; }
       BlendState GestionAlpha { get; set; }
@@ -20,8 +22,7 @@ namespace AtelierXNA
       {
          NomTextureTuile = nomTextureTuile;
       }
-
-      protected override void CréerTableauSommets()
+        protected override void CréerTableauSommets()
       {
          PtsTexture = new Vector2[2, 2];
          CréerTableauPointsTexture();
@@ -63,23 +64,19 @@ namespace AtelierXNA
          EffetDeBase.Texture = textureTuile;
          GestionAlpha = BlendState.AlphaBlend;
       }
-
-      //public override void Draw(GameTime gameTime)
-      //{
-      //   BlendState oldBlendState = GraphicsDevice.BlendState;
-      //   RasterizerState oldRasterizerState = GraphicsDevice.RasterizerState;
-      //   GraphicsDevice.BlendState = GestionAlpha;
-      //   RasterizerState ÉtatRasterizer = new RasterizerState();
-      //   ÉtatRasterizer.CullMode = CullMode.None;
-      //   GraphicsDevice.RasterizerState = ÉtatRasterizer;
-      //   base.Draw(gameTime);
-      //   GraphicsDevice.BlendState = oldBlendState;
-      //   GraphicsDevice.RasterizerState = oldRasterizerState;
-      //}
-
       protected override void DessinerTriangleStrip()
       {
          GraphicsDevice.DrawUserPrimitives<VertexPositionTexture>(PrimitiveType.TriangleStrip, Sommets, 0, NB_TRIANGLES);
       }
-   }
+        public virtual void  Mirroir()
+        {
+            Vector3 buffer = new Vector3(PtsSommets[0, 0].X, PtsSommets[0, 0].Y, PtsSommets[0, 0].Z);
+            PtsSommets[0, 0] = new Vector3(PtsSommets[1, 0].X, PtsSommets[1, 0].Y, PtsSommets[1, 0].Z);
+            PtsSommets[1, 0] = buffer;
+            buffer = new Vector3(PtsSommets[0, 1].X, PtsSommets[0, 1].Y, PtsSommets[0, 1].Z);
+            PtsSommets[0, 1] = new Vector3(PtsSommets[1, 1].X, PtsSommets[1, 1].Y, PtsSommets[1, 1].Z);
+            PtsSommets[1, 1] = buffer;
+            InitialiserSommets();
+        }
+    }
 }

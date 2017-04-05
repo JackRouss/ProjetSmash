@@ -9,43 +9,19 @@ namespace AtelierXNA
     {
         const float INTERVALLE_MAJ_STANDARD = 1f / 60f;
         const float ACCÉLÉRATION = 0.001f;
-        const float VITESSE_INITIALE_ROTATION = 5f;
         const float VITESSE_INITIALE_TRANSLATION = 0.5f;
-        const float DELTA_LACET = MathHelper.Pi / 180; // 1 degré à la fois
-        const float DELTA_TANGAGE = MathHelper.Pi / 180; // 1 degré à la fois
-        const float DELTA_ROULIS = MathHelper.Pi / 180; // 1 degré à la fois
         const float RAYON_COLLISION = 1f;
 
         Vector3 Direction { get; set; }
         Vector3 Latéral { get; set; }
         Vector3 Angle { get; set; }
-        List<Vector3> PositionsPersonnages { get; set; }
         float VitesseTranslation { get; set; }
-        float VitesseRotation { get; set; }
 
         float IntervalleMAJ { get; set; }
         float TempsÉcouléDepuisMAJ { get; set; }
-        InputManager GestionInput { get; set; }
         List<PersonnageAnimé> ListesPerso { get; set; }
-
-        bool estEnZoom;
-        bool EstEnZoom
-        {
-            get { return estEnZoom; }
-            set
-            {
-                float ratioAffichage = Game.GraphicsDevice.Viewport.AspectRatio;
-                estEnZoom = value;
-                if (estEnZoom)
-                {
-                    CréerVolumeDeVisualisation(OUVERTURE_OBJECTIF / 2, ratioAffichage, DISTANCE_PLAN_RAPPROCHÉ, DISTANCE_PLAN_ÉLOIGNÉ);
-                }
-                else
-                {
-                    CréerVolumeDeVisualisation(OUVERTURE_OBJECTIF, ratioAffichage, DISTANCE_PLAN_RAPPROCHÉ, DISTANCE_PLAN_ÉLOIGNÉ);
-                }
-            }
-        }
+        Map Carte { get; set; }
+        bool DoIt { get; set; }
 
         public CaméraDePoursuite(Game jeu, Vector3 positionCaméra, Vector3 cible, Vector3 orientation, float intervalleMAJ)
            : base(jeu)
@@ -53,34 +29,24 @@ namespace AtelierXNA
             IntervalleMAJ = intervalleMAJ;
             CréerVolumeDeVisualisation(OUVERTURE_OBJECTIF, DISTANCE_PLAN_RAPPROCHÉ, DISTANCE_PLAN_ÉLOIGNÉ);
             CréerPointDeVue(positionCaméra, cible, orientation);
-            EstEnZoom = false;
         }
 
         public override void Initialize()
         {
-            VitesseRotation = VITESSE_INITIALE_ROTATION;
             VitesseTranslation = VITESSE_INITIALE_TRANSLATION;
             TempsÉcouléDepuisMAJ = 0;
             base.Initialize();
-            GestionInput = Game.Services.GetService(typeof(InputManager)) as InputManager;
             Angle = Vector3.Zero;
             ListesPerso = new List<PersonnageAnimé>();
+            DoIt = true;
         }
 
         protected override void CréerPointDeVue()
-        {
-            Angle *= VitesseRotation;
-            OrientationVerticale = Vector3.Transform(OrientationVerticale, Matrix.CreateFromAxisAngle(Latéral, Angle.X));
-            OrientationVerticale = Vector3.Transform(OrientationVerticale, Matrix.CreateFromAxisAngle(Direction, Angle.Z));
-
-            Direction = Vector3.Transform(Direction, Matrix.CreateFromAxisAngle(OrientationVerticale, Angle.Y));
-            Direction = Vector3.Transform(Direction, Matrix.CreateFromAxisAngle(Latéral, Angle.X));
-
+        {           
             Latéral = Vector3.Transform(Latéral, Matrix.CreateFromAxisAngle(OrientationVerticale, Angle.Y));
             Latéral = Vector3.Transform(Latéral, Matrix.CreateFromAxisAngle(Direction, Angle.Z));
 
-
-            Vue = Matrix.CreateLookAt(Position, Position + Direction, OrientationVerticale);
+            Vue = Matrix.CreateLookAt(Position, Position + Direction , OrientationVerticale);
             GénérerFrustum();
             Angle = Vector3.Zero;
         }
@@ -96,111 +62,53 @@ namespace AtelierXNA
 
         public override void Update(GameTime gameTime)
         {
-            if(ListesPerso.Count == 0)
+            RemplirListePerso();
+            InitialiserPropCarte();
+            
+            float TempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            TempsÉcouléDepuisMAJ += TempsÉcoulé;
+            GérerDéplacement();
+
+            if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
+            {              
+                CréerPointDeVue();             
+                TempsÉcouléDepuisMAJ = 0;
+            }
+            base.Update(gameTime);
+        }
+        void InitialiserPropCarte()
+        {   
+            if(DoIt)
             {
+                Carte = Game.Components.First(t => t is Map) as Map;
+                DoIt = false;
+            }                           
+        }
+        void RemplirListePerso()
+        {
+                if (ListesPerso.Count == 0)
+                {
                 foreach (GameComponent perso in Game.Components)
                 {
                     if (perso is Personnage)
                     {
                         ListesPerso.Add(perso as PersonnageAnimé);
                     }
-                }
-            }
-            float TempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            TempsÉcouléDepuisMAJ += TempsÉcoulé;
-            GestionClavier();
-
-            GérerDéplacement();
-
-            if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
-            {
-
-                if (true)
-                {
-                    GérerAccélération();
-                    GérerRotation();
-                    CréerPointDeVue();
-                }
-                TempsÉcouléDepuisMAJ = 0;
-            }
-            base.Update(gameTime);
-        }
-
-        private int GérerTouche(Keys touche)
-        {
-            return GestionInput.EstEnfoncée(touche) ? 1 : 0;
-        }
-
-        private void GérerAccélération()
-        {
-            int valAccélération = (GérerTouche(Keys.Subtract) + GérerTouche(Keys.OemMinus)) - (GérerTouche(Keys.Add) + GérerTouche(Keys.OemPlus));
-            if (valAccélération != 0)
-            {
-                IntervalleMAJ += ACCÉLÉRATION * valAccélération;
-                IntervalleMAJ = MathHelper.Max(INTERVALLE_MAJ_STANDARD, IntervalleMAJ);
+                }               
             }
         }
-
         private void GérerDéplacement()
         {
             float moyennePosX = ListesPerso.Average(x => x.GetPositionPersonnage.X);
             float moyennePosY = ListesPerso.Average(x => x.GetPositionPersonnage.Y) + 20;
-            Position = new Vector3(MathHelper.Min(moyennePosX,40), MathHelper.Min(moyennePosY,30), Position.Z);
+            Position = new Vector3(MathHelper.Min(moyennePosX,Carte.LIMITE_PLAQUETTE.X), MathHelper.Min(moyennePosY,Carte.LIMITE_PLAQUETTE.Z), Position.Z);
             if(moyennePosX < 0)
             {
-                Position = new Vector3(MathHelper.Max(moyennePosX, -40), Position.Y, Position.Z);
+                Position = new Vector3(MathHelper.Max(moyennePosX, Carte.LIMITE_PLAQUETTE.Y), Position.Y, Position.Z);
             }
             if(moyennePosY < 0)
-            {
-                Position = new Vector3(Position.X, MathHelper.Max(moyennePosY, 10), Position.Z);
-            }
-        }
-
-        private void GérerRotation()
-        {
-            GérerLacet();
-            GérerTangage();
-            GérerRoulis();
-        }
-
-        private void GérerLacet()
-        {
-            float angle = 0;
-            if (GestionInput.EstEnfoncée(Keys.LeftShift))
-            {
-                angle += GestionInput.EstEnfoncée(Keys.Left) ? DELTA_LACET : 0;
-                angle -= GestionInput.EstEnfoncée(Keys.Right) ? DELTA_LACET : 0;
-                Angle += new Vector3(0, angle, 0);
-            }
-        }
-
-        private void GérerTangage()
-        {
-            float angle = 0;
-            if (GestionInput.EstEnfoncée(Keys.LeftShift))
-            {
-                angle += GestionInput.EstEnfoncée(Keys.Up) ? DELTA_TANGAGE : 0;
-                angle -= GestionInput.EstEnfoncée(Keys.Down) ? DELTA_TANGAGE : 0;
-                Angle += new Vector3(angle, 0, 0);
-            }
-        }
-
-        private void GérerRoulis()
-        {
-            float angle = 0;
-            if (GestionInput.EstEnfoncée(Keys.LeftShift))
-            {
-                angle += GestionInput.EstEnfoncée(Keys.PageUp) ? DELTA_ROULIS : 0;
-                angle -= GestionInput.EstEnfoncée(Keys.PageDown) ? DELTA_ROULIS : 0;
-                Angle += new Vector3(0, 0, angle);
-            }
-        }
-
-        private void GestionClavier()
-        {
-            if (GestionInput.EstNouvelleTouche(Keys.Z))
-            {
-                EstEnZoom = !EstEnZoom;
+            {          
+                Position = new Vector3(Position.X, MathHelper.Max(moyennePosY, Carte.LIMITE_PLAQUETTE.W), Position.Z);
             }
         }
     }

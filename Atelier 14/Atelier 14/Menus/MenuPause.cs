@@ -17,11 +17,10 @@ namespace AtelierXNA.Menus
     public class MenuPause : Microsoft.Xna.Framework.DrawableGameComponent
     {
         const string RÉSUMER_PARTIE = "Résumer la partie";
-        const string MENU_PRINCIPAL = "Retour au menu principal";
+        const string MENU_PRINCIPAL = "Recommencer";
         const string QUITTER = "Quitter le jeu";
         const string OPTIONS = "Options";
         const float ESPACE_ENTRE_OPTIONS = 40;
-        const string CHEMIN = @"../../../../Atelier 14Content\Textures\BackGround.png";
         public enum ÉTAT { RÉSUMER_PARTIE,MENU_PRINCIPAL, OPTIONS, QUITTER};
         public ÉTAT CHOIX;
         Color[] COULEURS = { Color.Firebrick, Color.Red, Color.OrangeRed, Color.Orange, Color.Gold, Color.Yellow, Color.YellowGreen, Color.LawnGreen, Color.Green, Color.DarkTurquoise, Color.DeepSkyBlue, Color.Blue, Color.DarkSlateBlue, Color.Indigo, Color.Purple };
@@ -47,6 +46,7 @@ namespace AtelierXNA.Menus
         float IntervalleMAJAnimation { get; set; }
         public bool RésumerLaPartie { get; set; }
         public bool RetournerMenuPrincipale { get; set; }
+        public bool PasserMenuPause { get; set; }
 
 
 
@@ -126,7 +126,7 @@ namespace AtelierXNA.Menus
 
                     if(CHOIX == ÉTAT.OPTIONS)
                     {
-
+                        PasserMenuPause = true;
                     }
 
                     if(CHOIX == ÉTAT.QUITTER)
