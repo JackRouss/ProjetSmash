@@ -247,7 +247,8 @@ namespace AtelierXNA
             }
             Components.Add(Bot);
             Components.Add(Joueur);
-
+            Interface = new InterfacePersonnages(this, "Robot", PlayerIndex.One);
+            Components.Add(Interface);
         }
         void InitialiserMenuPersonnages()
         {
@@ -287,7 +288,6 @@ namespace AtelierXNA
             }
         }
         #endregion
-
         #region Boucle de jeu.
         protected override void Update(GameTime gameTime)
         {

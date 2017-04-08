@@ -124,6 +124,7 @@
     <Compile Include="Menus\MenuPause.cs" />
     <Compile Include="Menus\MenuPersonnage.cs" />
     <Compile Include="Menus\MenuPrincipal.cs" />
+    <Compile Include="Éléments_Tuile\InterfacePersonnages.cs" />
     <Compile Include="Éléments_Tuile\Personnage.cs" />
     <Compile Include="Éléments_Tuile\PersonnageAnimé.cs" />
     <Compile Include="Cartes\Plaquette.cs" />
