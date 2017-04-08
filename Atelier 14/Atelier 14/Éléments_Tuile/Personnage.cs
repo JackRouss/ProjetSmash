@@ -27,9 +27,10 @@ namespace AtelierXNA
         protected ORIENTATION DIRECTION;
 
 
-        protected string TypePersonnage { get; set; }
+        public string TypePersonnage { get; set; }
         public int NbVies { get; private set; }
-        int VieEnPourcentage { get; set; }
+        public int VieEnPourcentage { get; private set; }
+        public PlayerIndex numManette { get; private set; }
 
 
 
@@ -80,7 +81,7 @@ namespace AtelierXNA
             DommageAttaque = 20;
             Force = 1000000;
 
-
+           
 
 
 
@@ -108,6 +109,8 @@ namespace AtelierXNA
 
             VecteurGauche = Vector3.Normalize(Carte.VecteurGauche);
             VecteurVitesse = Vector3.Zero;
+
+            
 
             base.Initialize();
         }

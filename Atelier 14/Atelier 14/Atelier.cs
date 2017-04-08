@@ -76,6 +76,8 @@ namespace AtelierXNA
         TuileTexturée BackGround { get; set; }
         ArrièrePlanDéroulant ArrièrePlan { get; set; }
         bool VieilÉtatCollisionPerso { get; set; }
+        InterfacePersonnages Interface { get; set; }
+
         #endregion
 
         #region Initialisation.
@@ -222,15 +224,15 @@ namespace AtelierXNA
             Keys[] CONTRÔLES_BOT = { Keys.H, Keys.F, Keys.RightShift, Keys.Enter, Keys.L, Keys.N };
             if (MenuPerso.État == MenuPersonnage.ÉTAT.NINJA)
             {
-                Joueur = new PersonnageAnimé(this, 5f, 35f, 50, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA);
+                Joueur = new PersonnageAnimé(this, 5f, 35f, 50, new Vector3(0, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA);
             }
             if (MenuPerso.État == MenuPersonnage.ÉTAT.ROBOT)
             {
-                Joueur = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Joueur = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
             if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.FACILE)
             {
-                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(0, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
             }
             if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.NORMAL)
             {
@@ -242,7 +244,8 @@ namespace AtelierXNA
             }
             Components.Add(Bot);
             Components.Add(Joueur);
-
+            Interface = new InterfacePersonnages(this, "Robot", PlayerIndex.One);
+            Components.Add(Interface);
         }
         void InitialiserMenuPersonnages()
         {
