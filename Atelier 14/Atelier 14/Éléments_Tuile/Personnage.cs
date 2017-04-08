@@ -184,27 +184,15 @@ namespace AtelierXNA
 
         private void GÈrerFriction()
         {
-            float mu_air = 0.1f;
-            float mu_sol = 0.2f;
-            if (VecteurVitesse.X != 0)
+            float mu = 0.1f;
+            if (VecteurVitesse.Y == 0 && VecteurVitesse.X != 0)
             {
-                Vector3 AncienVecteurVitesse = VecteurVitesse;
-                if (VecteurVitesse.X < 0)
-                    VecteurVitesse -= VecteurGauche * mu_air * Atelier.ACC…L…RATION_GRAVITATIONNELLE;
-                else if (VecteurVitesse.X > 0)
-                    VecteurVitesse += VecteurGauche * mu_air * Atelier.ACC…L…RATION_GRAVITATIONNELLE;
-                if (Math.Sign(VecteurVitesse.X) != Math.Sign(AncienVecteurVitesse.X))
+                if (VecteurVitesse.X < 0 && (VecteurVitesse - VecteurGauche * mu * Atelier.ACC…L…RATION_GRAVITATIONNELLE_PERSONNAGE).X < 0)
+                    VecteurVitesse -= VecteurGauche * mu * Atelier.ACC…L…RATION_GRAVITATIONNELLE_PERSONNAGE;
+                else if (VecteurVitesse.X > 0 && (VecteurVitesse + VecteurGauche * mu * Atelier.ACC…L…RATION_GRAVITATIONNELLE_PERSONNAGE).X > 0)
+                    VecteurVitesse += VecteurGauche * mu * Atelier.ACC…L…RATION_GRAVITATIONNELLE_PERSONNAGE;
+                else
                     VecteurVitesse = new Vector3(0, VecteurVitesse.Y, VecteurVitesse.Z);
-            }
-            if (VecteurVitesseGaucheDroite.X != 0)
-            {
-                Vector3 AncienVecteurVitesseGaucheDroite = VecteurVitesseGaucheDroite;
-                if (VecteurVitesseGaucheDroite.X < 0)
-                    VecteurVitesseGaucheDroite -= VecteurGauche * mu_sol * Atelier.ACC…L…RATION_GRAVITATIONNELLE;
-                else if (VecteurVitesseGaucheDroite.X > 0)
-                    VecteurVitesseGaucheDroite += VecteurGauche * mu_sol * Atelier.ACC…L…RATION_GRAVITATIONNELLE;
-                if (Math.Sign(VecteurVitesseGaucheDroite.X) != Math.Sign(AncienVecteurVitesseGaucheDroite.X))
-                    VecteurVitesseGaucheDroite = new Vector3(0, VecteurVitesseGaucheDroite.Y, VecteurVitesseGaucheDroite.Z);
             }
         }
         private void GÈnÈrerHitbox()
@@ -382,11 +370,7 @@ namespace AtelierXNA
             if(!EstBouclierActif)
                 VecteurVitesse += (p.VecteurVitesseGaucheDroite + p.VecteurVitesse) * p.Masse / Masse;
         }
-        public void GÈrerRecul(Personnage p)
-        {
-            if(!EstBouclierActif)
-                VecteurVitesse += (p.VecteurVitesseGaucheDroite + p.VecteurVitesse) * p.Masse / Masse;
-        }
+        
         public void EncaisserDÈg‚ts(Projectile p)
         {
             if (!EstBouclierActif)
@@ -394,11 +378,11 @@ namespace AtelierXNA
                 VieEnPourcentage += p.DÈgat;
                 if (p.Direction == ORIENTATION.DROITE)
                 {
-                    VecteurVitesse += Temps…coulÈDepuisMAJ * Force * Vector3.Right / Masse * VieEnPourcentage/100;
+                    VecteurVitesse += Temps…coulÈDepuisMAJ * ForceCoup * Vector3.Right / Masse * VieEnPourcentage/100;
                 }
                 else
                 {
-                    VecteurVitesse += Temps…coulÈDepuisMAJ * Force * Vector3.Left / Masse * VieEnPourcentage/100;
+                    VecteurVitesse += Temps…coulÈDepuisMAJ * ForceCoup * Vector3.Left / Masse * VieEnPourcentage/100;
                 }
             }
         }

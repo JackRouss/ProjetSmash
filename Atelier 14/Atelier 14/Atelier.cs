@@ -152,7 +152,7 @@ namespace AtelierXNA
                     GestionnaireDeTextures.Add(NOMS_SPRITES_NINJA[j] + i.ToString(), this.Content.Load<Texture2D>("Textures/" + "Ninja/" + NOMS_SPRITES_NINJA[j] + i));
                 }
             }
-            GestionnaireDeTextures.Add("BouclierNinja",this.Content.Load<Texture2D>("Textures/"+"Ninja/"+"BouclierNinja"));
+            //GestionnaireDeTextures.Add("BouclierNinja",this.Content.Load<Texture2D>("Textures/"+"Ninja/"+"BouclierNinja"));
         }
         private void ChargerRobot()
         {
