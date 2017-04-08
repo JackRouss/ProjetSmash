@@ -44,7 +44,7 @@ namespace AtelierXNA
         public string TypePersonnage { get; set; }
         public int NbVies { get; private set; }
         public int VieEnPourcentage { get; private set; }
-        public PlayerIndex numManette { get; private set; }
+        public PlayerIndex NumManette { get; private set; }
 
 
 
@@ -91,7 +91,7 @@ namespace AtelierXNA
         protected InputControllerManager GestionInputManette { get; set; }
         protected InputManager GestionInputClavier { get; set; }
 
-        public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles)
+        public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles, PlayerIndex numManette)
             : base(game)
         {
             //Propriétés pour le combat (à définir dans le constructeur)
@@ -111,6 +111,7 @@ namespace AtelierXNA
             Position = position;
             PositionSpawn = position;
             NbVies = 3;
+            NumManette = numManette;
             GénérerHitbox();
         }
 

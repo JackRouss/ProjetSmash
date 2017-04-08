@@ -25,7 +25,7 @@ namespace AtelierXNA.Éléments_Tuile
         string TypePersonnage { get; set; }
         PlayerIndex NumManette { get; set; }
 
-        Texture2D TetePersonnage { get; set; }
+        List<Texture2D> TetePersonnage { get; set; }
         RessourcesManager<SpriteFont> GestionnaireFonts { get; set; }
         RessourcesManager<Texture2D> GestionnaireTexture { get; set; }
         SpriteBatch GestionSprites { get; set; }
@@ -35,7 +35,6 @@ namespace AtelierXNA.Éléments_Tuile
         CaméraDePoursuite Caméra { get; set; }
 
         TuileTexturée NomJoueur { get; set; }
-        Game Game { get; set; }
 
 
         public InterfacePersonnages(Game game, string typePersonnege, PlayerIndex numManette)
@@ -43,7 +42,6 @@ namespace AtelierXNA.Éléments_Tuile
         {
             TypePersonnage = typePersonnege;
             NumManette = numManette;
-            Game = game;
         }
 
         /// <summary>
@@ -57,10 +55,11 @@ namespace AtelierXNA.Éléments_Tuile
             GestionSprites = Game.Services.GetService(typeof(SpriteBatch)) as SpriteBatch;
             ArialFont = GestionnaireFonts.Find("Arial");
             CouleurTexte = Color.White;
-            TetePersonnage = GestionnaireTexture.Find("Idle (1)");
             ListesPerso = new List<PersonnageAnimé>();
+            TetePersonnage = new List<Texture2D>();
             RemplirListePerso();
             RemplirListeCamera();
+            RemplirListeTetePersonage();
 
             base.Initialize();
         }
@@ -71,7 +70,7 @@ namespace AtelierXNA.Éléments_Tuile
             {
                 foreach (GameComponent perso in Game.Components)
                 {
-                    if (perso is Personnage)
+                    if (perso is PersonnageAnimé)
                     {
                         ListesPerso.Add(perso as PersonnageAnimé);
                     }
@@ -81,6 +80,14 @@ namespace AtelierXNA.Éléments_Tuile
         void RemplirListeCamera()
         {
             Caméra = Game.Components.First(t => t is CaméraDePoursuite) as CaméraDePoursuite;
+        }
+
+        void RemplirListeTetePersonage()
+        {
+            foreach(PersonnageAnimé perso in ListesPerso)
+            {
+                TetePersonnage.Add(GestionnaireTexture.Find(perso.TypePersonnage + "/" + perso.NomsSprites[4] + (perso.TypePersonnage == "Robot"? "(1)":"0")));
+            }
         }
 
         /// <summary>
@@ -101,12 +108,11 @@ namespace AtelierXNA.Éléments_Tuile
             foreach(PersonnageAnimé perso in ListesPerso)
             {
                 Vector3 positionPerso = perso.GetPositionPersonnage;
-                GestionSprites.Draw(TetePersonnage, new Rectangle(5, Game.Window.ClientBounds.Height - 100, 50,80), CouleurTexte);
+                GestionSprites.Draw(TetePersonnage[redneck], new Rectangle(5 + redneck* ÉCART_ENTRE_INTERFACE + 100*redneck, Game.Window.ClientBounds.Height - 100, 50,80), CouleurTexte);
                 GestionSprites.DrawString(ArialFont, perso.TypePersonnage, new Vector2(BORDURE_GAUCHE + redneck * ÉCART_ENTRE_INTERFACE, Game.Window.ClientBounds.Height - ÉCART_ENTRE_COPOSANT_INTERFACE), CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
                 GestionSprites.DrawString(ArialFont, perso.VieEnPourcentage.ToString(), new Vector2(BORDURE_GAUCHE + redneck * ÉCART_ENTRE_INTERFACE, Game.Window.ClientBounds.Height - ArialFont.MeasureString(TypePersonnage).Y), CouleurTexte);
-                //GestionSprites.DrawString(ArialFont, perso.numManette.ToString(), new Vector2(positionPerso.X+390 + (float)2.1* positionPerso.X, positionPerso.Y+160 + (float)-4 * positionPerso.Y), CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
-                GestionSprites.DrawString(ArialFont, perso.numManette.ToString(), new Vector2(CounterCamera(positionPerso.X, Caméra.Position.X), positionPerso.Y + 160 + (float)-4 * positionPerso.Y), CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
-
+                Vector3 PositionÉcran = GestionSprites.GraphicsDevice.Viewport.Project(positionPerso, Caméra.Projection, Caméra.Vue, Matrix.Identity);
+                GestionSprites.DrawString(ArialFont, perso.NumManette.ToString(), new Vector2(PositionÉcran.X - 15, PositionÉcran.Y - 80), CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
                 redneck++;
             }
             
@@ -116,8 +122,8 @@ namespace AtelierXNA.Éléments_Tuile
 
         float CounterCamera(float position, float positionCamera)
         {
-            float différence = Math.Abs(positionCamera - position);
-            return 390 + différence;
+            float différence = Math.Abs(positionCamera) + Math.Abs(position);
+            return Game.Window.ClientBounds.Width/2 + différence*1.5f * (Math.Abs(position)/ position);
 
         }
     }
