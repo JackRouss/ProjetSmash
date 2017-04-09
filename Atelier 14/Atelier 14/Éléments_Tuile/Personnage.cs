@@ -42,9 +42,9 @@ namespace AtelierXNA
         protected ORIENTATION DIRECTION;
 
 
-        protected string TypePersonnage { get; set; }
+        public  string TypePersonnage { get; protected set; }
         public int NbVies { get; private set; }
-        int VieEnPourcentage { get; set; }
+        public int VieEnPourcentage { get; private set; }
 
 
 
@@ -84,7 +84,7 @@ namespace AtelierXNA
         public abstract void DéplacerFrame();
         protected int CptSaut { get; set; }
 
-
+        public PlayerIndex NumManette { get; private set; }
         protected float IntervalleMAJ { get; set; }
         protected float TempsÉcouléDepuisMAJ { get; set; }
 
@@ -92,13 +92,13 @@ namespace AtelierXNA
         protected InputControllerManager GestionInputManette { get; set; }
         protected InputManager GestionInputClavier { get; set; }
 
-        public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles)
+        public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles, PlayerIndex numManette)
             : base(game)
         {
             //Propriétés pour le combat (à définir dans le constructeur)
             DommageAttaque = DOMMAGE_ATTAQUE;
             ForceCoup = FORCE_COUP;
-
+            NumManette = numManette;
 
 
             CONTRÔLES = contrôles;
@@ -389,11 +389,11 @@ namespace AtelierXNA
                 VieEnPourcentage += p.Dégat;
                 if (p.Direction == ORIENTATION.DROITE)
                 {
-                    VecteurVitesse += TempsÉcouléDepuisMAJ * p.Force * Vector3.Right * (1 + VieEnPourcentage / 100) / Masse ;
+                    VecteurVitesse += TempsÉcouléDepuisMAJ * p.Force * Vector3.Right * (1 + VieEnPourcentage / 100) / Masse;
                 }
                 else
                 {
-                    VecteurVitesse += TempsÉcouléDepuisMAJ * p.Force * Vector3.Left * (1 + VieEnPourcentage / 100) / Masse ;
+                    VecteurVitesse += TempsÉcouléDepuisMAJ * p.Force * Vector3.Left * (1 + VieEnPourcentage / 100) / Masse;
                 }
             }
         }
