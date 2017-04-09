@@ -8,21 +8,24 @@ namespace AtelierXNA.Éléments_Tuile
 {
     public class Projectile : TuileTexturée, IPause
     {
-        Vector3 Position { get; set; }
+        float FORCE_COUP_PROJECTILE = 50f;
+        public Vector3 Position { get; private set; }
         Vector2 Étendue { get; set; }
-        float Vitesse { get; set; }
+        public float Vitesse { get; private set; }
         float TempsÉcouléDepuisMAJ { get; set; }
         float TempsÉcouléTotal { get; set; }
         float IntervalleMAJ { get; set; }
         public Personnage.ORIENTATION Direction { get; private set; }
         bool Atombé { get; set; }
         public int Dégat { get; private set; }
+        public float Force { get; private set; }
         public BoundingSphere SphèreDeCollision { get; private set; }
         Map Carte { get; set; }
 
         public Projectile(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, Vector2 étendue, string nomTextureTuile, float intervalleMAJ,Personnage.ORIENTATION direction, float vitesse, bool atombé,int dégat) 
             : base(jeu,homothétieInitiale,rotationInitiale,positionInitiale,étendue,nomTextureTuile,intervalleMAJ)
         {
+            Force = FORCE_COUP_PROJECTILE;
             Position = new Vector3(positionInitiale.X, positionInitiale.Y + 6, positionInitiale.Z);
             IntervalleMAJ = intervalleMAJ;
             Direction = direction;

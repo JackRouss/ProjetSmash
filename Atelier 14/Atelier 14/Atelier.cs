@@ -28,7 +28,7 @@ namespace AtelierXNA
         public Vector3 VECTEUR_ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE * (Vector3.Down);
         public Vector3 CIBLE_INITIALE_CAMÉRA = new Vector3(1, 0, -1);
         public Vector3 POSITION_INITIALE_CAMÉRA = Vector3.Zero;
-        public const float ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = 40f;
+        public const float ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = 20f;
         public const float ACCÉLÉRATION_GRAVITATIONNELLE_PROJECTILE = 0.5f; 
 
         public string[] NOMS_SPRITES_NINJA = { "Attack__00", "Climb_00", "Dead__00", "Glide_00", "Idle__00", "Jump__00", "Jump_Attack__00", "Jump_Throw__00", "Run__00", "Slide__00", "Throw__00" };

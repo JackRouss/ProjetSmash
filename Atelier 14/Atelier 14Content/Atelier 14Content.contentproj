@@ -199,11 +199,6 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="Textures\Ninja\Dead__001.png">
-      <Name>Dead__001</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
     <Compile Include="Textures\Ninja\Dead__002.png">
       <Name>Dead__002</Name>
       <Importer>TextureImporter</Importer>
@@ -651,11 +646,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Textures\Robot\Dead %281%29.png">
-      <Name>Dead %281%29</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
     <Compile Include="Textures\Robot\Dead %2810%29.png">
       <Name>Dead %2810%29</Name>
       <Importer>TextureImporter</Importer>
@@ -1169,6 +1159,20 @@
     </Compile>
     <Compile Include="Textures\BackGround4.png">
       <Name>BackGround4</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Textures\Ninja\Dead__001.png">
+      <Name>Dead__001</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Textures\Robot\Dead %281%29.png">
+      <Name>Dead %281%29</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
