@@ -10,7 +10,7 @@ namespace AtelierXNA
       //const int NB_TRIANGLES = 2;
       RessourcesManager<Texture2D> gestionnaireDeTextures;
       Texture2D textureTuile;
-        private Game game;
+        //private Game game;
 
         VertexPositionTexture[] Sommets { get; set; }
       Vector2[,] PtsTexture { get; set; }
