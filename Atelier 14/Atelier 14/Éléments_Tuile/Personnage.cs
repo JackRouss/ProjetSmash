@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Éléments_Tuile;
+using AtelierXNA.Autres;
 
 namespace AtelierXNA
 {
@@ -64,7 +65,7 @@ namespace AtelierXNA
         public Vector3 VecteurVitesse { get; set; }
         public abstract void DéplacerFrame();
         protected int CptSaut { get; set; }
-
+        public string tag { get; private set; }
 
         protected float IntervalleMAJ { get; set; }
         protected float TempsÉcouléDepuisMAJ { get; set; }
@@ -72,6 +73,7 @@ namespace AtelierXNA
 
         protected InputControllerManager GestionInputManette { get; set; }
         protected InputManager GestionInputClavier { get; set; }
+        protected Bouclier BouclierPersonnage { get; set; }
 
         public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles)
             : base(game)
@@ -79,10 +81,6 @@ namespace AtelierXNA
             //Propriétés pour le combat (à définir dans le constructeur)
             DommageAttaque = 20;
             Force = 1000000;
-
-
-
-
 
             CONTRÔLES = contrôles;
             ÉTAT_PERSO = ÉTAT.IMMOBILE;
@@ -123,11 +121,11 @@ namespace AtelierXNA
             VecteurVitesse = EstMort() ? Vector3.Zero : VecteurVitesse;
             Position = EstMort() ? PositionSpawn : Position;
 
-
+            EstBouclierActif = (GestionInputClavier.EstEnfoncée(CONTRÔLES[2]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.RightShoulder)) && VecteurVitesse.Y ==0 ? true : false;
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
                 TempsEntreProjectile--;
-                if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE) //Conditions ici pour gérer l'immobilité.
+                if ((VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE) || EstBouclierActif) //Conditions ici pour gérer l'immobilité.
                 {
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
                 }
@@ -144,7 +142,11 @@ namespace AtelierXNA
                 AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
 
                 //Toutes les actions qui peuvent modifier le vecteur vitesse du personnage.
-                GérerTouchesEnfoncées();
+                GérerBloque();
+                if(!EstBouclierActif)
+                {
+                    GérerTouchesEnfoncées();
+                }
                 GérerAccélérationGravitationnelle();
                 GérerFriction();
 
@@ -153,7 +155,10 @@ namespace AtelierXNA
 
                 TempsÉcouléDepuisMAJ = 0;
             }
-            GérerNouvellesTouches();
+            if(!EstBouclierActif)
+            {
+                GérerNouvellesTouches();
+            }
             if (!GestionInputClavier.EstClavierActivé && !GestionInputManette.EstManetteActivée(PlayerIndex.One))
             {
                 if (VecteurVitesse.Y != 0)
@@ -162,7 +167,20 @@ namespace AtelierXNA
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
             }
         }
+        void GérerBloque()
+        {
+            if (EstBouclierActif)
+            {
+                if (VecteurVitesse.Y == 0)
+                {
+                    Bloquer();
+                    ÉTAT_PERSO = ÉTAT.BLOQUER;
+                }
 
+            }
+            else
+                Game.Components.Remove(BouclierPersonnage);
+        }
         private void GérerFriction()
         {
             float mu = 0.1f;
@@ -216,7 +234,6 @@ namespace AtelierXNA
         protected void GérerTouchesEnfoncées()
         {
 
-
             if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[0]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.LeftThumbstickRight)) && ((!EstEnAttaque || VecteurVitesse.Y != 0)))
             {
                 VecteurVitesse -= VecteurGauche * VitesseDéplacementGaucheDroite;
@@ -233,14 +250,6 @@ namespace AtelierXNA
                 if (VecteurVitesse.Y == 0)
                 {
                     ÉTAT_PERSO = ÉTAT.COURRIR;
-                }
-            }
-            if (GestionInputClavier.EstEnfoncée(CONTRÔLES[2]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.RightShoulder))
-            {
-                Bloquer();
-                if (VecteurVitesse.Y == 0)
-                {
-                    ÉTAT_PERSO = ÉTAT.BLOQUER;
                 }
             }
         }
@@ -277,8 +286,7 @@ namespace AtelierXNA
             }
         }
         private void GérerLancer()
-        {
-          
+        {     
             if(TempsEntreProjectile <= 0)
             {
                 if(this.TypePersonnage == "Ninja")
@@ -300,10 +308,13 @@ namespace AtelierXNA
 
         }
         private void Bloquer()
-        {
-            EstBouclierActif = true;
+        {        
+            if (BouclierPersonnage == null || !Game.Components.Contains(BouclierPersonnage))
+            {
+                AjouterBouclier();
+            }
         }
-
+        protected abstract void AjouterBouclier();
         public void EncaisserDégâts(Personnage p)
         {
             if (!EstBouclierActif)

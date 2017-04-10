@@ -113,6 +113,7 @@
     <Compile Include="Autres\Afficheur3D.cs" />
     <Compile Include="Autres\ArrièrePlan.cs" />
     <Compile Include="Atelier.cs" />
+    <Compile Include="Autres\Bouclier.cs" />
     <Compile Include="Autres\CaméraDePoursuite.cs" />
     <Compile Include="Autres\InputControllerManager.cs" />
     <Compile Include="Cartes\Map.cs" />
