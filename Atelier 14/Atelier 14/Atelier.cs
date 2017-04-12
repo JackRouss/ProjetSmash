@@ -28,7 +28,7 @@ namespace AtelierXNA
         public Vector3 VECTEUR_ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE * (Vector3.Down);
         public Vector3 CIBLE_INITIALE_CAMÉRA = new Vector3(1, 0, -1);
         public Vector3 POSITION_INITIALE_CAMÉRA = Vector3.Zero;
-        public const float ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = 20f;
+        public const float ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = 32f;
         public const float ACCÉLÉRATION_GRAVITATIONNELLE_PROJECTILE = 0.5f; 
 
         public string[] NOMS_SPRITES_NINJA = { "Attack__00", "Climb_00", "Dead__00", "Glide_00", "Idle__00", "Jump__00", "Jump_Attack__00", "Jump_Throw__00", "Run__00", "Slide__00", "Throw__00" };
@@ -153,7 +153,7 @@ namespace AtelierXNA
                     GestionnaireDeTextures.Add(NOMS_SPRITES_NINJA[j] + i.ToString(), this.Content.Load<Texture2D>("Textures/" + "Ninja/" + NOMS_SPRITES_NINJA[j] + i));
                 }
             }
-            //GestionnaireDeTextures.Add("BouclierNinja",this.Content.Load<Texture2D>("Textures/"+"Ninja/"+"BouclierNinja"));
+            GestionnaireDeTextures.Add("BouclierNinja",this.Content.Load<Texture2D>("Textures/"+"Ninja/"+"BouclierNinja"));
         }
         private void ChargerRobot()
         {
@@ -407,18 +407,51 @@ namespace AtelierXNA
 
         void GérerCollisions()
         {
+            if(Joueur.EstBouclierActif)
+            {
+                foreach(GameComponent g in Components)
+                {
+                    if(g is Projectile)
+                    {
+                        if(Joueur.BouclierPersonnage.EstEnCollision(g as Projectile) && (g as Projectile).NumPlayer != Joueur.NumManette)
+                        {
+                            Joueur.BouclierPersonnage.EncaisserDégâts(g as Projectile);
+                        }
+                    }
+                    if(g is Personnage)
+                    {
+                        if(Joueur.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque)
+                        {
+                            Joueur.BouclierPersonnage.EncaisserDégâts(g as Personnage);
+                        }
+                    }
+                }
+            }
+            if (Bot.EstBouclierActif)
+            {
+                foreach (GameComponent g in Components)
+                {
+                    if (g is Projectile)
+                    {
+                        if (Bot.BouclierPersonnage.EstEnCollision(g as Projectile) && (g as Projectile).NumPlayer != Joueur.NumManette)
+                        {
+                            Bot.BouclierPersonnage.EncaisserDégâts(g as Projectile);
+                        }
+                    }
+                    if (g is Personnage)
+                    {
+                        if (Bot.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque)
+                        {
+                            Bot.BouclierPersonnage.EncaisserDégâts(g as Personnage);
+                        }
+                    }
+                }
+            }
+
             if (Joueur.EstEnCollision(Bot) && VieilÉtatCollisionPerso != Joueur.EstEnCollision(Bot))
             {
                 Joueur.GérerRecul(Bot);
-                Bot.GérerRecul(Joueur);
-                if (Joueur.EstEnAttaque)
-                {
-                    Bot.EncaisserDégâts(Joueur);
-                }
-                if (Bot.EstEnAttaque)
-                {
-                    Joueur.EncaisserDégâts(Bot);
-                }
+                Bot.GérerRecul(Joueur);           
             }
 
             if (Joueur.EstEnAttaque && Joueur.EstEnCollision(Bot) && (VieilÉtatAttaqueJoueur != Joueur.EstEnAttaque))
@@ -429,20 +462,23 @@ namespace AtelierXNA
             if (Bot.EstEnAttaque && Bot.EstEnCollision(Joueur) && (VieilÉtatAttaqueBot != Bot.EstEnAttaque))
             {
                 Joueur.EncaisserDégâts(Bot);
+
             }
-
-
-            foreach (GameComponent g in Components)
+      
+               foreach (GameComponent g in Components)
             {
                 if (g is Projectile)
                 {
-                    if ((g as Projectile).EstEnCollision(Joueur))
+                    
+                    if ((g as Projectile).EstEnCollision(Joueur) && (g as Projectile).NumPlayer != Joueur.NumManette)
                     {
                         Joueur.EncaisserDégâts(g as Projectile);
+                        (g as Projectile).ADetruire = true;
                     }
-                    else if ((g as Projectile).EstEnCollision(Bot))
+                    else if ((g as Projectile).EstEnCollision(Bot) && (g as Projectile).NumPlayer != Bot.NumManette)
                     {
                         Bot.EncaisserDégâts(g as Projectile);
+                        (g as Projectile).ADetruire = true;
                     }
                 }
             }
