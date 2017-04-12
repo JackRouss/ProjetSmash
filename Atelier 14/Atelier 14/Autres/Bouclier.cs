@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AtelierXNA.Autres;
+using AtelierXNA.Éléments_Tuile;
 
 namespace AtelierXNA.Autres
 {
@@ -81,8 +82,7 @@ namespace AtelierXNA.Autres
             Sommets = new VertexPositionTexture[NbSommets];
             PtsTexture = new Vector2[(int)Charpente.Y + 1, (int)Charpente.X + 1];
             PtsEspace = new Vector3[(int)Charpente.Y + 1, (int)Charpente.X + 1];
-            Deltas = new Vector2(TextureSphère.Width / Charpente.X, TextureSphère.Height / Charpente.Y);
-            Origine = Vector3.Zero;
+            Deltas = new Vector2(TextureSphère.Width / Charpente.X, TextureSphère.Height / Charpente.Y);     
             InitialiserPtsTexture();
             InitialiserPtsEspace();
             base.Initialize();
@@ -154,7 +154,12 @@ namespace AtelierXNA.Autres
 
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
-                
+                if(DommageAbsorbé != 0)
+                {
+                    Rayon = Rayon - DommageAbsorbé / 5;
+                    InitialiserPtsEspace();
+                    DommageAbsorbé = 0;
+                }
             }
             base.Update(gameTime);
         }
@@ -176,6 +181,22 @@ namespace AtelierXNA.Autres
         #endregion
 
         #region Booléens de la classe.
+        public void EncaisserDégâts(Personnage p)
+        {
+            DommageAbsorbé = p.DommageAttaque;
+        }
+        public void EncaisserDégâts(Projectile p)
+        {
+            DommageAbsorbé = p.Dégat;
+        }
+        public bool EstEnCollision(Personnage p)
+        {
+            return SphèreDeCollision.Intersects(p.HitBox);
+        }
+        public bool EstEnCollision(Projectile p)
+        {
+            return SphèreDeCollision.Intersects(p.SphèreDeCollision);
+        }
         #endregion
 
     }
