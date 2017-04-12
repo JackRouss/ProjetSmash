@@ -100,6 +100,7 @@ namespace AtelierXNA.Éléments_Tuile
 
             base.Update(gameTime);
         }
+        
 
         public override void Draw(GameTime gameTime)
         {

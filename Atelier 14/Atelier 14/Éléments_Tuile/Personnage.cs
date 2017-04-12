@@ -50,7 +50,7 @@ namespace AtelierXNA
 
         public BoundingSphere HitBox { get; private set; }
         //public BoundingBox HitBox { get; private set; }
-        public Bouclier BouclierPersonnage { get; private set; }
+        //public Bouclier BouclierPersonnage { get; private set; }
 
         float TempsEntreProjectile { get; set; }
         protected float VitesseDéplacementGaucheDroite { get; set; }
