@@ -22,29 +22,10 @@ namespace AtelierXNA.Autres
       
         #region Propriétés et initialisation.
         //Caractéristiques de la sphère.
-        BoundingSphere sphèreDeCollision;
-        Vector3 origine;
-        public BoundingSphere SphèreDeCollision
-        {
-            get
-            {
-                return sphèreDeCollision;
-            }
-            set
-            {
-                sphèreDeCollision = value;
-            }
-        }
-        protected Vector3 Origine
-        {
-            get { return origine; }
-            set
-            {
-                SphèreDeCollision = new BoundingSphere(value, Rayon);
-                origine = value;
-            }
-        }
-        protected float Rayon { get; private set; }
+
+        public BoundingSphere SphèreDeCollision { get; private set; }         
+        protected Vector3 Origine { get; set; } 
+        public float Rayon { get; private set; }
         float TempsÉcouléDepuisMAJ { get; set; }
         float IntervalleMAJ { get; set; }
         Texture2D TextureSphère { get; set; }
@@ -72,11 +53,10 @@ namespace AtelierXNA.Autres
             Deltas = Vector2.Zero;
             NbTriangles = (int)(Charpente.X * Charpente.Y) * 2;
             NbSommets = NbTriangles * 3;
-            SphèreDeCollision = new BoundingSphere(Origine, Rayon);
         }
-
         public override void Initialize()
         {
+            SphèreDeCollision = new BoundingSphere(PositionInitiale, Rayon);
             GestionnaireDeTextures = Game.Services.GetService(typeof(RessourcesManager<Texture2D>)) as RessourcesManager<Texture2D>;
             TextureSphère = GestionnaireDeTextures.Find(NomTexture);
             Sommets = new VertexPositionTexture[NbSommets];
@@ -124,13 +104,6 @@ namespace AtelierXNA.Autres
                     PtsTexture[l, c] = new Vector2(c * deltaX, l * deltaY);
                 }
         }
-        //protected override void CalculerMatriceMonde()
-        //{   
-        //    Monde = Matrix.Identity;
-        //    Monde *= Matrix.CreateScale(1);
-        //    Monde *= Matrix.CreateFromYawPitchRoll(0, 0, 0);
-        //   // Monde *= Matrix.CreateTranslation();      
-        //}
         protected void InitialiserPtsEspace()
         {
             float x;
@@ -154,12 +127,15 @@ namespace AtelierXNA.Autres
 
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
+                Rayon = MathHelper.Max(Rayon - 0.01f,0);
+                Initialize();
                 if(DommageAbsorbé != 0)
                 {
-                    Rayon = Rayon - DommageAbsorbé / 5;
-                    InitialiserPtsEspace();
+                    Rayon = Rayon - DommageAbsorbé / 10;
+                    Initialize(); 
                     DommageAbsorbé = 0;
                 }
+                TempsÉcouléDepuisMAJ = 0;
             }
             base.Update(gameTime);
         }

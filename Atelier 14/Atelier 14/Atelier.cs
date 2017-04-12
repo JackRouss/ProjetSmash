@@ -407,15 +407,16 @@ namespace AtelierXNA
 
         void GérerCollisions()
         {
-            if(Joueur.EstBouclierActif)
+            if (Joueur.EstBouclierActif )
             {
-                foreach(GameComponent g in Components)
+                foreach (GameComponent g in Components)
                 {
                     if(g is Projectile)
                     {
                         if(Joueur.BouclierPersonnage.EstEnCollision(g as Projectile) && (g as Projectile).NumPlayer != Joueur.NumManette)
                         {
                             Joueur.BouclierPersonnage.EncaisserDégâts(g as Projectile);
+                            (g as Projectile).ADetruire = true;
                         }
                     }
                     if(g is Personnage)
@@ -433,9 +434,10 @@ namespace AtelierXNA
                 {
                     if (g is Projectile)
                     {
-                        if (Bot.BouclierPersonnage.EstEnCollision(g as Projectile) && (g as Projectile).NumPlayer != Joueur.NumManette)
+                        if (Bot.BouclierPersonnage.EstEnCollision(g as Projectile) && (g as Projectile).NumPlayer != Bot.NumManette)
                         {
                             Bot.BouclierPersonnage.EncaisserDégâts(g as Projectile);
+                            (g as Projectile).ADetruire = true;
                         }
                     }
                     if (g is Personnage)
@@ -447,7 +449,7 @@ namespace AtelierXNA
                     }
                 }
             }
-
+            
             if (Joueur.EstEnCollision(Bot) && VieilÉtatCollisionPerso != Joueur.EstEnCollision(Bot))
             {
                 Joueur.GérerRecul(Bot);

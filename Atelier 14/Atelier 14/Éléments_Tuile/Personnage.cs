@@ -51,6 +51,7 @@ namespace AtelierXNA
         public BoundingSphere HitBox { get; private set; }
         //public BoundingBox HitBox { get; private set; }
         public  Bouclier BouclierPersonnage { get; protected set; }
+        float RayonDuBouclier { get; set; }
 
         float TempsEntreProjectile { get; set; }
         protected float VitesseDÈplacementGaucheDroite { get; set; }
@@ -96,6 +97,7 @@ namespace AtelierXNA
         public Personnage(Game game, float vitesseDÈplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrÙles, PlayerIndex numManette)
             : base(game)
         {
+            RayonDuBouclier = 6;
             //PropriÈtÈs pour le combat (‡ dÈfinir dans le constructeur)
             DommageAttaque = DOMMAGE_ATTAQUE;
             ForceCoup = FORCE_COUP;
@@ -143,9 +145,9 @@ namespace AtelierXNA
             VecteurVitesseGaucheDroite = EstMort() ? Vector3.Zero : VecteurVitesseGaucheDroite;
             Position = EstMort() ? PositionSpawn : Position;
 
-
             if (Temps…coulÈDepuisMAJ >= IntervalleMAJ)
             {
+                RayonDuBouclier = MathHelper.Min(RayonDuBouclier + 0.02f, 6);
                 TempsEntreProjectile--;
                 if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && …TAT_PERSO != …TAT.IMMOBILE) //Conditions ici pour gÈrer l'immobilitÈ.
                 {
@@ -251,8 +253,13 @@ namespace AtelierXNA
             }
             else
             {
+                if (BouclierPersonnage != null && EstBouclierActif)
+                {
+                    RayonDuBouclier = BouclierPersonnage.Rayon;
+                    Game.Components.Remove(BouclierPersonnage);
+                }
                 EstBouclierActif = false;
-                Game.Components.Remove(BouclierPersonnage);
+             
             }
 
         }
@@ -291,9 +298,9 @@ namespace AtelierXNA
         private void Bloquer()
         {      
                 EstBouclierActif = true;
-                if (BouclierPersonnage == null || !Game.Components.Contains(BouclierPersonnage))
+                if ((BouclierPersonnage == null || !Game.Components.Contains(BouclierPersonnage)) /*&& (VecteurVitesseGaucheDroite + VecteurVitesse).X == 0*/ )
                 {
-                    BouclierPersonnage = new Bouclier(Game, 1, Vector3.Zero, Position + Vector3.Up * 6, 6, new Vector2(2, 30), "BouclierNinja", Atelier.INTERVALLE_MAJ_STANDARD);
+                    BouclierPersonnage = new Bouclier(Game, 1, Vector3.Zero, Position + Vector3.Up * 6, RayonDuBouclier, new Vector2(2, 30), "BouclierNinja", Atelier.INTERVALLE_MAJ_STANDARD);
                     Game.Components.Add(BouclierPersonnage);
                 }
                 …TAT_PERSO = …TAT.BLOQUER;        
@@ -359,9 +366,7 @@ namespace AtelierXNA
         }
         protected abstract void AjouterBouclier();
         public void EncaisserDÈg‚ts(Personnage p)
-        {
-            if (!EstBouclierActif)
-            {
+        {        
                 if (p.DIRECTION == ORIENTATION.DROITE)
                 {
                     VecteurVitesse += p.ForceCoup * Vector3.Normalize(new Vector3(1, 0.1f, 0)) * Temps…coulÈDepuisMAJ * (1 + VieEnPourcentage / 100f) / Masse;
@@ -371,18 +376,14 @@ namespace AtelierXNA
                     VecteurVitesse += p.ForceCoup * Vector3.Normalize(new Vector3(-1, 0.1f, 0)) * Temps…coulÈDepuisMAJ * (1 + VieEnPourcentage / 100f) / Masse;
                 }
                 VieEnPourcentage += p.DommageAttaque;
-            }
         }
         public void GÈrerRecul(Personnage p)
         {
-            if (!EstBouclierActif)
                 VecteurVitesse += (p.VecteurVitesseGaucheDroite + p.VecteurVitesse) * p.Masse / Masse;
         }
 
         public void EncaisserDÈg‚ts(Projectile p)
         {
-            if (!EstBouclierActif)
-            {
                 VieEnPourcentage += p.DÈgat;
                 if (p.Direction == ORIENTATION.DROITE)
                 {
@@ -392,7 +393,6 @@ namespace AtelierXNA
                 {
                     VecteurVitesse += Temps…coulÈDepuisMAJ * p.Force * Vector3.Left * (1 + VieEnPourcentage / 100) / Masse;
                 }
-            }
         }
         #endregion
 
