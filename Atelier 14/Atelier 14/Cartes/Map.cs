@@ -29,7 +29,7 @@ namespace AtelierXNA
         //Propriétés utilisées par le personnage.
         public Vector3 VecteurGauche { get; private set; }
         public List<Vector3> IntervallesSurfaces { get; private set; }//( MinX, MaxX,Hauteur en Y de la surface )
-        List<Plaquette> Plateformes { get; set; }
+        public List<Plaquette> Plateformes { get; private set; }
 
         float Largeur { get; set; }
         float Longueur { get; set; }

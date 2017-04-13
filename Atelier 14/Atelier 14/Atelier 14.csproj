@@ -115,7 +115,10 @@
     <Compile Include="Atelier.cs" />
     <Compile Include="Autres\Bouclier.cs" />
     <Compile Include="Autres\CaméraDePoursuite.cs" />
+    <Compile Include="AI\Chemin.cs" />
+    <Compile Include="AI\Graphe.cs" />
     <Compile Include="Autres\InputControllerManager.cs" />
+    <Compile Include="AI\Node.cs" />
     <Compile Include="Cartes\Map.cs" />
     <Compile Include="IPause.cs" />
     <Compile Include="Menus\MenuCartes.cs" />
@@ -124,6 +127,7 @@
     <Compile Include="Menus\MenuPause.cs" />
     <Compile Include="Menus\MenuPersonnage.cs" />
     <Compile Include="Menus\MenuPrincipal.cs" />
+    <Compile Include="AI\Bot.cs" />
     <Compile Include="Éléments_Tuile\InterfacePersonnages.cs" />
     <Compile Include="Éléments_Tuile\Personnage.cs" />
     <Compile Include="Éléments_Tuile\PersonnageAnimé.cs" />

@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Menus;
 using AtelierXNA.Éléments_Tuile;
-using AtelierXNA.Autres;
+using AtelierXNA.AI;
 
 namespace AtelierXNA
 {
@@ -153,7 +153,7 @@ namespace AtelierXNA
                     GestionnaireDeTextures.Add(NOMS_SPRITES_NINJA[j] + i.ToString(), this.Content.Load<Texture2D>("Textures/" + "Ninja/" + NOMS_SPRITES_NINJA[j] + i));
                 }
             }
-            //GestionnaireDeTextures.Add("BouclierNinja",this.Content.Load<Texture2D>("Textures/"+"Ninja/"+"BouclierNinja"));
+            GestionnaireDeTextures.Add("BouclierNinja", this.Content.Load<Texture2D>("Textures/" + "Ninja/" + "BouclierNinja"));
         }
         private void ChargerRobot()
         {
@@ -236,18 +236,19 @@ namespace AtelierXNA
             }
             if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.FACILE)
             {
-                Bot = new PersonnageAnimé(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT, PlayerIndex.Two);
+                Bot = new Bot(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT,"Facile", PlayerIndex.Two);
             }
             if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.NORMAL)
             {
-                Bot = new PersonnageAnimé(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT, PlayerIndex.Two);
+                Bot = new Bot(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT,"Normal", PlayerIndex.Two);
             }
             if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.DIFFICILE)
             {
-                Bot = new PersonnageAnimé(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT, PlayerIndex.Two);
+                Bot = new Bot(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT, "Difficile",PlayerIndex.Two);
             }
-            Components.Add(Bot);
+            
             Components.Add(Joueur);
+            Components.Add(Bot);
             Interface = new InterfacePersonnages(this, "Robot", PlayerIndex.One);
             Components.Add(Interface);
         }
@@ -289,6 +290,7 @@ namespace AtelierXNA
             }
         }
         #endregion
+
         #region Boucle de jeu.
         protected override void Update(GameTime gameTime)
         {
@@ -411,14 +413,6 @@ namespace AtelierXNA
             {
                 Joueur.GérerRecul(Bot);
                 Bot.GérerRecul(Joueur);
-                if (Joueur.EstEnAttaque)
-                {
-                    Bot.EncaisserDégâts(Joueur);
-                }
-                if (Bot.EstEnAttaque)
-                {
-                    Joueur.EncaisserDégâts(Bot);
-                }
             }
 
             if (Joueur.EstEnAttaque && Joueur.EstEnCollision(Bot) && (VieilÉtatAttaqueJoueur != Joueur.EstEnAttaque))

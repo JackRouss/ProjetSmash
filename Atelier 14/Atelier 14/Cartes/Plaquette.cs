@@ -8,13 +8,14 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-
+using AtelierXNA.AI;
 
 namespace AtelierXNA
-{// Partit Jack
+{
 
     public class Plaquette : PrimitiveDeBase
     {
+        const int NB_NODES = 5;
         const int NB_TRIANGLE_SURFACE = 2;
         const int NB_TRIANGLE_BASE = 8;
         const int NB_SOMMETS_LIST = 3;
@@ -24,6 +25,10 @@ namespace AtelierXNA
         float Largeur { get; set; }
         float Longueur { get; set; }
         public Vector3 IntervallesSurfaces{ get; private set; }
+        public List<Node> Nodes { get; set; }
+
+
+
         Vector3 Origine { get; set; }
         public Vector3 Position { get; private set; }
         Vector3[] PtsSommets { get; set; }
@@ -92,9 +97,13 @@ namespace AtelierXNA
             PtsSommets[28] = PtsSommets[6];
             PtsSommets[29] = PtsSommets[0];
         }
-        void CalculerPropriétésPourPersonnages()//PROBLÈME ICI.
+        void CalculerPropriétésPourPersonnages()
         {
             IntervallesSurfaces = new Vector3(Position.X - Longueur/coeff_Surface,Position.X+Longueur/coeff_Surface,Position.Y);
+            Nodes = new List<Node>();
+            for (int i = 0; i < NB_NODES; ++i)
+                Nodes.Add( new Node(new Vector3(Position.X + i*Longueur/(NB_NODES-1),Position.Y,Position.Z),i));//Le i est bidon ici; il faut le redéfinir lorsque l'on créé le graphe.
+            //AJOUTER LES NODES POUR LA MAP PRINCIPALE.
         }
         protected override void InitialiserSommets()
         {

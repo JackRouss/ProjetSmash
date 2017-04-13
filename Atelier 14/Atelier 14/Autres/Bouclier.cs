@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AtelierXNA.Autres
+namespace AtelierXNA.AI
 {
     public class Bouclier : PrimitiveDeBaseAnimée
     {
