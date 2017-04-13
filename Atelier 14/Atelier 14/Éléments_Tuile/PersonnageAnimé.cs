@@ -143,7 +143,7 @@ namespace AtelierXNA
         }
         protected override void AjouterBouclier()
         {
-            BouclierPersonnage = new Bouclier(Game, 1, Vector3.Zero, Position + Vector3.Up * ZoneAffichageDimensions.Y / 2, ZoneAffichageDimensions.X * 1.35f, new Vector2(2, 30), "BouclierNinja", Atelier.INTERVALLE_MAJ_STANDARD);
+            BouclierPersonnage = new Bouclier(Game, 1, Vector3.Zero, Position + Vector3.Up * ZoneAffichageDimensions.Y / 2,RayonDuBouclier, new Vector2(2, 30), "BouclierNinja", Atelier.INTERVALLE_MAJ_STANDARD, NumManette);
             Game.Components.Add(BouclierPersonnage);
         }
         public override void Draw(GameTime gameTime)

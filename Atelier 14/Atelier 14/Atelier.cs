@@ -407,6 +407,9 @@ namespace AtelierXNA
 
         void GérerCollisions()
         {
+            bool bouclierJoueurAAbsorber = false;
+            bool bouclierBotAAbsorber = false;
+
             if (Joueur.EstBouclierActif )
             {
                 foreach (GameComponent g in Components)
@@ -417,13 +420,15 @@ namespace AtelierXNA
                         {
                             Joueur.BouclierPersonnage.EncaisserDégâts(g as Projectile);
                             (g as Projectile).ADetruire = true;
+                            bouclierJoueurAAbsorber = true;
                         }
                     }
                     if(g is Personnage)
                     {
-                        if(Joueur.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque)
+                        if(Joueur.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque && VieilÉtatAttaqueBot != Bot.EstEnAttaque)
                         {
                             Joueur.BouclierPersonnage.EncaisserDégâts(g as Personnage);
+                            bouclierJoueurAAbsorber = true;
                         }
                     }
                 }
@@ -438,13 +443,15 @@ namespace AtelierXNA
                         {
                             Bot.BouclierPersonnage.EncaisserDégâts(g as Projectile);
                             (g as Projectile).ADetruire = true;
+                            bouclierBotAAbsorber = true;
                         }
                     }
                     if (g is Personnage)
                     {
-                        if (Bot.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque)
+                        if (Bot.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque && VieilÉtatAttaqueJoueur != Joueur.EstEnAttaque)
                         {
                             Bot.BouclierPersonnage.EncaisserDégâts(g as Personnage);
+                            bouclierBotAAbsorber = true;
                         }
                     }
                 }
@@ -452,16 +459,18 @@ namespace AtelierXNA
             
             if (Joueur.EstEnCollision(Bot) && VieilÉtatCollisionPerso != Joueur.EstEnCollision(Bot))
             {
-                Joueur.GérerRecul(Bot);
-                Bot.GérerRecul(Joueur);           
+                if(!Joueur.EstBouclierActif)
+                    Joueur.GérerRecul(Bot);
+                if(!Bot.EstBouclierActif)
+                    Bot.GérerRecul(Joueur);         
             }
 
-            if (Joueur.EstEnAttaque && Joueur.EstEnCollision(Bot) && (VieilÉtatAttaqueJoueur != Joueur.EstEnAttaque))
+            if (Joueur.EstEnAttaque && Joueur.EstEnCollision(Bot) && (VieilÉtatAttaqueJoueur != Joueur.EstEnAttaque) && !bouclierBotAAbsorber)
             {
                 Bot.EncaisserDégâts(Joueur);
             }
 
-            if (Bot.EstEnAttaque && Bot.EstEnCollision(Joueur) && (VieilÉtatAttaqueBot != Bot.EstEnAttaque))
+            if (Bot.EstEnAttaque && Bot.EstEnCollision(Joueur) && (VieilÉtatAttaqueBot != Bot.EstEnAttaque) && !bouclierJoueurAAbsorber)
             {
                 Joueur.EncaisserDégâts(Bot);
 

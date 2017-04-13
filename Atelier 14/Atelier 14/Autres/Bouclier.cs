@@ -42,10 +42,14 @@ namespace AtelierXNA.Autres
         string NomTexture { get; set; }
         RessourcesManager<Texture2D> GestionnaireDeTextures { get; set; }
         BasicEffect EffetDeBase { get; set; }
+        List<PersonnageAnimé> ListesPerso { get; set; }
+        PlayerIndex NumPLayer { get; set; }
+        int INDEX_LISTE { get; set; }
 
-        public Bouclier(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, float rayon, Vector2 charpente, string nomTexture, float intervalleMAJ)
+        public Bouclier(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, float rayon, Vector2 charpente, string nomTexture, float intervalleMAJ, PlayerIndex numPlayer)
             : base(jeu, homothétieInitiale, rotationInitiale, positionInitiale, intervalleMAJ)
         {
+            NumPLayer = numPlayer;
             IntervalleMAJ = intervalleMAJ;
             Rayon = rayon;
             Charpente = charpente;
@@ -68,8 +72,34 @@ namespace AtelierXNA.Autres
             base.Initialize();
             EffetDeBase = new BasicEffect(GraphicsDevice);
             InitialiserParamètresEffetDeBase();
+            ListesPerso = new List<PersonnageAnimé>();
+            RemplirListePerso();
+            TrouverIndex();
+            
         }
-
+        void ReInitialize()
+        {
+            SphèreDeCollision = new BoundingSphere(PositionInitiale, Rayon);
+            Sommets = new VertexPositionTexture[NbSommets];
+            PtsTexture = new Vector2[(int)Charpente.Y + 1, (int)Charpente.X + 1];
+            PtsEspace = new Vector3[(int)Charpente.Y + 1, (int)Charpente.X + 1];
+            Deltas = new Vector2(TextureSphère.Width / Charpente.X, TextureSphère.Height / Charpente.Y);
+            InitialiserPtsTexture();
+            InitialiserPtsEspace();
+            base.Initialize();
+        }
+        void TrouverIndex()
+        {
+            int cpt = 0;
+            foreach(Personnage p in ListesPerso)
+            {
+                if(p.NumManette == NumPLayer)
+                {
+                    INDEX_LISTE = cpt;
+                }
+                cpt++;
+            }
+        }
         private void InitialiserParamètresEffetDeBase()
         {
             EffetDeBase.TextureEnabled = true;
@@ -127,17 +157,31 @@ namespace AtelierXNA.Autres
 
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
+                PositionInitiale = ListesPerso[INDEX_LISTE].GetPositionPersonnage  + (Vector3.Up * ListesPerso[INDEX_LISTE].ZoneAffichageDimensions.Y /2);
                 Rayon = MathHelper.Max(Rayon - 0.01f,0);
-                Initialize();
                 if(DommageAbsorbé != 0)
                 {
                     Rayon = Rayon - DommageAbsorbé / 10;
-                    Initialize(); 
+                    Rayon = MathHelper.Max(Rayon, 0);
                     DommageAbsorbé = 0;
                 }
+                ReInitialize();
                 TempsÉcouléDepuisMAJ = 0;
             }
             base.Update(gameTime);
+        }
+        void RemplirListePerso()
+        {
+            if (ListesPerso.Count == 0)
+            {
+                foreach (GameComponent perso in Game.Components)
+                {
+                    if (perso is Personnage)
+                    {
+                        ListesPerso.Add(perso as PersonnageAnimé);
+                    }
+                }
+            }
         }
         #region Affichage
         public override void Draw(GameTime gameTime)

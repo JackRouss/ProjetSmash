@@ -51,7 +51,7 @@ namespace AtelierXNA
         public BoundingSphere HitBox { get; private set; }
         //public BoundingBox HitBox { get; private set; }
         public  Bouclier BouclierPersonnage { get; protected set; }
-        float RayonDuBouclier { get; set; }
+        protected float RayonDuBouclier { get; private set; }
 
         float TempsEntreProjectile { get; set; }
         protected float VitesseDéplacementGaucheDroite { get; set; }
@@ -144,6 +144,7 @@ namespace AtelierXNA
             VecteurVitesse = EstMort() ? Vector3.Zero : VecteurVitesse;
             VecteurVitesseGaucheDroite = EstMort() ? Vector3.Zero : VecteurVitesseGaucheDroite;
             Position = EstMort() ? PositionSpawn : Position;
+            RayonDuBouclier = EstMort() ? 6 : RayonDuBouclier;
 
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
@@ -300,8 +301,7 @@ namespace AtelierXNA
                 EstBouclierActif = true;
                 if ((BouclierPersonnage == null || !Game.Components.Contains(BouclierPersonnage)) /*&& (VecteurVitesseGaucheDroite + VecteurVitesse).X == 0*/ )
                 {
-                    BouclierPersonnage = new Bouclier(Game, 1, Vector3.Zero, Position + Vector3.Up * 6, RayonDuBouclier, new Vector2(2, 30), "BouclierNinja", Atelier.INTERVALLE_MAJ_STANDARD);
-                    Game.Components.Add(BouclierPersonnage);
+                    AjouterBouclier();
                 }
                 ÉTAT_PERSO = ÉTAT.BLOQUER;        
         }
@@ -312,7 +312,7 @@ namespace AtelierXNA
             {
                 GérerSauts();
             }
-            if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.X) && !EstBouclierActif)
+            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.X)) && !EstBouclierActif)
             {
                 GérerLancer();
                 ÉTAT_PERSO = ÉTAT.LANCER;
