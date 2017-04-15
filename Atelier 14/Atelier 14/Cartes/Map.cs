@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using AtelierXNA.AI;
 
 
 namespace AtelierXNA
@@ -15,7 +16,7 @@ namespace AtelierXNA
 
     public class Map : PrimitiveDeBase, IPause
     {
-
+        const int NB_NODES = 10;
         public Vector4 LIMITE_MAP { get; private set; }// (x a droite, x a gauche, y en haut, y en bas)
         public Vector4 LIMITE_PLAQUETTE { get; private set; }
         const int NB_TRIANGLE_SURFACE = 2;
@@ -30,6 +31,7 @@ namespace AtelierXNA
         public Vector3 VecteurGauche { get; private set; }
         public List<Vector3> IntervallesSurfaces { get; private set; }//( MinX, MaxX,Hauteur en Y de la surface )
         public List<Plaquette> Plateformes { get; private set; }
+        public List<Node> Nodes { get; private set; }
 
         float Largeur { get; set; }
         float Longueur { get; set; }
@@ -123,6 +125,9 @@ namespace AtelierXNA
             IntervallesSurfaces.Add(Plateformes[0].IntervallesSurfaces);
             IntervallesSurfaces.Add(new Vector3(PtsSommets[0].X, PtsSommets[4].X, Origine.Y));
             IntervallesSurfaces.Add(Plateformes[1].IntervallesSurfaces);
+            Nodes = new List<Node>();
+            for (int i = 0; i < NB_NODES; ++i)
+                Nodes.Add(new Node(new Vector3(PtsSommets[0].X + i * (PtsSommets[4].X - PtsSommets[0].X) / (NB_NODES - 1), Origine.Y, Origine.Z), i));//Le i est bidon ici; il faut le redéfinir lorsque l'on créé le graphe.
         }
         protected override void InitialiserSommets()
         {

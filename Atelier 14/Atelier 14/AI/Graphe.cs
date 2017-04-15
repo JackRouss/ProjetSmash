@@ -9,14 +9,31 @@ namespace AtelierXNA.AI
 {
     public class Graphe
     {
-        public List<Node> GrapheComplet { get; private set; }
-        public int[,] MatriceAdjacence { get; private set; }
+        List<Node> GrapheComplet { get; set; }
+        public int[,] MatriceAdjacence { get;  private set; }
 
-        public Graphe(List<Plaquette> plaquettes)
+        //public int this[int r, int l]
+        //{
+        //    get
+        //    {
+        //        return MatriceAdjacence[r, l];
+        //    }
+        //}
+        public Graphe(Map carte)
         {
-            InitialiserGraphe(plaquettes);
+            InitialiserGraphe(carte.Plateformes, carte.Nodes);
         }
-        void InitialiserGraphe(List<Plaquette> plaquettes)
+        public List<Node> GetGrapheComplet()
+        {
+            List<Node> liste = new List<Node>();
+            foreach(Node n in GrapheComplet)
+            {
+                Node q = new Node(n.GetPosition(),n.Index);
+                liste.Add(q);
+            }
+            return liste;
+        }
+        void InitialiserGraphe(List<Plaquette> plaquettes, List<Node> nodesCarte)
         {
             GrapheComplet = new List<Node>();
             int cpt = 0;
@@ -29,11 +46,24 @@ namespace AtelierXNA.AI
                     ++cpt;
                 }
             }
+            foreach (Node node in nodesCarte)
+            {
+                node.Index = cpt;
+                GrapheComplet.Add(node);
+                ++cpt;
+            }
 
             MatriceAdjacence = new int[GrapheComplet.Count,GrapheComplet.Count];
             for (int i = 0; i < MatriceAdjacence.GetLength(0); ++i)//Pour chaque rangée
                 for (int j = 0; j < MatriceAdjacence.GetLength(1); ++j)//Pour chaque colonne.
                     MatriceAdjacence[i, j] = GrapheComplet.First(t => t.Index == i).EstAdjacent(GrapheComplet.First(t => t.Index == j)) ? 1 : 0;
+        }
+        public void CalculerH(Node arrivée)
+        {
+            foreach(Node n in GrapheComplet)
+            {
+                n.CalculerH(arrivée);
+            }
         }
     }
 }

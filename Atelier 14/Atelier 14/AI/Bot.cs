@@ -12,12 +12,15 @@ namespace AtelierXNA.AI
     public class Bot : PersonnageAnimé
     {
         const float DISTANCE_ATTAQUE = 5f;
+        const float TEMPS_PATHFIND_UPDATE = 2f;
         enum ÉTATS {OFFENSIVE, DÉFENSIVE, NEUTRE};
         ÉTATS ÉtatBot { get; set; }
 
         //Éléments utilisées dans le A_Star:
         Graphe GrapheDéplacements { get; set; }
         Chemin Path { get; set; }
+        bool EstEnModeDéplacement { get; set; }
+        float TempsPourPath { get; set; }
 
         BoundingSphere SphèreDeRéaction { get; set; }
         Personnage Joueur { get; set; }
@@ -33,14 +36,42 @@ namespace AtelierXNA.AI
             base.Initialize();
             Joueur = Game.Components.First(t => t is Personnage && t != this) as Personnage;
             Carte = Game.Components.First(t => t is Map) as Map;
-            GrapheDéplacements = new Graphe(Carte.Plateformes);
+            GrapheDéplacements = new Graphe(Carte);
             Path = new Chemin(GrapheDéplacements);
         }
         public override void Update(GameTime gameTime)
         {
                base.Update(gameTime);
                 SphèreDeRéaction = new BoundingSphere(Position,DISTANCE_ATTAQUE);
-                PathFind();
+                float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                TempsPourPath += tempsÉcoulé;
+
+
+
+
+
+
+
+
+
+                if (TempsPourPath >= TEMPS_PATHFIND_UPDATE)
+                {
+                    PathFind();
+                    TempsPourPath = 0;
+                }
+                SeDéplacerSelonLeChemin();
+
+
+
+
+
+
+
+
+
+
+
+
                 GérerÉtat();
                 if (ÉtatBot == ÉTATS.OFFENSIVE)
                 {
@@ -122,7 +153,60 @@ namespace AtelierXNA.AI
         }
         private void PathFind()
         {
-            //Path.A_Star(GrapheDéplacements.GrapheComplet.ElementAt(0),GrapheDéplacements.GrapheComplet.ElementAt(GrapheDéplacements.GrapheComplet.Count - 3));
+            Node nodeJoueur = CalculerNodeLePlusProche(Joueur.GetPositionPersonnage, GrapheDéplacements.GetGrapheComplet());
+            Node nodeBot = CalculerNodeLePlusProche(Position, GrapheDéplacements.GetGrapheComplet());
+
+            Path.A_Star(nodeBot, nodeJoueur);
+            if(Path.CheminLePlusCourt != null)
+                EstEnModeDéplacement = true;
+        }
+
+        private void SeDéplacerSelonLeChemin()
+        {
+            if(Path.CheminLePlusCourt != null)
+            {
+                List<Node> CheminLePlusCourt = Path.CheminLePlusCourt;
+                Node nodeActuel = CalculerNodeLePlusProche(Position, CheminLePlusCourt);//Ne fonctionnera pas toujours je crois bien: il peut exister un node plus proche, mais il ne sera pas nécessairment celui qui mènera au chemin le plus court.
+
+                if (CheminLePlusCourt.IndexOf(nodeActuel) != CheminLePlusCourt.Count - 1)//Si on n'est pas arrivé à destination.
+                {
+                    if (nodeActuel.GetPosition().X > CheminLePlusCourt[CheminLePlusCourt.IndexOf(nodeActuel) + 1].GetPosition().X)
+                    {
+                        Gauche();
+                    }
+                    else if (nodeActuel.GetPosition().X < CheminLePlusCourt[CheminLePlusCourt.IndexOf(nodeActuel) + 1].GetPosition().X)
+                    {
+                        Droite();
+                    }
+                    //else if(nodeActuel.Position.Y < CheminLePlusCourt[CheminLePlusCourt.IndexOf(nodeActuel) + 1].Position.Y)
+                    //{
+                    //  Bas();
+                    //}
+                    if (nodeActuel.GetPosition().Y < CheminLePlusCourt[CheminLePlusCourt.IndexOf(nodeActuel) + 1].GetPosition().Y)
+                    {
+                        GérerSauts();
+                        EstEnModeDéplacement = false;
+                    }
+                }
+                
+            }
+        }
+
+        private Node CalculerNodeLePlusProche(Vector3 position, List<Node> listeÀParcourir)
+        {
+            Node node = listeÀParcourir[0];
+            float distance = Vector3.Distance(node.GetPosition(), position);
+
+            foreach (Node n in listeÀParcourir)
+            {
+                if (Vector3.Distance(n.GetPosition(), position) < distance)
+                {
+                    node = n;
+                    distance = Vector3.Distance(n.GetPosition(), position);
+                }
+            }
+
+            return node;
         }
         #endregion
 

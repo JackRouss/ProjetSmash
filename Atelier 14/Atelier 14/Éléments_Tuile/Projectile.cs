@@ -18,14 +18,17 @@ namespace AtelierXNA.Éléments_Tuile
         float IntervalleMAJ { get; set; }
         public Personnage.ORIENTATION Direction { get; private set; }
         bool Atombé { get; set; }
+        public bool ADetruire { get; set; }
         public int Dégat { get; private set; }
         public float Force { get; private set; }
         public BoundingSphere SphèreDeCollision { get; private set; }
         Map Carte { get; set; }
+        public PlayerIndex NumPlayer { get; private set; }
 
-        public Projectile(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, Vector2 étendue, string nomTextureTuile, float intervalleMAJ,Personnage.ORIENTATION direction, float vitesse, bool atombé,int dégat) 
+        public Projectile(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, Vector2 étendue, string nomTextureTuile, float intervalleMAJ,Personnage.ORIENTATION direction, float vitesse, bool atombé,int dégat, PlayerIndex numPlayer) 
             : base(jeu,homothétieInitiale,rotationInitiale,positionInitiale,étendue,nomTextureTuile,intervalleMAJ)
         {
+            NumPlayer = numPlayer;
             Force = FORCE_COUP_PROJECTILE;
             PositionInitiale = positionInitiale;
             Position = new Vector3(positionInitiale.X, positionInitiale.Y + 6, positionInitiale.Z);
@@ -44,6 +47,7 @@ namespace AtelierXNA.Éléments_Tuile
         }
         public override void Initialize()
         {
+            ADetruire = false;
             CalculerMatriceMonde();
             base.Initialize();
             Carte = Game.Components.First(t => t is Map) as Map;
@@ -67,12 +71,12 @@ namespace AtelierXNA.Éléments_Tuile
             float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
             TempsÉcouléDepuisMAJ += tempsÉcoulé;
             TempsÉcouléTotal += tempsÉcoulé;
+            GérerDelete();
 
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
                 GérerDéplacement();
                 CalculerMatriceMonde();
-                GérerDelete();
                 GérerHitbox();
                 TempsÉcouléDepuisMAJ = 0;
             }          
@@ -84,7 +88,7 @@ namespace AtelierXNA.Éléments_Tuile
 
         void GérerDelete()
         {
-            if(ADelete())
+            if(ADelete() || ADetruire)
             {
                 Game.Components.Remove(this);
             }

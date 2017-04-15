@@ -9,6 +9,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Éléments_Tuile;
+using AtelierXNA.AI;
+using AtelierXNA.Autres;
+//using AtelierXNA.Autres;
 
 namespace AtelierXNA
 {
@@ -91,7 +94,9 @@ namespace AtelierXNA
                     État = NomsSprites[8];
                 }
                 else if (ÉTAT_PERSO == ÉTAT.BLOQUER)
-                { }
+                {
+                    État = NomsSprites[4];
+                }
                 else if (ÉTAT_PERSO == ÉTAT.ATTAQUER)
                 {
                     if (VecteurVitesse.Y != 0)
@@ -138,7 +143,11 @@ namespace AtelierXNA
                 Frame.ChangerÉtat(État);
             }
         }
-
+        protected override void AjouterBouclier()
+        {
+            BouclierPersonnage = new Bouclier(Game, 1, Vector3.Zero, Position + Vector3.Up * ZoneAffichageDimensions.Y / 2,RayonDuBouclier, new Vector2(2, 30), "BouclierNinja", Atelier.INTERVALLE_MAJ_STANDARD, NumManette);
+            Game.Components.Add(BouclierPersonnage);
+        }
         public override void Draw(GameTime gameTime)
         {
             if (DIRECTION == ORIENTATION.GAUCHE)

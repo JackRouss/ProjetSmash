@@ -8,7 +8,7 @@ namespace AtelierXNA
    {
       protected float HomothétieInitiale { get; private set; }
       protected Vector3 RotationInitiale { get; private set; }
-      protected Vector3 PositionInitiale { get; private set; }
+      protected Vector3 PositionInitiale { get; set; }
       protected int NbSommets { get; set; }
       protected int NbTriangles { get; set; }
       protected Matrix Monde { get; set; }

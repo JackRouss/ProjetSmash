@@ -13,14 +13,14 @@ namespace AtelierXNA.AI
         //Données initiales.
         Node Départ { get; set; }
         Node Arrivée { get; set; }
-        Graphe GrapheComplet { get; set; }
+        Graphe GrapheComplet { get;  set; }
 
         //Données de manipulation.
         List<Node> ClosedList { get; set; }
         List<Node> OpenList { get; set; }
 
         //Données sortantes.
-        List<Node> CheminLePlusCourt { get; set; }
+        public List<Node> CheminLePlusCourt { get; private set; }
 
         public Chemin(Graphe grapheComplet)
         {
@@ -32,22 +32,23 @@ namespace AtelierXNA.AI
         {
             Départ = départ;
             Arrivée = arrivée;
-            InitialiserOpenList();
+            OpenList.Add(Départ);
 
 
-            foreach (Node n in GrapheComplet.GrapheComplet)//Heuristic calculation.
-                n.CalculerH(Arrivée);
+            GrapheComplet.CalculerH(Arrivée);
 
-            Départ.G = 0;
-            Départ.F = Départ.G + Départ.H;
+            Départ.F = Départ.H;
 
             while (OpenList.Count != 0)
             {
                 Node current = OpenList.OrderBy(n => n.F).First();
 
-                if(current == Arrivée)
-                    CheminLePlusCourt = ReconstruireChemin(current); 
-
+                if(current.Index == Arrivée.Index)
+                {
+                    CheminLePlusCourt = ReconstruireChemin(current);
+                    break;
+                }
+                    
                 OpenList.Remove(current);
                 ClosedList.Add(current);
 
@@ -55,13 +56,13 @@ namespace AtelierXNA.AI
                 {
                     if (GrapheComplet.MatriceAdjacence[current.Index, i] == 1)
                     {
+                        Node neighbor = GrapheComplet.GetGrapheComplet().Find(n => n.Index == i);
                         if (ClosedList.Find(p => p.Index == i) != null)
                             continue;//Ignore the neighbor which is already evaluated.
 
-                        float tentative_gScore = current.G + CalculerG(current, OpenList.Find(p => p.Index == i));
-
-                        if (OpenList.First(n => n.Index == i) == null)//Trouver un nouveaux node.
-                            OpenList.Add(ClosedList.First(p => p.Index == i));
+                        float tentative_gScore = current.G + CalculerG(current, neighbor);
+                        if (!OpenList.Contains(neighbor))//Trouver un nouveaux node.
+                            OpenList.Add(neighbor);
                         else if (tentative_gScore >= OpenList.First(n => n.Index == i).G)
                             continue;
 
@@ -71,29 +72,28 @@ namespace AtelierXNA.AI
                     }
                 }
             }
-        }
-        private void InitialiserOpenList()
-        {
-            for (int i = 0; i < GrapheComplet.MatriceAdjacence.GetLength(0); ++i)
-                if (GrapheComplet.MatriceAdjacence[Départ.Index, i] == 1)
-                    OpenList.Add(GrapheComplet.GrapheComplet.First(n => n.Index == i));
+            ClosedList.Clear();
+            OpenList.Clear();
         }
         private List<Node> ReconstruireChemin(Node current)
         {
             List<Node> chemin = new List<Node>();
             Node evaluated = current;
-
+            
             while(evaluated != null)
             {
                 chemin.Add(evaluated);
-                evaluated = evaluated.CameFrom;
+                evaluated = evaluated.GetCameFrom();
             }
-
+            chemin.Add(Départ);//PEUT ÊTRE À ENLEVER
+            chemin.Reverse();
+            
+            
             return chemin;
         }
         private float CalculerG(Node current,Node voisin)
         {
-           return Vector3.Distance(current.Position, voisin.Position);
+           return Vector3.Distance(current.GetPosition(), voisin.GetPosition());
         }
     }
 }

@@ -9,12 +9,24 @@ namespace AtelierXNA.AI
     public class Node
     {
        //Données de base.
-       public Vector3 Position { get; private set; }
+       Vector3 Position { get; set; }
+       public Vector3 GetPosition()
+       {
+           return new Vector3(Position.X,Position.Y,Position.Z);
+       }
        public int Index { get; set; }
        public float H { get; set; }//Reste constant durant toute l'exécution.
        public float G { get; set; }
        public float F { get; set; }
-       public Node CameFrom { get; set; }
+       public Node CameFrom { private get;  set; }
+       public Node GetCameFrom()
+       {
+           if (CameFrom != null)
+               return new Node(CameFrom.GetPosition(), CameFrom.Index);
+           else
+               return null;
+           
+       }
 
         public Node(Vector3 position, int index)
         {
@@ -23,7 +35,7 @@ namespace AtelierXNA.AI
         }
         public bool EstAdjacent(Node n)//À DÉFINIR, DIFFICILE À DÉFINIR//
         {
-            return (Vector3.Distance(n.Position, Position) <= 10 );
+            return (Vector3.Distance(n.Position, Position) <= 25 ) || n.Position.Y == Position.Y;
         }
         public void CalculerH(Node arrivée)
         {
