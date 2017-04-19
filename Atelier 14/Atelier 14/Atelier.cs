@@ -391,7 +391,7 @@ namespace AtelierXNA
             if (ÉtatJeu == GameState.JEU && AChangéÉtat)
             {
                 MediaPlayer.Stop();
-                //MediaPlayer.Play(GestionnaireDeChansons.Find("Cyborg Ninja"));
+                MediaPlayer.Play(GestionnaireDeChansons.Find("MEME"));
             }
         }
 

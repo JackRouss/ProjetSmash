@@ -68,11 +68,11 @@ namespace AtelierXNA.Éléments_Tuile
                 GérerDéplacement();
                 CalculerMatriceMonde();
                 GérerDelete();
-                GérerHitbox();
+                CalculerHitbox();
                 TempsÉcouléDepuisMAJ = 0;
             }          
         }
-        void GérerHitbox()
+        void CalculerHitbox()
         {
             SphèreDeCollision = new BoundingSphere(Position, Math.Max(Étendue.X / 2, Étendue.Y / 2));
         }

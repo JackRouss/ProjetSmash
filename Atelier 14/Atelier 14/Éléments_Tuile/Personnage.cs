@@ -131,10 +131,6 @@ namespace AtelierXNA
                 {
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
                 }
-                else if (VecteurVitesse.Y < -1)
-                {
-                    ÉTAT_PERSO = ÉTAT.SAUTER;
-                }
                 else if (VecteurVitesse.Y != 0)
                 {
                     ÉTAT_PERSO = ÉTAT.SAUTER;
