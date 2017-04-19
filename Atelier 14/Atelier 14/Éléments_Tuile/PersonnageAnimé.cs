@@ -93,6 +93,7 @@ namespace AtelierXNA
                 }
                 else if (ÉTAT_PERSO == ÉTAT.BLOQUER)
                 {
+                    État = NomsSprites[4];
                 }
                 else if (ÉTAT_PERSO == ÉTAT.ATTAQUER)
                 {
