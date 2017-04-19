@@ -47,7 +47,7 @@ namespace AtelierXNA
         protected int ÉtatNum { get; set; }//Ce même état sous forme numérique (indice du tableau de NomsSprites).
         public string[] NomsSprites { get; private set; }
         int[] NbFramesSprites { get; set; }
-        TuileTexturéeAnimée Frame { get; set; }
+        protected TuileTexturéeAnimée Frame { get; set; }
         public Vector2 ZoneAffichageDimensions { get; private set; }
 
 

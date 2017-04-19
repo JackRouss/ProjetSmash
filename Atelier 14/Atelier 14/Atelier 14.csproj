@@ -115,7 +115,12 @@
     <Compile Include="Atelier.cs" />
     <Compile Include="Autres\Bouclier.cs" />
     <Compile Include="Autres\CaméraDePoursuite.cs" />
+    <Compile Include="Autres\InfoModèle.cs" />
     <Compile Include="Autres\InputControllerManager.cs" />
+    <Compile Include="Autres\Lumière.cs" />
+    <Compile Include="Autres\Matériau.cs" />
+    <Compile Include="Autres\MatériauÉclairé.cs" />
+    <Compile Include="Autres\ParamètresShaders.cs" />
     <Compile Include="Cartes\Map.cs" />
     <Compile Include="IPause.cs" />
     <Compile Include="Menus\MenuCartes.cs" />

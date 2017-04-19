@@ -12,7 +12,7 @@ namespace AtelierXNA
       Texture2D textureTuile;
         //private Game game;
 
-        VertexPositionTexture[] Sommets { get; set; }
+       public VertexPositionTexture[] Sommets { get; set; }
       Vector2[,] PtsTexture { get; set; }
       string NomTextureTuile { get; set; }
       BlendState GestionAlpha { get; set; }
