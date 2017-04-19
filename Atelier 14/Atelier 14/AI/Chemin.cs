@@ -13,7 +13,7 @@ namespace AtelierXNA.AI
         //Données initiales.
         Node Départ { get; set; }
         Node Arrivée { get; set; }
-        Graphe GrapheComplet { get;  set; }
+        Graphe GrapheComplet { get; set; }
 
         //Données de manipulation.
         List<Node> ClosedList { get; set; }
@@ -43,22 +43,22 @@ namespace AtelierXNA.AI
             {
                 Node current = OpenList.OrderBy(n => n.F).First();
 
-                if(current.Index == Arrivée.Index)
+                if (current.Index == Arrivée.Index)
                 {
                     CheminLePlusCourt = ReconstruireChemin(current);
                     break;
                 }
-                    
+
                 OpenList.Remove(current);
                 ClosedList.Add(current);
 
-                for (int i = 0; i < GrapheComplet.MatriceAdjacence.GetLength(0); ++i)//foreach neighbors of current
+                for (int i = 0; i < GrapheComplet.MatriceAdjacence.GetLength(0); ++i)//pour chaque voisin
                 {
                     if (GrapheComplet.MatriceAdjacence[current.Index, i] == 1)
                     {
                         Node neighbor = GrapheComplet.GetGrapheComplet().Find(n => n.Index == i);
                         if (ClosedList.Find(p => p.Index == i) != null)
-                            continue;//Ignore the neighbor which is already evaluated.
+                            continue;//Ignorer le voisin, il est déjà évalué!
 
                         float tentative_gScore = current.G + CalculerG(current, neighbor);
                         if (!OpenList.Contains(neighbor))//Trouver un nouveaux node.
@@ -79,21 +79,19 @@ namespace AtelierXNA.AI
         {
             List<Node> chemin = new List<Node>();
             Node evaluated = current;
-            
-            while(evaluated != null)
+
+            while (evaluated != null)
             {
                 chemin.Add(evaluated);
                 evaluated = evaluated.GetCameFrom();
             }
             chemin.Add(Départ);//PEUT ÊTRE À ENLEVER
             chemin.Reverse();
-            
-            
             return chemin;
         }
-        private float CalculerG(Node current,Node voisin)
+        private float CalculerG(Node current, Node voisin)
         {
-           return Vector3.Distance(current.GetPosition(), voisin.GetPosition());
+            return Vector3.Distance(current.GetPosition(), voisin.GetPosition());
         }
     }
 }

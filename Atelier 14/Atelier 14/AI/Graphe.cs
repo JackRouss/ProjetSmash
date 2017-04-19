@@ -10,25 +10,20 @@ namespace AtelierXNA.AI
     public class Graphe
     {
         List<Node> GrapheComplet { get; set; }
-        public int[,] MatriceAdjacence { get;  private set; }
-
-        //public int this[int r, int l]
-        //{
-        //    get
-        //    {
-        //        return MatriceAdjacence[r, l];
-        //    }
-        //}
+        List<Vector3> Intervalles { get; set; }
+        public int[,] MatriceAdjacence { get; private set; }
         public Graphe(Map carte)
         {
+            Intervalles = new List<Vector3>(carte.IntervallesSurfaces);
             InitialiserGraphe(carte.Plateformes, carte.Nodes);
+            
         }
         public List<Node> GetGrapheComplet()
         {
             List<Node> liste = new List<Node>();
-            foreach(Node n in GrapheComplet)
+            foreach (Node n in GrapheComplet)
             {
-                Node q = new Node(n.GetPosition(),n.Index);
+                Node q = new Node(n.GetPosition(), n.Index);
                 liste.Add(q);
             }
             return liste;
@@ -37,9 +32,9 @@ namespace AtelierXNA.AI
         {
             GrapheComplet = new List<Node>();
             int cpt = 0;
-            foreach(Plaquette p in plaquettes)
+            foreach (Plaquette p in plaquettes)
             {
-                foreach(Node node in p.Nodes)
+                foreach (Node node in p.Nodes)
                 {
                     node.Index = cpt;
                     GrapheComplet.Add(node);
@@ -53,14 +48,14 @@ namespace AtelierXNA.AI
                 ++cpt;
             }
 
-            MatriceAdjacence = new int[GrapheComplet.Count,GrapheComplet.Count];
+            MatriceAdjacence = new int[GrapheComplet.Count, GrapheComplet.Count];
             for (int i = 0; i < MatriceAdjacence.GetLength(0); ++i)//Pour chaque rangée
                 for (int j = 0; j < MatriceAdjacence.GetLength(1); ++j)//Pour chaque colonne.
-                    MatriceAdjacence[i, j] = GrapheComplet.First(t => t.Index == i).EstAdjacent(GrapheComplet.First(t => t.Index == j)) ? 1 : 0;
+                    MatriceAdjacence[i, j] = GrapheComplet.First(t => t.Index == i).EstAdjacent(GrapheComplet.First(t => t.Index == j),Intervalles) ? 1 : 0;
         }
         public void CalculerH(Node arrivée)
         {
-            foreach(Node n in GrapheComplet)
+            foreach (Node n in GrapheComplet)
             {
                 n.CalculerH(arrivée);
             }
