@@ -272,14 +272,18 @@ namespace AtelierXNA
                 Gauche();
             }
 
-            if (GestionInputClavier.EstEnfoncée(CONTRÔLES[2]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.RightShoulder))
+            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[2]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.RightShoulder)) && VecteurVitesse.Y ==0 )
             {
                 Bloquer();
             }
             else
             {
+                if(EstBouclierActif)
+                {
+                    RayonDuBouclier = BouclierPersonnage.Rayon;
+                    Game.Components.Remove(BouclierPersonnage);
+                }
                 EstBouclierActif = false;
-                Game.Components.Remove(BouclierPersonnage);
             }
         }
 
@@ -319,7 +323,7 @@ namespace AtelierXNA
         private void Bloquer()
         {      
                 EstBouclierActif = true;
-                if ((BouclierPersonnage == null || !Game.Components.Contains(BouclierPersonnage)) /*&& (VecteurVitesseGaucheDroite + VecteurVitesse).X == 0*/ )
+                if ((BouclierPersonnage == null || !Game.Components.Contains(BouclierPersonnage)))
                 {
                     AjouterBouclier();
                 }
@@ -337,7 +341,7 @@ namespace AtelierXNA
                 GérerLancer();
                 ÉTAT_PERSO = ÉTAT.LANCER;
             }
-            if (GestionInputClavier.EstNouvelleTouche(CONTRÔLES[5]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.A) && !EstBouclierActif)
+            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[5]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.A)) && !EstBouclierActif)
             {
                 GérerAttaque();
                 ÉTAT_PERSO = ÉTAT.ATTAQUER;

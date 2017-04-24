@@ -220,7 +220,6 @@ namespace AtelierXNA
         void AjouterCarte()
         {
             Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero, CouleurCartes[MenuCa.ChoixCarte]);
-
             Components.Add(Carte);
         }
         void AjouterJoueurs()
