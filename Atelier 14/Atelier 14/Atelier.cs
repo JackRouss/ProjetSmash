@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Menus;
 using AtelierXNA.Éléments_Tuile;
-using AtelierXNA.Autres;
+using AtelierXNA.AI;
 
 namespace AtelierXNA
 {
@@ -236,18 +236,19 @@ namespace AtelierXNA
             }
             if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.FACILE)
             {
-                Bot = new PersonnageAnimé(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT, PlayerIndex.Two);
+                Bot = new Bot(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT,"Facile", PlayerIndex.Two);
             }
             if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.NORMAL)
             {
-                Bot = new PersonnageAnimé(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT, PlayerIndex.Two);
+                Bot = new Bot(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT,"Normal", PlayerIndex.Two);
             }
             if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.DIFFICILE)
             {
-                Bot = new PersonnageAnimé(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT, PlayerIndex.Two);
+                Bot = new Bot(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT, "Difficile",PlayerIndex.Two);
             }
-            Components.Add(Bot);
+            
             Components.Add(Joueur);
+            Components.Add(Bot);
             Interface = new InterfacePersonnages(this, "Robot", PlayerIndex.One);
             Components.Add(Interface);
         }
@@ -289,6 +290,7 @@ namespace AtelierXNA
             }
         }
         #endregion
+
         #region Boucle de jeu.
         protected override void Update(GameTime gameTime)
         {
@@ -407,22 +409,28 @@ namespace AtelierXNA
 
         void GérerCollisions()
         {
-            if(Joueur.EstBouclierActif)
+            bool bouclierJoueurAAbsorber = false;
+            bool bouclierBotAAbsorber = false;
+
+            if (Joueur.EstBouclierActif )
             {
-                foreach(GameComponent g in Components)
+                foreach (GameComponent g in Components)
                 {
                     if(g is Projectile)
                     {
                         if(Joueur.BouclierPersonnage.EstEnCollision(g as Projectile) && (g as Projectile).NumPlayer != Joueur.NumManette)
                         {
                             Joueur.BouclierPersonnage.EncaisserDégâts(g as Projectile);
+                            (g as Projectile).ADetruire = true;
+                            bouclierJoueurAAbsorber = true;
                         }
                     }
                     if(g is Personnage)
                     {
-                        if(Joueur.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque)
+                        if(Joueur.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque && VieilÉtatAttaqueBot != Bot.EstEnAttaque)
                         {
                             Joueur.BouclierPersonnage.EncaisserDégâts(g as Personnage);
+                            bouclierJoueurAAbsorber = true;
                         }
                     }
                 }
@@ -433,39 +441,44 @@ namespace AtelierXNA
                 {
                     if (g is Projectile)
                     {
-                        if (Bot.BouclierPersonnage.EstEnCollision(g as Projectile) && (g as Projectile).NumPlayer != Joueur.NumManette)
+                        if (Bot.BouclierPersonnage.EstEnCollision(g as Projectile) && (g as Projectile).NumPlayer != Bot.NumManette)
                         {
                             Bot.BouclierPersonnage.EncaisserDégâts(g as Projectile);
+                            (g as Projectile).ADetruire = true;
+                            bouclierBotAAbsorber = true;
                         }
                     }
                     if (g is Personnage)
                     {
-                        if (Bot.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque)
+                        if (Bot.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque && VieilÉtatAttaqueJoueur != Joueur.EstEnAttaque)
                         {
                             Bot.BouclierPersonnage.EncaisserDégâts(g as Personnage);
+                            bouclierBotAAbsorber = true;
                         }
                     }
                 }
             }
-
+            
             if (Joueur.EstEnCollision(Bot) && VieilÉtatCollisionPerso != Joueur.EstEnCollision(Bot))
             {
-                Joueur.GérerRecul(Bot);
-                Bot.GérerRecul(Joueur);           
+                if(!Joueur.EstBouclierActif)
+                    Joueur.GérerRecul(Bot);
+                if(!Bot.EstBouclierActif)
+                    Bot.GérerRecul(Joueur);         
             }
 
-            if (Joueur.EstEnAttaque && Joueur.EstEnCollision(Bot) && (VieilÉtatAttaqueJoueur != Joueur.EstEnAttaque))
+            if (Joueur.EstEnAttaque && Joueur.EstEnCollision(Bot) && (VieilÉtatAttaqueJoueur != Joueur.EstEnAttaque) && !bouclierBotAAbsorber)
             {
                 Bot.EncaisserDégâts(Joueur);
             }
 
-            if (Bot.EstEnAttaque && Bot.EstEnCollision(Joueur) && (VieilÉtatAttaqueBot != Bot.EstEnAttaque))
+            if (Bot.EstEnAttaque && Bot.EstEnCollision(Joueur) && (VieilÉtatAttaqueBot != Bot.EstEnAttaque) && !bouclierJoueurAAbsorber)
             {
                 Joueur.EncaisserDégâts(Bot);
 
             }
-      
-               foreach (GameComponent g in Components)
+
+            foreach (GameComponent g in Components)
             {
                 if (g is Projectile)
                 {
