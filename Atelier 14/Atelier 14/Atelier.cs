@@ -37,7 +37,7 @@ namespace AtelierXNA
         public int[] NB_FRAMES_SPRITES_NINJA = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
 
 
-        enum GameState { MENU_PRINCIPAL, MENU_PERSONNAGE, MENU_DIFFICULTÉ, MENU_CARTE, MENU_PAUSE, JEU }
+        enum GameState { MENU_PRINCIPAL, MENU_PERSONNAGE, MENU_DIFFICULTÉ, MENU_CARTE, MENU_PAUSE, JEU , FIN_JEU}
 
 
         #endregion
@@ -65,6 +65,7 @@ namespace AtelierXNA
         MenuDifficulté MenuDiff { get; set; }
         MenuPause MenuPau { get; set; }
         MenuCartes MenuCa { get; set; }
+        MenuFinJeu Fin { get; set; }
 
 
 
@@ -289,6 +290,11 @@ namespace AtelierXNA
                 }
             }
         }
+        void AnimationFinJeux()
+        {
+            ToggleComponentsUpdate();
+
+        }
         #endregion
 
         #region Boucle de jeu.
@@ -343,11 +349,52 @@ namespace AtelierXNA
                     break;
                 
                 case GameState.JEU:
+                    int cpt = 0;
                     if (GestionInput.EstNouvelleTouche(Keys.Escape))
                     {
                         ÉtatJeu = GameState.MENU_PAUSE;
                         InitialiserMenuPause();
                         MediaPlayer.Pause();
+                    }
+                    if (Joueur.décédé)
+                    {
+                        //Parce que Éric voulait savoir c'etait quoi les commentaires
+                        //if (cpt > 0)
+                        //{
+                        //    Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 6, Bot.TypePersonnage + " et " + Joueur.TypePersonnage);
+
+                        //}
+                        //else
+                        //{
+                        Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 0.4f, Bot.TypePersonnage);
+                        //}
+
+                        ÉtatJeu = GameState.FIN_JEU;
+                        ToggleComponentsUpdate();
+                        Components.Add(Fin);
+                        //cpt++;
+
+
+
+                    }
+                    if (Bot.décédé)
+                    {
+                        //if (cpt > 0)
+                        //{
+                        //    Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 6, Bot.TypePersonnage + " et " + Joueur.TypePersonnage);
+
+                        //}
+                        //else
+                        //{
+                            Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 6, Joueur.TypePersonnage);
+
+                        //}
+                        ÉtatJeu = GameState.FIN_JEU;
+                        Components.Add(Fin);
+
+                        ToggleComponentsUpdate();
+                        //cpt++;
+
                     }
                     break;
                 
@@ -373,6 +420,8 @@ namespace AtelierXNA
                     {
 
                     }
+                    break;
+                case GameState.FIN_JEU:
                     break;
             }
             if (AncienÉtatJeu != ÉtatJeu)

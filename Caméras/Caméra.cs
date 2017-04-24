@@ -93,5 +93,6 @@ namespace AtelierXNA
       {
          CréerPointDeVue(position, cible, orientationVerticale);
       }
-   }
+        
+    }
 }
