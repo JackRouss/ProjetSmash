@@ -78,7 +78,10 @@ namespace AtelierXNA.AI
                     }
                     
                 }
-        }    
+                    
+
+        }
+     
         public void CalculerH(Node arrivée)
         {
             foreach (Node n in GrapheComplet)

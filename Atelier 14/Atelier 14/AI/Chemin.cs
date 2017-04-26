@@ -50,28 +50,35 @@ namespace AtelierXNA.AI
                     break;
                 }
 
-                OpenList.Remove(current);
-                ClosedList.Add(current);
 
                 for (int i = 0; i < GrapheComplet.MatriceAdjacence.GetLength(0); ++i)//pour chaque voisin
                 {
                     if (GrapheComplet.MatriceAdjacence[current.Index, i] == 1)
                     {
                         Node neighbor = GrapheComplet.GetGrapheComplet().Find(n => n.Index == i);
-                        if (ClosedList.Find(p => p.Index == i) != null)
-                            continue;//Ignorer le voisin, il est déjà évalué!
-
                         float tentative_gScore = current.G + CalculerG(current, neighbor);
-                        if (!OpenList.Contains(neighbor))//Trouver un nouveaux node.
+                        if (ClosedList.Find(p => p.Index == i) != null)//première condition avec coût inférieur.
+                        {
+                            if(ClosedList.Find(p => p.Index == i).G <= tentative_gScore)
+                                continue;//Ignorer le voisin, il est déjà évalué!
+                        }
+                        if(OpenList.Find(n => n.Index == i) != null)
+                        {
+                            if(tentative_gScore >= OpenList.First(n => n.Index == i).G)
+                                continue;
+                        }
+                        else
+                        {
                             OpenList.Add(neighbor);
-                        else if (tentative_gScore >= OpenList.First(n => n.Index == i).G)
-                            continue;
-
-                        OpenList[OpenList.IndexOf(OpenList.Find(n => n.Index == i))].CameFrom = current;
-                        OpenList[OpenList.IndexOf(OpenList.Find(n => n.Index == i))].G = tentative_gScore;
-                        OpenList[OpenList.IndexOf(OpenList.Find(n => n.Index == i))].F = OpenList.First(n => n.Index == i).G + OpenList.First(n => n.Index == i).H;
+                            OpenList[OpenList.IndexOf(OpenList.Find(n => n.Index == i))].CameFrom = current;
+                            OpenList[OpenList.IndexOf(OpenList.Find(n => n.Index == i))].G = tentative_gScore;
+                            OpenList[OpenList.IndexOf(OpenList.Find(n => n.Index == i))].F = OpenList.First(n => n.Index == i).G + OpenList.First(n => n.Index == i).H;
+                        }
                     }
+                    
                 }
+                ClosedList.Add(current);
+                OpenList.Remove(current);
             }
 
 
@@ -88,7 +95,9 @@ namespace AtelierXNA.AI
                 chemin.Add(evaluated);
                 evaluated = evaluated.GetCameFrom();
             }
-            chemin.Add(Départ);//PEUT ÊTRE À ENLEVER
+            if(chemin.Find(t => t.Index == Départ.Index) == null)
+                chemin.Add(Départ);//PEUT ÊTRE À ENLEVER
+            
             chemin.Reverse();
             return chemin;
         }

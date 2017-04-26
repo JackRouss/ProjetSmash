@@ -62,6 +62,9 @@ namespace AtelierXNA
             InitialiserSommets();
             Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
             Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
+            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 2, Origine.Y + 2*hauteur, Origine.Z), Couleur));
+            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 2, Origine.Y + 2 * hauteur, Origine.Z), Couleur));
+            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X, Origine.Y + 2 * hauteur, Origine.Z), Couleur));
             foreach(Plaquette p in Plateformes)
             {
                 p.Initialize();
@@ -122,9 +125,14 @@ namespace AtelierXNA
             IntervallesSurfaces = new List<Vector3>();
             VecteurGauche = PtsSommets[0] - PtsSommets[4];
             
-            IntervallesSurfaces.Add(Plateformes[0].IntervallesSurfaces);
+
+            foreach(Plaquette p in Plateformes)//Pour faire que ce sont des obstacles.
+            {
+                IntervallesSurfaces.Add(p.IntervallesSurfaces);
+            }
             IntervallesSurfaces.Add(new Vector3(PtsSommets[0].X, PtsSommets[4].X, Origine.Y));
-            IntervallesSurfaces.Add(Plateformes[1].IntervallesSurfaces);
+
+            
             Nodes = new List<Node>();
             for (int i = 0; i < NB_NODES; ++i)
             {

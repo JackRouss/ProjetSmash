@@ -11,8 +11,9 @@ namespace AtelierXNA.AI
 {
     public class Bot : PersonnageAnimé
     {
-        const float TIME_STEP = 3f;
+        const float TIME_STEP = 1f;
         const float DISTANCE_ATTAQUE = 5f;
+        const float DISTANCE_THRESH = 0.2f;
         enum ÉTATS { OFFENSIVE, DÉFENSIVE, NEUTRE };
         ÉTATS ÉtatBot { get; set; }
 
@@ -20,6 +21,8 @@ namespace AtelierXNA.AI
         #region A*
         Graphe GrapheDéplacements { get; set; }
         Chemin Path { get; set; }
+        Node TargetNode { get; set; }
+        List<Node> CheminLePlusCourt { get; set; }
         bool EstEnModeDéplacement { get; set; }
         float TempsPath { get; set; }
         #endregion
@@ -43,6 +46,7 @@ namespace AtelierXNA.AI
             Carte = Game.Components.First(t => t is Map) as Map;
             GrapheDéplacements = new Graphe(Carte);
             Path = new Chemin(GrapheDéplacements);
+            CheminLePlusCourt = new List<Node>();
         }
         public override void Update(GameTime gameTime)
         {
@@ -52,7 +56,7 @@ namespace AtelierXNA.AI
             GérerÉtat();
             if (ÉtatBot == ÉTATS.OFFENSIVE)
             {
-                if(TempsPath <= TIME_STEP)
+                if(TempsPath >= TIME_STEP)
                 {
                     PathFind();
                     TempsPath = 0;
@@ -71,18 +75,18 @@ namespace AtelierXNA.AI
 
         private void GérerÉtat()
         {
-            if (VieEnPourcentage <= 50)
-            {
-                ÉtatBot = ÉTATS.OFFENSIVE;
-            }
-            if (VieEnPourcentage > 50 && VieEnPourcentage < 150)
-            {
-                ÉtatBot = ÉTATS.NEUTRE;
-            }
-            if (VieEnPourcentage > 150)
-            {
-                ÉtatBot = ÉTATS.DÉFENSIVE;
-            }
+            //if (VieEnPourcentage <= 50)
+            //{
+            //    ÉtatBot = ÉTATS.OFFENSIVE;
+            //}
+            //if (VieEnPourcentage > 50 && VieEnPourcentage < 150)
+            //{
+            //    ÉtatBot = ÉTATS.NEUTRE;
+            //}
+            //if (VieEnPourcentage > 150)
+            //{
+            //    ÉtatBot = ÉTATS.DÉFENSIVE;
+            //}
         }
 
 
@@ -168,33 +172,33 @@ namespace AtelierXNA.AI
         {
             if (Path.CheminLePlusCourt != null)
             {
-                List<Node> CheminLePlusCourt = Path.CheminLePlusCourt;
-                Node nodeActuel = CalculerNodeLePlusProche(Position, CheminLePlusCourt);//Ne fonctionnera pas toujours je crois bien: il peut exister un node plus proche, mais il ne sera pas nécessairment celui qui mènera au chemin le plus court.
-
-                if (CheminLePlusCourt.IndexOf(nodeActuel) != CheminLePlusCourt.Count - 1)//Si on n'est pas arrivé à destination.
+                if(Path.CheminLePlusCourt.Count >= 2)
                 {
-                    if (nodeActuel.GetPosition().X > CheminLePlusCourt[CheminLePlusCourt.IndexOf(nodeActuel) + 1].GetPosition().X)
+                    TargetNode = Path.CheminLePlusCourt[1];
+                    //Node nodeActuel = CalculerNodeLePlusProche(Position, CheminLePlusCourt);//Ne fonctionnera pas toujours je crois bien: il peut exister un node plus proche, mais il ne sera pas nécessairment celui qui mènera au chemin le plus court.
+                    if (Math.Abs(TargetNode.GetPosition().X - Position.X) > DISTANCE_THRESH)
                     {
-                        Gauche();
+                        if (TargetNode.GetPosition().X > Position.X)
+                        {
+                            Droite();
+                        }
+                        if (TargetNode.GetPosition().X < Position.X)
+                        {
+                            Gauche();
+                        }
                     }
-                    else if (nodeActuel.GetPosition().X < CheminLePlusCourt[CheminLePlusCourt.IndexOf(nodeActuel) + 1].GetPosition().X)
+                    if (Math.Abs(TargetNode.GetPosition().Y - Position.Y) > DISTANCE_THRESH)
                     {
-                        Droite();
-                    }
-
-                    if (nodeActuel.GetPosition().Y > CheminLePlusCourt[CheminLePlusCourt.IndexOf(nodeActuel) + 1].GetPosition().Y)//RAJOUTER DES CONDITIONS + MODIFIER MÉTHODE BAS
-                    {
-                        //Bas();
-                    }
-                    else if (nodeActuel.GetPosition().Y < CheminLePlusCourt[CheminLePlusCourt.IndexOf(nodeActuel) + 1].GetPosition().Y)//S'ARRANGER POUR QU'IL SAUTE INTELLIGEMENT
-                    {
-                        if (VecteurVitesse.Y == 0)
+                        if (TargetNode.NomPlaquette != Path.CheminLePlusCourt[0].NomPlaquette)
                         {
                             GérerSauts();
                         }
                     }
+                    if ((Math.Abs(TargetNode.GetPosition().Y - Position.Y) <= DISTANCE_THRESH || Math.Abs(TargetNode.GetPosition().X - Position.X) <= DISTANCE_THRESH) && (AncienVecteurVitesse.Y < 0 && VecteurVitesse.Y ==0))
+                    {
+                        Path.CheminLePlusCourt.Remove(TargetNode);
+                    }
                 }
-
             }
         }
 
