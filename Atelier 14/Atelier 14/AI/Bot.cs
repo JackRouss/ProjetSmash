@@ -11,7 +11,7 @@ namespace AtelierXNA.AI
 {
     public class Bot : PersonnageAnimé
     {
-        const float TIME_STEP = 0.5f;
+        const float TIME_STEP = 3f;
         const float DISTANCE_ATTAQUE = 5f;
         enum ÉTATS { OFFENSIVE, DÉFENSIVE, NEUTRE };
         ÉTATS ÉtatBot { get; set; }
@@ -21,6 +21,7 @@ namespace AtelierXNA.AI
         Graphe GrapheDéplacements { get; set; }
         Chemin Path { get; set; }
         bool EstEnModeDéplacement { get; set; }
+        float TempsPath { get; set; }
         #endregion
         BoundingSphere SphèreDeRéaction { get; set; }
 
@@ -45,10 +46,17 @@ namespace AtelierXNA.AI
         }
         public override void Update(GameTime gameTime)
         {
+            float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            TempsPath += tempsÉcoulé;
             base.Update(gameTime);
             GérerÉtat();
             if (ÉtatBot == ÉTATS.OFFENSIVE)
             {
+                if(TempsPath <= TIME_STEP)
+                {
+                    PathFind();
+                    TempsPath = 0;
+                }
                 Attaquer();
             }
             else if (ÉtatBot == ÉTATS.NEUTRE)
@@ -134,7 +142,7 @@ namespace AtelierXNA.AI
         #region Offensive
         private void Attaquer()
         {
-            PathFind();
+            
             SeDéplacerSelonLeChemin();
         }
         private void Lancer()

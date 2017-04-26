@@ -43,6 +43,7 @@ namespace AtelierXNA.AI
             {
                 Node current = OpenList.OrderBy(n => n.F).First();
 
+
                 if (current.Index == Arrivée.Index)
                 {
                     CheminLePlusCourt = ReconstruireChemin(current);
@@ -72,6 +73,8 @@ namespace AtelierXNA.AI
                     }
                 }
             }
+
+
             ClosedList.Clear();
             OpenList.Clear();
         }
