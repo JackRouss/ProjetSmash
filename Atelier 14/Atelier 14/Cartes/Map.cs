@@ -16,7 +16,7 @@ namespace AtelierXNA
 
     public class Map : PrimitiveDeBase, IPause
     {
-        const int NB_NODES = 10;
+        const int NB_NODES = 20;
         public Vector4 LIMITE_MAP { get; private set; }// (x a droite, x a gauche, y en haut, y en bas)
         public Vector4 LIMITE_PLAQUETTE { get; private set; }
         const int NB_TRIANGLE_SURFACE = 2;
@@ -62,6 +62,9 @@ namespace AtelierXNA
             InitialiserSommets();
             Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
             Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
+            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 2, Origine.Y + 2*hauteur, Origine.Z), Couleur));
+            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 2, Origine.Y + 2 * hauteur, Origine.Z), Couleur));
+            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X, Origine.Y + 2 * hauteur, Origine.Z), Couleur));
             foreach(Plaquette p in Plateformes)
             {
                 p.Initialize();
@@ -122,12 +125,23 @@ namespace AtelierXNA
             IntervallesSurfaces = new List<Vector3>();
             VecteurGauche = PtsSommets[0] - PtsSommets[4];
             
-            IntervallesSurfaces.Add(Plateformes[0].IntervallesSurfaces);
+
+            foreach(Plaquette p in Plateformes)//Pour faire que ce sont des obstacles.
+            {
+                IntervallesSurfaces.Add(p.IntervallesSurfaces);
+            }
             IntervallesSurfaces.Add(new Vector3(PtsSommets[0].X, PtsSommets[4].X, Origine.Y));
-            IntervallesSurfaces.Add(Plateformes[1].IntervallesSurfaces);
+
+            
             Nodes = new List<Node>();
             for (int i = 0; i < NB_NODES; ++i)
-                Nodes.Add(new Node(new Vector3(PtsSommets[0].X + i * (PtsSommets[4].X - PtsSommets[0].X) / (NB_NODES - 1), Origine.Y, Origine.Z), i));//Le i est bidon ici; il faut le redéfinir lorsque l'on créé le graphe.
+            {
+                Node bidonVilleDeMerde = new Node(new Vector3(PtsSommets[0].X + i * (PtsSommets[4].X - PtsSommets[0].X) / (NB_NODES - 1), Origine.Y, Origine.Z), i);
+                bidonVilleDeMerde.EstExtremiterGauche = i == 0;
+                bidonVilleDeMerde.EstExtremiterDroite = i == NB_NODES - 1;               
+                Nodes.Add(bidonVilleDeMerde);//Le i est bidon ici; il faut le redéfinir lorsque l'on créé le graphe.
+            }
+                
         }
         protected override void InitialiserSommets()
         {
