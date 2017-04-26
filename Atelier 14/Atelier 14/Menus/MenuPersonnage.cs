@@ -18,7 +18,7 @@ namespace AtelierXNA
         const float ÉCHELLE_NINJA = 400;
         public const float INTERVALLE_MAJ_COULEUR = 1f / 10;
         const int BORDURE_HAUT = 50;
-        const string TITRE = "Choix du personnage :";
+        const string TITRE = "Choix du personnage \n pour Joueur";
         public enum ÉTAT { NINJA, ROBOT}
         public ÉTAT État;
 
@@ -51,11 +51,14 @@ namespace AtelierXNA
         float TempsÉcouléDepuisMAJCouleurs { get; set; }
         int CptFrame { get; set; }
         int CptCouleurs { get; set; }
+        PlayerIndex NumJoueur { get; set; }
+        string Message { get; set; }
 
-        public MenuPersonnage(Game jeu, float intervalleMAJAnimation)
+        public MenuPersonnage(Game jeu, float intervalleMAJAnimation, PlayerIndex numJoueur)
             : base(jeu) 
         {
             IntervalleMAJAnimation = intervalleMAJAnimation;
+            NumJoueur = numJoueur;
             État = ÉTAT.NINJA;
             
         }
@@ -80,6 +83,8 @@ namespace AtelierXNA
             RatioRobot = (float)GestionnaireDeTextures.Find("Idle (1)").Bounds.Width / GestionnaireDeTextures.Find("Idle (1)").Bounds.Height;
             RégionNinja = new Rectangle((int)POSITION_NINJA.X,(int)POSITION_NINJA.Y,(int)(RatioNinja*ÉCHELLE_NINJA),(int)(1*ÉCHELLE_NINJA) + BORDURE_HAUT);
             RégionRobot = new Rectangle((int)POSITION_ROBOT.X, (int)POSITION_ROBOT.Y, (int)(RatioRobot * ÉCHELLE_ROBOT), (int)(1 * ÉCHELLE_ROBOT) + BORDURE_HAUT);
+
+            Message = TITRE + NumJoueur.ToString() + " :";
             
             CréerTuilesNinja();
             CréerTuilesRobot();
@@ -171,7 +176,7 @@ namespace AtelierXNA
                 GestionSprites.Draw(Ninja[CptFrame], RégionNinja, COULEURS[CptCouleurs]);
                 GestionSprites.Draw(Robot[CptFrame], RégionRobot, Color.White);
             }
-            GestionSprites.DrawString(ArialFont,TITRE,POSITION_TITRE,Color.White);
+            GestionSprites.DrawString(ArialFont,Message,POSITION_TITRE,Color.White);
             GestionSprites.End();
             base.Draw(gameTime);
         }
