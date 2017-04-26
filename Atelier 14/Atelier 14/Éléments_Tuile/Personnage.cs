@@ -33,8 +33,6 @@ namespace AtelierXNA
         const float FORCE_COUP = 500000f;
 
 
-
-
         protected Keys[] CONTRÔLES { get; private set; }
         public enum ORIENTATION { DROITE, GAUCHE };
         protected enum ÉTAT { COURRIR, SAUTER, ATTAQUER, LANCER, BLOQUER, MORT, IMMOBILE };
@@ -272,7 +270,7 @@ namespace AtelierXNA
                 Gauche();
             }
 
-            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[2]) || GestionInputManette.EstToucheEnfoncée(NumManette, Buttons.RightShoulder)) && VecteurVitesse.Y ==0 )
+            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[2]) || GestionInputManette.EstToucheEnfoncée(NumManette, Buttons.RightTrigger)) && VecteurVitesse.Y ==0 )
             {
                 Bloquer();
             }
