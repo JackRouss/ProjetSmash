@@ -24,6 +24,12 @@ namespace AtelierXNA
         readonly string[] NomCartes = { "BackGround1", "BackGround2", "BackGround3", "BackGround4" };
         readonly Vector2[] DimensionCarte = { new Vector2(843, 316),new Vector2(844, 358), new Vector2(844, 364), new Vector2(844, 362) };
         readonly Color[] CouleurCartes = { Color.ForestGreen, Color.DeepSkyBlue, Color.Beige, Color.YellowGreen };
+        PlayerIndex[] Joueurs = { PlayerIndex.One, PlayerIndex.Two};
+        bool[] ConnectionJoueur { get; set; }
+        bool PvP { get; set; }
+        MenuPersonnage.ÉTAT[] ChoixJoueurs { get; set; }
+        int cptJoueur { get; set; }
+
 
         public Vector3 VECTEUR_ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE * (Vector3.Down);
         public Vector3 CIBLE_INITIALE_CAMÉRA = new Vector3(1, 0, -1);
@@ -37,7 +43,7 @@ namespace AtelierXNA
         public int[] NB_FRAMES_SPRITES_NINJA = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
 
 
-        enum GameState { MENU_PRINCIPAL, MENU_PERSONNAGE, MENU_DIFFICULTÉ, MENU_CARTE, MENU_PAUSE, JEU , FIN_JEU}
+        enum GameState { MENU_PRINCIPAL, MENU_PERSONNAGE, MENU_DIFFICULTÉ, MENU_CARTE, MENU_PAUSE, JEU , FIN_JEU, MENU_PvP}
 
 
         #endregion
@@ -66,6 +72,8 @@ namespace AtelierXNA
         MenuPause MenuPau { get; set; }
         MenuCartes MenuCa { get; set; }
         MenuFinJeu Fin { get; set; }
+        MenuPvP MenuJoueurs { get; set; }
+        PersonnageAnimé PersoEnJeux { get; set; }
 
 
 
@@ -73,6 +81,7 @@ namespace AtelierXNA
 
         #region Composants de jeu.
         PersonnageAnimé Joueur { get; set; }
+        PersonnageAnimé Joueur2 { get; set; }
         PersonnageAnimé Bot { get; set; }
         Map Carte { get; set; }
         TuileTexturée BackGround { get; set; }
@@ -80,6 +89,7 @@ namespace AtelierXNA
         bool VieilÉtatCollisionPerso { get; set; }
         bool VieilÉtatAttaqueJoueur { get; set; }
         bool VieilÉtatAttaqueBot { get; set; }
+        bool VieilÉtatAttaqueJoueur2 { get; set; }
         InterfacePersonnages Interface { get; set; }
         #endregion
 
@@ -92,18 +102,24 @@ namespace AtelierXNA
             IsFixedTimeStep = false;
             IsMouseVisible = true;
         }
-
+        
 
         protected override void Initialize()
         {
             InitialiserServices();
             Menu = new MenuPrincipal(this);
             Components.Add(Menu);
+            ConnectionManette();
+            InitialiserJoueur();
             base.Initialize();
             //MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
         }
 
-
+        void InitialiserJoueur()
+        {
+            cptJoueur = 0;
+            ChoixJoueurs = new MenuPersonnage.ÉTAT[2];
+        }
 
         #region Chargement des ressources.
         protected override void LoadContent()
@@ -194,6 +210,16 @@ namespace AtelierXNA
             Components.Add(GestionInput);
             Components.Add(GestionManettes);
         }
+
+        void ConnectionManette()
+        {
+            ConnectionJoueur = new bool[Joueurs.Length];
+            for (int i = 0; i < ConnectionJoueur.Length; i++)
+            {
+                ConnectionJoueur[i] = GestionManettes.EstManetteActivée(Joueurs[i]);
+            }
+        }
+
         void InitialiserJeu()
         {
             Components.Remove(MenuDiff);
@@ -207,7 +233,15 @@ namespace AtelierXNA
 
 
             AjouterCarte();
-            AjouterJoueurs();
+            if (PvP)
+            {
+                AjouterJoueursPvP();
+            }
+            else
+            {
+                AjouterJoueursPvBot();
+
+            }
 
             base.Initialize();
         }
@@ -222,7 +256,7 @@ namespace AtelierXNA
             Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero, CouleurCartes[MenuCa.ChoixCarte]);
             Components.Add(Carte);
         }
-        void AjouterJoueurs()
+        void AjouterJoueursPvBot()
         {
             Keys[] CONTRÔLES_JOUEUR = { Keys.D, Keys.A, Keys.LeftShift, Keys.Space, Keys.P, Keys.J };
             Keys[] CONTRÔLES_BOT = { Keys.H, Keys.F, Keys.RightShift, Keys.Enter, Keys.L, Keys.N };
@@ -249,17 +283,50 @@ namespace AtelierXNA
             
             Components.Add(Joueur);
             Components.Add(Bot);
+            PersoEnJeux = Bot;
             Interface = new InterfacePersonnages(this, "Robot", PlayerIndex.One);
             Components.Add(Interface);
         }
-        void InitialiserMenuPersonnages()
+
+        void AjouterJoueursPvP()
         {
-            Components.Remove(Menu);
-            MenuPerso = new MenuPersonnage(this, INTERVALLE_MAJ_ANIMATION);
+            Keys[] CONTRÔLES_JOUEUR = { Keys.D, Keys.A, Keys.LeftShift, Keys.Space, Keys.P, Keys.J };
+            Keys[] CONTRÔLES_JOUEUR2 = { Keys.H, Keys.F, Keys.RightShift, Keys.Enter, Keys.L, Keys.N };
+            if (ChoixJoueurs[0] == MenuPersonnage.ÉTAT.NINJA)
+            {
+                Joueur = new PersonnageAnimé(this, 20f, 35f, 100, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA, PlayerIndex.One);
+            }
+            if (ChoixJoueurs[0] == MenuPersonnage.ÉTAT.ROBOT)
+            {
+                Joueur = new PersonnageAnimé(this, 15f, 35f, 100, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT, PlayerIndex.One);
+            }
+            if (ChoixJoueurs[1] == MenuPersonnage.ÉTAT.NINJA)
+            {
+                Joueur2 = new PersonnageAnimé(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR2, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_ROBOT, PlayerIndex.Two);
+            }
+            if (ChoixJoueurs[1] == MenuPersonnage.ÉTAT.ROBOT)
+            {
+                Joueur2 = new PersonnageAnimé(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR2, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT, PlayerIndex.Two);
+            }
+           
+
+            Components.Add(Joueur);
+            Components.Add(Joueur2);
+            PersoEnJeux = Joueur2;
+            Interface = new InterfacePersonnages(this, "Robot", PlayerIndex.One);
+            Components.Add(Interface);
+        }
+
+
+        void InitialiserMenuPersonnages(PlayerIndex player)
+        {
+            Components.Remove(MenuJoueurs);
+            MenuPerso = new MenuPersonnage(this, INTERVALLE_MAJ_ANIMATION, player);
             MenuPerso.Initialize();
             Components.Add(MenuPerso);
             base.Initialize();
         }
+
         void InitialiserMenuCartes()
         {
             Components.Remove(MenuPerso);
@@ -294,6 +361,23 @@ namespace AtelierXNA
             ToggleComponentsUpdate();
 
         }
+
+        void InitialiserMenuPvP()
+        {
+            Components.Remove(Menu);
+            MenuJoueurs = new MenuPvP(this, INTERVALLE_MAJ_ANIMATION);
+            Components.Add(MenuJoueurs);
+        }
+
+        void InitialiserFinJeux(PersonnageAnimé mort)
+        {
+            Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 0.4f, mort.TypePersonnage);
+
+            ÉtatJeu = GameState.FIN_JEU;
+            ToggleComponentsUpdate();
+            Components.Add(Fin);
+        }
+
         #endregion
 
         #region Boucle de jeu.
@@ -304,7 +388,14 @@ namespace AtelierXNA
             base.Update(gameTime);
             if (ÉtatJeu == GameState.JEU)
             {
-                GérerCollisions();
+                if (PvP)
+                {
+                    GérerCollisionsPvP();
+                }
+                else
+                {
+                    GérerCollisionsPvBot();
+                }
             }
         }
 
@@ -317,17 +408,54 @@ namespace AtelierXNA
 
                     if (Menu.PasserMenuSuivant)
                     {
+                        //if (ConnectionJoueur[1])
+                        if(true)
+                        {
+                            ÉtatJeu = GameState.MENU_PvP;
+                            Menu.PasserMenuSuivant = false;
+                            InitialiserMenuPvP();
+                        }
+                        else
+                        {
+                            ÉtatJeu = GameState.MENU_PERSONNAGE;
+                            Menu.PasserMenuSuivant = false;
+                            InitialiserMenuPersonnages(Joueurs[cptJoueur]);
+                        }
+                       
+                    }
+                    break;
+
+                case GameState.MENU_PvP:
+                    PvP = MenuJoueurs.PvPActiver;
+                    if (MenuJoueurs.PasserMenuSuivant)
+                    {
                         ÉtatJeu = GameState.MENU_PERSONNAGE;
                         Menu.PasserMenuSuivant = false;
-                        InitialiserMenuPersonnages();
+                        InitialiserMenuPersonnages(Joueurs[cptJoueur]);
+
                     }
+
                     break;
                 case GameState.MENU_PERSONNAGE:
                     if (MenuPerso.PasserMenuSuivant)
                     {
-                        ÉtatJeu = GameState.MENU_CARTE;
-                        MenuPerso.PasserMenuSuivant = false;
-                        InitialiserMenuCartes();
+                        ChoixJoueurs[cptJoueur] = MenuPerso.État;
+                        cptJoueur++;
+                        if (MenuJoueurs.PvPActiver)
+                        {
+                            InitialiserMenuPersonnages(Joueurs[cptJoueur]);
+                            MenuPerso.PasserMenuSuivant = false;
+                            MenuJoueurs.PvPActiver = false;
+
+                        }
+                        else
+                        {
+                            ÉtatJeu = GameState.MENU_CARTE;
+                            MenuPerso.PasserMenuSuivant = false;
+                            InitialiserMenuCartes();
+
+                        }
+                       
                     }
                     break;
                 case GameState.MENU_CARTE:
@@ -348,7 +476,6 @@ namespace AtelierXNA
                     break;
                 
                 case GameState.JEU:
-                    int cpt = 0;
                     if (GestionInput.EstNouvelleTouche(Keys.Escape))
                     {
                         ÉtatJeu = GameState.MENU_PAUSE;
@@ -357,44 +484,13 @@ namespace AtelierXNA
                     }
                     if (Joueur.décédé)
                     {
-                        //Parce que Éric voulait savoir c'etait quoi les commentaires
-                        //if (cpt > 0)
-                        //{
-                        //    Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 6, Bot.TypePersonnage + " et " + Joueur.TypePersonnage);
-
-                        //}
-                        //else
-                        //{
-                        Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 0.4f, Bot.TypePersonnage);
-                        //}
-
-                        ÉtatJeu = GameState.FIN_JEU;
-                        ToggleComponentsUpdate();
-                        Components.Add(Fin);
-                        //cpt++;
-
-
-
+                        InitialiserFinJeux(PersoEnJeux);
                     }
-                    if (Bot.décédé)
+                    if (PersoEnJeux.décédé)
                     {
-                        //if (cpt > 0)
-                        //{
-                        //    Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 6, Bot.TypePersonnage + " et " + Joueur.TypePersonnage);
-
-                        //}
-                        //else
-                        //{
-                            Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 6, Joueur.TypePersonnage);
-
-                        //}
-                        ÉtatJeu = GameState.FIN_JEU;
-                        Components.Add(Fin);
-
-                        ToggleComponentsUpdate();
-                        //cpt++;
-
+                        InitialiserFinJeux(Joueur);
                     }
+                   
                     break;
                 
                
@@ -455,7 +551,7 @@ namespace AtelierXNA
             }
         }
 
-        void GérerCollisions()
+        void GérerCollisionsPvBot()
         {
             bool bouclierJoueurAAbsorber = false;
             bool bouclierBotAAbsorber = false;
@@ -546,6 +642,99 @@ namespace AtelierXNA
             VieilÉtatCollisionPerso = Joueur.EstEnCollision(Bot);
             VieilÉtatAttaqueJoueur = Joueur.EstEnAttaque;
             VieilÉtatAttaqueBot = Bot.EstEnAttaque;
+        }
+
+        void GérerCollisionsPvP()
+        {
+            bool bouclierJoueurAAbsorber = false;
+            bool bouclierJoueur2AAbsorber = false;
+
+            if (Joueur.EstBouclierActif)
+            {
+                foreach (GameComponent g in Components)
+                {
+                    if (g is Projectile)
+                    {
+                        if (Joueur.BouclierPersonnage.EstEnCollision(g as Projectile) && (g as Projectile).NumPlayer != Joueur.NumManette)
+                        {
+                            Joueur.BouclierPersonnage.EncaisserDégâts(g as Projectile);
+                            (g as Projectile).ADetruire = true;
+                            bouclierJoueurAAbsorber = true;
+                        }
+                    }
+                    if (g is Personnage)
+                    {
+                        if (Joueur.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque && VieilÉtatAttaqueJoueur2 != Joueur2.EstEnAttaque)
+                        {
+                            Joueur.BouclierPersonnage.EncaisserDégâts(g as Personnage);
+                            bouclierJoueurAAbsorber = true;
+                        }
+                    }
+                }
+            }
+            if (Joueur2.EstBouclierActif)
+            {
+                foreach (GameComponent g in Components)
+                {
+                    if (g is Projectile)
+                    {
+                        if (Joueur2.BouclierPersonnage.EstEnCollision(g as Projectile) && (g as Projectile).NumPlayer != Joueur2.NumManette)
+                        {
+                            Joueur2.BouclierPersonnage.EncaisserDégâts(g as Projectile);
+                            (g as Projectile).ADetruire = true;
+                            bouclierJoueur2AAbsorber = true;
+                        }
+                    }
+                    if (g is Personnage)
+                    {
+                        if (Joueur2.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque && VieilÉtatAttaqueJoueur != Joueur.EstEnAttaque)
+                        {
+                            Joueur2.BouclierPersonnage.EncaisserDégâts(g as Personnage);
+                            bouclierJoueur2AAbsorber = true;
+                        }
+                    }
+                }
+            }
+
+            if (Joueur.EstEnCollision(Joueur2) && VieilÉtatCollisionPerso != Joueur.EstEnCollision(Joueur2))
+            {
+                if (!Joueur.EstBouclierActif)
+                    Joueur.GérerRecul(Joueur2);
+                if (!Joueur2.EstBouclierActif)
+                    Joueur2.GérerRecul(Joueur);
+            }
+
+            if (Joueur.EstEnAttaque && Joueur.EstEnCollision(Joueur2) && (VieilÉtatAttaqueJoueur != Joueur.EstEnAttaque) && !bouclierJoueur2AAbsorber)
+            {
+                Joueur2.EncaisserDégâts(Joueur);
+            }
+
+            if (Joueur2.EstEnAttaque && Joueur2.EstEnCollision(Joueur) && (VieilÉtatAttaqueJoueur2 != Joueur2.EstEnAttaque) && !bouclierJoueurAAbsorber)
+            {
+                Joueur.EncaisserDégâts(Joueur2);
+
+            }
+
+            foreach (GameComponent g in Components)
+            {
+                if (g is Projectile)
+                {
+
+                    if ((g as Projectile).EstEnCollision(Joueur) && (g as Projectile).NumPlayer != Joueur.NumManette)
+                    {
+                        Joueur.EncaisserDégâts(g as Projectile);
+                        (g as Projectile).ADetruire = true;
+                    }
+                    else if ((g as Projectile).EstEnCollision(Joueur2) && (g as Projectile).NumPlayer != Joueur2.NumManette)
+                    {
+                        Joueur2.EncaisserDégâts(g as Projectile);
+                        (g as Projectile).ADetruire = true;
+                    }
+                }
+            }
+            VieilÉtatCollisionPerso = Joueur.EstEnCollision(Joueur2);
+            VieilÉtatAttaqueJoueur = Joueur.EstEnAttaque;
+            VieilÉtatAttaqueJoueur2 = Joueur2.EstEnAttaque;
         }
 
         protected override void Draw(GameTime gameTime)
