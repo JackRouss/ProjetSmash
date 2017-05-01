@@ -96,6 +96,8 @@ namespace AtelierXNA
         protected InputControllerManager GestionInputManette { get; set; }
         protected InputManager GestionInputClavier { get; set; }
 
+        public bool décédé { get; set; }
+
         public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles, PlayerIndex numManette)
             : base(game)
         {
@@ -131,6 +133,8 @@ namespace AtelierXNA
             VecteurGauche = Vector3.Normalize(Carte.VecteurGauche);
             VecteurVitesse = Vector3.Zero;
 
+            décédé = false;
+
             base.Initialize();
         }
         #endregion
@@ -138,11 +142,18 @@ namespace AtelierXNA
         #region Boucle de jeu.
         public override void Update(GameTime gameTime)
         {
+            Suicide();
             AncienVecteurVitesse = VecteurVitesse;
             float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
             TempsÉcouléDepuisMAJ += tempsÉcoulé;
-
-            NbVies = EstMort() ? --NbVies : NbVies;
+            if (EstMort())
+            {
+                --NbVies;
+            }
+            if(NbVies == 0)
+            {
+                décédé = true;
+            }
             VieEnPourcentage = EstMort() ? 0 : VieEnPourcentage;
             VecteurVitesse = EstMort() ? Vector3.Zero : VecteurVitesse;
             VecteurVitesseGaucheDroite = EstMort() ? Vector3.Zero : VecteurVitesseGaucheDroite;
@@ -181,6 +192,16 @@ namespace AtelierXNA
             }
             GérerNouvellesTouches();
         }
+
+        void Suicide()
+        {
+            if (GestionInputClavier.EstNouvelleTouche(Keys.B))
+            {
+                décédé = true;
+            }
+        }
+
+
         private void GérerFriction()
         {
             float mu_air = 0.1f;

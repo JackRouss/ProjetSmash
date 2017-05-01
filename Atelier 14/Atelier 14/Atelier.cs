@@ -37,7 +37,7 @@ namespace AtelierXNA
         public int[] NB_FRAMES_SPRITES_NINJA = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
 
 
-        enum GameState { MENU_PRINCIPAL, MENU_PERSONNAGE, MENU_DIFFICULTÉ, MENU_CARTE, MENU_PAUSE, JEU }
+        enum GameState { MENU_PRINCIPAL, MENU_PERSONNAGE, MENU_DIFFICULTÉ, MENU_CARTE, MENU_PAUSE, JEU , FIN_JEU}
 
 
         #endregion
@@ -65,6 +65,7 @@ namespace AtelierXNA
         MenuDifficulté MenuDiff { get; set; }
         MenuPause MenuPau { get; set; }
         MenuCartes MenuCa { get; set; }
+        MenuFinJeu Fin { get; set; }
 
 
 
@@ -289,6 +290,13 @@ namespace AtelierXNA
                 }
             }
         }
+        void AnimationFinJeux(string gagnant)
+        {
+            Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 3, gagnant);
+            Components.Add(Fin);
+            ToggleComponentsUpdate();
+
+        }
         #endregion
 
         #region Boucle de jeu.
@@ -349,6 +357,18 @@ namespace AtelierXNA
                         InitialiserMenuPause();
                         MediaPlayer.Pause();
                     }
+                    if (Joueur.décédé)
+                    {
+                        ÉtatJeu = GameState.FIN_JEU;
+                        AnimationFinJeux(Bot.TypePersonnage);
+                    }
+                    if (Bot.décédé)
+                    {
+                        
+                        ÉtatJeu = GameState.FIN_JEU;
+                        AnimationFinJeux(Joueur.TypePersonnage);
+
+                    }
                     break;
                 
                
@@ -372,6 +392,16 @@ namespace AtelierXNA
                     if (MenuPau.PasserMenuPause)
                     {
 
+                    }
+                    break;
+                case GameState.FIN_JEU:
+                    if (Fin.Recommencer)
+                    {
+                        ÉtatJeu = GameState.MENU_PRINCIPAL;
+                        Components.Clear();
+                        EnleverServices();
+                        Initialize();
+                        Fin.Recommencer = false;
                     }
                     break;
             }
