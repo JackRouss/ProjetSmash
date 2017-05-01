@@ -150,7 +150,8 @@ namespace AtelierXNA
         }
         private void ChargerModèles()
         {
-
+            GestionnaireDeModèles.Add("LP_tree",this.Content.Load<Model>("Models/LP_tree"));
+            GestionnaireDeModèles.Add("tree", this.Content.Load<Model>("Models/tree"));
         }
         private void ChargerTextures()
         {
@@ -242,7 +243,6 @@ namespace AtelierXNA
                 AjouterJoueursPvBot();
 
             }
-
             base.Initialize();
         }
         void AjouterCaméra()

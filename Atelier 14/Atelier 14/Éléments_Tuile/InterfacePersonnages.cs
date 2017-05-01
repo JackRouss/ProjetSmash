@@ -51,6 +51,7 @@ namespace AtelierXNA.Éléments_Tuile
         /// </summary>
         public override void Initialize()
         {
+            DrawOrder = 6;
             GestionnaireFonts = Game.Services.GetService(typeof(RessourcesManager<SpriteFont>)) as RessourcesManager<SpriteFont>;
             GestionnaireTexture = Game.Services.GetService(typeof(RessourcesManager<Texture2D>)) as RessourcesManager<Texture2D>;
             GestionSprites = Game.Services.GetService(typeof(SpriteBatch)) as SpriteBatch;

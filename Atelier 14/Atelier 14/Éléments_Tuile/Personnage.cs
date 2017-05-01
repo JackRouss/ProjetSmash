@@ -122,6 +122,7 @@ namespace AtelierXNA
 
         public override void Initialize()
         {
+            DrawOrder = 4;
             GestionInputClavier = Game.Services.GetService(typeof(InputManager)) as InputManager;
             GestionInputManette = Game.Services.GetService(typeof(InputControllerManager)) as InputControllerManager;
 

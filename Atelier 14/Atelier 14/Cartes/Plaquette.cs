@@ -43,6 +43,7 @@ namespace AtelierXNA
 
         public override void Initialize()
         {
+            DrawOrder = 3;
             Longueur = 20f;
             Largeur = 20;
             Origine = Vector3.Zero;
