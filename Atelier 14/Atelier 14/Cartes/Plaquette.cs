@@ -15,12 +15,14 @@ namespace AtelierXNA
 
     public class Plaquette : PrimitiveDeBase
     {
-        const int NB_NODES = 10;
+        public const float LONGUEUR = 20f;
+        public const float LARGEUR = 20f;
+        const int NB_NODES = 6;
         const int NB_TRIANGLE_SURFACE = 2;
         const int NB_TRIANGLE_BASE = 8;
         const int NB_SOMMETS_LIST = 3;
         const int coeff_Surface = 2;
-        const int hauteur = 1;
+        public const int HAUTEUR = 1;
 
         float Largeur { get; set; }
         float Longueur { get; set; }
@@ -34,6 +36,7 @@ namespace AtelierXNA
         Vector3[] PtsSommets { get; set; }
         VertexPositionColor[] Sommets { get; set; }
         VertexPositionColor[] SommetsBase { get; set; }
+        public BoundingBox Hitbox { get; private set; }
         BasicEffect EffetDeBase { get; set; }
         Color Couleur { get; set; }
 
@@ -43,8 +46,10 @@ namespace AtelierXNA
 
         public override void Initialize()
         {
-            Longueur = 20f;
-            Largeur = 20;
+            Longueur = LONGUEUR;
+            Largeur = LARGEUR;
+            Hitbox = new BoundingBox(new Vector3(Position.X - Longueur/coeff_Surface, Position.Y - HAUTEUR, Position.Z - 10), new Vector3(Position.X+Longueur/coeff_Surface, Position.Y+HAUTEUR, Position.Z + 10));
+            
             Origine = Vector3.Zero;
             InitialiserPtsSommets();
             InitialiserSommets();
@@ -66,12 +71,12 @@ namespace AtelierXNA
             PtsSommets[5] = PtsSommets[1];
 
             //Plaque du dessous
-            PtsSommets[6] = new Vector3(Origine.X - Longueur / coeff_Surface, Origine.Y - hauteur, Origine.Z - Largeur / coeff_Surface);
-            PtsSommets[7] = new Vector3(Origine.X - Longueur / coeff_Surface, Origine.Y - hauteur, Origine.Z + Largeur / coeff_Surface);
-            PtsSommets[8] = new Vector3(Origine.X + Longueur / coeff_Surface, Origine.Y - hauteur, Origine.Z + Largeur / coeff_Surface);
+            PtsSommets[6] = new Vector3(Origine.X - Longueur / coeff_Surface, Origine.Y - HAUTEUR, Origine.Z - Largeur / coeff_Surface);
+            PtsSommets[7] = new Vector3(Origine.X - Longueur / coeff_Surface, Origine.Y - HAUTEUR, Origine.Z + Largeur / coeff_Surface);
+            PtsSommets[8] = new Vector3(Origine.X + Longueur / coeff_Surface, Origine.Y - HAUTEUR, Origine.Z + Largeur / coeff_Surface);
             PtsSommets[9] = PtsSommets[6];
             PtsSommets[10] = PtsSommets[8];
-            PtsSommets[11] = new Vector3(Origine.X + Longueur / coeff_Surface, Origine.Y - hauteur, Origine.Z - Largeur / coeff_Surface);
+            PtsSommets[11] = new Vector3(Origine.X + Longueur / coeff_Surface, Origine.Y - HAUTEUR, Origine.Z - Largeur / coeff_Surface);
 
             //Coter Face
             PtsSommets[12] = PtsSommets[7];

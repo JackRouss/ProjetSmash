@@ -21,19 +21,42 @@ namespace AtelierXNA.AI
         public bool EstExtremiterDroite { get; set; }
         public bool EstExtremiterGauche { get; set; }
         public int NomPlaquette { get; private set; }
-        public Node CameFrom { private get; set; }
-        public Node GetCameFrom()
-        {
-            if (CameFrom != null)
-                return new Node(CameFrom.GetPosition(), CameFrom.Index);
-            else
-                return null;
+        public Node CameFrom { get; set; }
+        //public Node GetCameFrom()
+        //{
+        //    if (CameFrom != null)
+        //    {
+        //        Node machin = new Node(CameFrom.GetPosition(), CameFrom.Index);
+        //        machin.DonnéNomPlaquette(CameFrom.NomPlaquette);
+        //        machin.G = CameFrom.G;
+        //        machin
+        //        machin.EstExtremiterDroite = CameFrom.EstExtremiterDroite;
+        //        machin.EstExtremiterGauche = CameFrom.EstExtremiterGauche;
+        //        return machin;
+        //    }
+        //    else
+        //        return null;
 
+        //}
+        public Node(Node n)
+        {
+            H = n.H;
+            G = n.G;
+            F = n.F;
+            EstExtremiterDroite = n.EstExtremiterDroite;
+            EstExtremiterGauche = n.EstExtremiterGauche;
+            NomPlaquette = n.NomPlaquette;
+            Index = n.Index;
+            if(n.CameFrom != null)
+                CameFrom = new Node(n.CameFrom);
+            Position = n.GetPosition();
         }
+        BoundingSphere Hitbox { get; set; }
         public Node(Vector3 position, int index)
         {
             Index = index;
             Position = position;
+            Hitbox = new BoundingSphere(Position, Bot.DISTANCE_THRESH);
         }
         public void DonnéNomPlaquette(int nomPlaquette)
         {
@@ -42,7 +65,12 @@ namespace AtelierXNA.AI
   
         public void CalculerH(Node arrivée)
         {
-            H = Math.Abs(arrivée.Position.X - Position.X) + Math.Abs(arrivée.Position.Y - Position.Y);
+            //H = Math.Abs(arrivée.Position.X - Position.X) + Math.Abs(arrivée.Position.Y - Position.Y);
+            H = Vector3.Distance(Position,arrivée.GetPosition());
+        }
+        public bool EstEnCollision(Personnage p)
+        {
+            return Hitbox.Intersects(p.HitBox);
         }
 
     }

@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Menus;
 using AtelierXNA.Éléments_Tuile;
 using AtelierXNA.AI;
+using AtelierXNA.Autres;
 
 namespace AtelierXNA
 {
@@ -23,7 +24,7 @@ namespace AtelierXNA
         const float INTERVALLE_MAJ_ANIMATION = 1f / 25f;
         readonly string[] NomCartes = { "BackGround1", "BackGround2", "BackGround3", "BackGround4" };
         readonly Vector2[] DimensionCarte = { new Vector2(843, 316),new Vector2(844, 358), new Vector2(844, 364), new Vector2(844, 362) };
-        readonly Color[] CouleurCartes = { Color.ForestGreen, Color.DeepSkyBlue, Color.Beige, Color.YellowGreen };
+        public static readonly Color[] CouleurCartes = { Color.ForestGreen, Color.DeepSkyBlue, Color.Beige, Color.YellowGreen };
 
         public Vector3 VECTEUR_ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE * (Vector3.Down);
         public Vector3 CIBLE_INITIALE_CAMÉRA = new Vector3(1, 0, -1);
@@ -36,7 +37,7 @@ namespace AtelierXNA
         public int[] NB_FRAMES_SPRITES_ROBOT = { 8, 9, 10, 10, 10, 10, 8, 5, 8, 10, 4 };
         public int[] NB_FRAMES_SPRITES_NINJA = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
 
-
+        const int NB_PLATEFORMES = 10;
         enum GameState { MENU_PRINCIPAL, MENU_PERSONNAGE, MENU_DIFFICULTÉ, MENU_CARTE, MENU_PAUSE, JEU }
 
 
@@ -50,7 +51,7 @@ namespace AtelierXNA
         RessourcesManager<Model> GestionnaireDeModèles { get; set; }
         RessourcesManager<SoundEffect> GestionnaireDeSons { get; set; }
         RessourcesManager<Song> GestionnaireDeChansons { get; set; }
-
+        Générateur g { get; set; }
 
 
 
@@ -90,6 +91,8 @@ namespace AtelierXNA
             PériphériqueGraphique.SynchronizeWithVerticalRetrace = false;
             IsFixedTimeStep = false;
             IsMouseVisible = true;
+            g = new Générateur();
+            Services.AddService(typeof(Générateur), g);
         }
 
 
@@ -99,7 +102,7 @@ namespace AtelierXNA
             Menu = new MenuPrincipal(this);
             Components.Add(Menu);
             base.Initialize();
-            //MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
+            MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
         }
 
 
@@ -218,7 +221,7 @@ namespace AtelierXNA
         }
         void AjouterCarte()
         {
-            Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero, CouleurCartes[MenuCa.ChoixCarte]);
+            Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero, CouleurCartes[MenuCa.ChoixCarte],NB_PLATEFORMES);
             Components.Add(Carte);
         }
         void AjouterJoueurs()
@@ -402,7 +405,7 @@ namespace AtelierXNA
             if (ÉtatJeu == GameState.JEU && AChangéÉtat)
             {
                 MediaPlayer.Stop();
-                //MediaPlayer.Play(GestionnaireDeChansons.Find("Cyborg Ninja"));
+                MediaPlayer.Play(GestionnaireDeChansons.Find("Cyborg Ninja"));
             }
         }
 

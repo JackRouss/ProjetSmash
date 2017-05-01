@@ -109,6 +109,10 @@ namespace AtelierXNA.Éléments_Tuile
         {
             return SphèreDeCollision.Intersects(personnage.HitBox);
         }
+        public bool EstEnCollision(BoundingSphere h)
+        {
+            return SphèreDeCollision.Intersects(h);
+        }
         protected override void CalculerMatriceMonde()
         {
             Monde =  Matrix.Identity;

@@ -117,6 +117,7 @@
     <Compile Include="Autres\CaméraDePoursuite.cs" />
     <Compile Include="AI\Chemin.cs" />
     <Compile Include="AI\Graphe.cs" />
+    <Compile Include="Autres\Générateur.cs" />
     <Compile Include="Autres\InputControllerManager.cs" />
     <Compile Include="AI\Node.cs" />
     <Compile Include="Cartes\Map.cs" />

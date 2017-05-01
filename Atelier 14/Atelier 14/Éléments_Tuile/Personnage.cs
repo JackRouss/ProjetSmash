@@ -19,16 +19,16 @@ namespace AtelierXNA
     {
 
         #region Propriétés, constantes et initialisation.
-        const float LARGEUR_HITBOX = 5f;
-        const float HAUTEUR_HITBOX = 5f;
-        const float PROFONDEUR_HITBOX = 5f;
+        protected const float LARGEUR_HITBOX = 5f;
+        protected const float HAUTEUR_HITBOX = 5f;
+        protected const float PROFONDEUR_HITBOX = 5f;
 
 
         //Ces constantes seront à ajouter en propriétés.
-        const float VITESSE_MAX_GAUCHE_DROITE = 50f;
+        protected const float VITESSE_MAX_GAUCHE_DROITE = 50f;
         const float DURÉE_BOUCLIER = 1f;
-        const float ACCÉLÉRATION_SOL = 500f;
-        const float ACCÉLÉRATION_AIR = 500f;
+        protected const float ACCÉLÉRATION_SOL = 500f;
+        protected const float ACCÉLÉRATION_AIR = 500f;
         const int DOMMAGE_ATTAQUE = 12;
         const float FORCE_COUP = 500000f;
 
@@ -73,17 +73,18 @@ namespace AtelierXNA
 
 
         //Données propres au personnages, qui seront variables.
-        protected Vector3 Position { get; set; }
+        public Vector3 Position { get; protected set; }
         public Vector3 GetPositionPersonnage
         {
             get { return new Vector3(Position.X, Position.Y, Position.Z); }
         }
         protected Vector3 PositionSpawn { get; set; }
-        protected Vector3 AnciennePosition { get; set; }
+        public  Vector3 AnciennePosition { get; protected set; }
         Vector3 VecteurGauche { get; set; }
         protected Vector3 VecteurVitesse { get; private set; }
         protected Vector3 AncienVecteurVitesse { get; private set; }
-        protected Vector3 VecteurVitesseGaucheDroite { get; private set; }
+        protected Vector3 AncienVecteurVitesseGaucheDroite { get; set; }
+        protected Vector3 VecteurVitesseGaucheDroite { get; set; }
         public abstract void DéplacerFrame();
         protected int CptSaut { get; set; }
         public string tag { get; private set; }
@@ -153,7 +154,7 @@ namespace AtelierXNA
             {
                 RayonDuBouclier = MathHelper.Min(RayonDuBouclier + 0.02f, 6);
                 TempsEntreProjectile--;
-                if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE) //Conditions ici pour gérer l'immobilité.
+                if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE && !(this is Bot)) //Conditions ici pour gérer l'immobilité.
                 {
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
                 }
@@ -173,7 +174,7 @@ namespace AtelierXNA
                 GérerTouchesEnfoncées();
                 GérerAccélérationGravitationnelle();
                 GérerFriction();
-
+                AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
                 Position += (VecteurVitesse + VecteurVitesseGaucheDroite) * TempsÉcouléDepuisMAJ;
                 GénérerHitbox();
 
@@ -266,7 +267,7 @@ namespace AtelierXNA
             }
         }
 
-        protected void Droite()
+        protected virtual void Droite()
         {
                 DIRECTION = ORIENTATION.DROITE;
                 if (VecteurVitesse.Y == 0)
@@ -283,7 +284,7 @@ namespace AtelierXNA
                 }
             }
 
-        protected void Gauche()
+        protected virtual void Gauche()
         {
                 DIRECTION = ORIENTATION.GAUCHE;
                 if (VecteurVitesse.Y == 0)
@@ -299,7 +300,7 @@ namespace AtelierXNA
                     VecteurVitesseGaucheDroite -= new Vector3(ACCÉLÉRATION_AIR * TempsÉcouléDepuisMAJ, 0, 0);
                 }
             }
-        private void Bloquer()
+        protected virtual void Bloquer()
         {      
                 EstBouclierActif = true;
                 if ((BouclierPersonnage == null || !Game.Components.Contains(BouclierPersonnage)))
@@ -345,7 +346,7 @@ namespace AtelierXNA
                 ++CptSaut;
             }
         }
-        private void GérerLancer()
+        protected void GérerLancer()
         {
             if (TempsEntreProjectile <= 0)
             {
