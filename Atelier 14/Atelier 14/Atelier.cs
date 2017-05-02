@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Menus;
 using AtelierXNA.Éléments_Tuile;
+using AtelierXNA.AI;
 
 namespace AtelierXNA
 {
@@ -27,7 +28,7 @@ namespace AtelierXNA
         public Vector3 VECTEUR_ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE * (Vector3.Down);
         public Vector3 CIBLE_INITIALE_CAMÉRA = new Vector3(1, 0, -1);
         public Vector3 POSITION_INITIALE_CAMÉRA = Vector3.Zero;
-        public const float ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = 40f;
+        public const float ACCÉLÉRATION_GRAVITATIONNELLE_PERSONNAGE = 32f;
         public const float ACCÉLÉRATION_GRAVITATIONNELLE_PROJECTILE = 0.5f; 
 
         public string[] NOMS_SPRITES_NINJA = { "Attack__00", "Climb_00", "Dead__00", "Glide_00", "Idle__00", "Jump__00", "Jump_Attack__00", "Jump_Throw__00", "Run__00", "Slide__00", "Throw__00" };
@@ -76,6 +77,9 @@ namespace AtelierXNA
         TuileTexturée BackGround { get; set; }
         ArrièrePlanDéroulant ArrièrePlan { get; set; }
         bool VieilÉtatCollisionPerso { get; set; }
+        bool VieilÉtatAttaqueJoueur { get; set; }
+        bool VieilÉtatAttaqueBot { get; set; }
+        InterfacePersonnages Interface { get; set; }
         #endregion
 
         #region Initialisation.
@@ -149,6 +153,7 @@ namespace AtelierXNA
                     GestionnaireDeTextures.Add(NOMS_SPRITES_NINJA[j] + i.ToString(), this.Content.Load<Texture2D>("Textures/" + "Ninja/" + NOMS_SPRITES_NINJA[j] + i));
                 }
             }
+            GestionnaireDeTextures.Add("BouclierNinja",this.Content.Load<Texture2D>("Textures/"+"Ninja/"+"BouclierNinja"));
         }
         private void ChargerRobot()
         {
@@ -193,6 +198,7 @@ namespace AtelierXNA
             Components.Remove(MenuDiff);
 
 
+
             AjouterCaméra();
             BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], NomCartes[MenuCa.ChoixCarte], 0);
             Components.Add(BackGround);
@@ -213,7 +219,6 @@ namespace AtelierXNA
         void AjouterCarte()
         {
             Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero, CouleurCartes[MenuCa.ChoixCarte]);
-
             Components.Add(Carte);
         }
         void AjouterJoueurs()
@@ -222,27 +227,29 @@ namespace AtelierXNA
             Keys[] CONTRÔLES_BOT = { Keys.H, Keys.F, Keys.RightShift, Keys.Enter, Keys.L, Keys.N };
             if (MenuPerso.État == MenuPersonnage.ÉTAT.NINJA)
             {
-                Joueur = new PersonnageAnimé(this, 5f, 35f, 50, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA);
+                Joueur = new PersonnageAnimé(this, 20f, 35f, 100, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_NINJA, "Ninja", NB_FRAMES_SPRITES_NINJA, PlayerIndex.One);
             }
             if (MenuPerso.État == MenuPersonnage.ÉTAT.ROBOT)
             {
-                Joueur = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Joueur = new PersonnageAnimé(this, 15f, 35f, 100, new Vector3(15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_JOUEUR, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT, PlayerIndex.One);
             }
             if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.FACILE)
             {
-                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Bot = new Bot(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT,"Facile", PlayerIndex.Two);
             }
             if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.NORMAL)
             {
-                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Bot = new Bot(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT,"Normal", PlayerIndex.Two);
             }
             if (MenuDiff.CHOIX == MenuDifficulté.ÉTAT.DIFFICILE)
             {
-                Bot = new PersonnageAnimé(this, 5f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT);
+                Bot = new Bot(this, 15f, 35f, 100, new Vector3(-15, 0, 0), INTERVALLE_MAJ_STANDARD, CONTRÔLES_BOT, INTERVALLE_MAJ_ANIMATION, NOMS_SPRITES_ROBOT, "Robot", NB_FRAMES_SPRITES_ROBOT, "Difficile",PlayerIndex.Two);
             }
-            Components.Add(Bot);
+            
             Components.Add(Joueur);
-
+            Components.Add(Bot);
+            Interface = new InterfacePersonnages(this, "Robot", PlayerIndex.One);
+            Components.Add(Interface);
         }
         void InitialiserMenuPersonnages()
         {
@@ -361,6 +368,10 @@ namespace AtelierXNA
                         Initialize();
                         MenuPau.RetournerMenuPrincipale = false;
                     }
+                    if (MenuPau.PasserMenuPause)
+                    {
+
+                    }
                     break;
             }
             if (AncienÉtatJeu != ÉtatJeu)
@@ -397,39 +408,95 @@ namespace AtelierXNA
 
         void GérerCollisions()
         {
+            bool bouclierJoueurAAbsorber = false;
+            bool bouclierBotAAbsorber = false;
+
+            if (Joueur.EstBouclierActif )
+            {
+                foreach (GameComponent g in Components)
+                {
+                    if(g is Projectile)
+                    {
+                        if(Joueur.BouclierPersonnage.EstEnCollision(g as Projectile) && (g as Projectile).NumPlayer != Joueur.NumManette)
+                        {
+                            Joueur.BouclierPersonnage.EncaisserDégâts(g as Projectile);
+                            (g as Projectile).ADetruire = true;
+                            bouclierJoueurAAbsorber = true;
+                        }
+                    }
+                    if(g is Personnage)
+                    {
+                        if(Joueur.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque && VieilÉtatAttaqueBot != Bot.EstEnAttaque)
+                        {
+                            Joueur.BouclierPersonnage.EncaisserDégâts(g as Personnage);
+                            bouclierJoueurAAbsorber = true;
+                        }
+                    }
+                }
+            }
+            if (Bot.EstBouclierActif)
+            {
+                foreach (GameComponent g in Components)
+                {
+                    if (g is Projectile)
+                    {
+                        if (Bot.BouclierPersonnage.EstEnCollision(g as Projectile) && (g as Projectile).NumPlayer != Bot.NumManette)
+                        {
+                            Bot.BouclierPersonnage.EncaisserDégâts(g as Projectile);
+                            (g as Projectile).ADetruire = true;
+                            bouclierBotAAbsorber = true;
+                        }
+                    }
+                    if (g is Personnage)
+                    {
+                        if (Bot.BouclierPersonnage.EstEnCollision(g as Personnage) && (g as Personnage).EstEnAttaque && VieilÉtatAttaqueJoueur != Joueur.EstEnAttaque)
+                        {
+                            Bot.BouclierPersonnage.EncaisserDégâts(g as Personnage);
+                            bouclierBotAAbsorber = true;
+                        }
+                    }
+                }
+            }
+            
             if (Joueur.EstEnCollision(Bot) && VieilÉtatCollisionPerso != Joueur.EstEnCollision(Bot))
             {
-                Joueur.VecteurVitesse += Bot.VecteurVitesse * Bot.Masse / Joueur.Masse;
-                Bot.VecteurVitesse += Joueur.VecteurVitesse * Joueur.Masse / Bot.Masse;
+                if(!Joueur.EstBouclierActif)
+                    Joueur.GérerRecul(Bot);
+                if(!Bot.EstBouclierActif)
+                    Bot.GérerRecul(Joueur);         
             }
-            if (Joueur.EstEnCollision(Bot))
+
+            if (Joueur.EstEnAttaque && Joueur.EstEnCollision(Bot) && (VieilÉtatAttaqueJoueur != Joueur.EstEnAttaque) && !bouclierBotAAbsorber)
             {
-                if (Joueur.EstEnAttaque)
-                {
-                    Bot.EncaisserDégâts(Joueur);
-                }
-                if (Bot.EstEnAttaque)
-                {
-                    Joueur.EncaisserDégâts(Bot);
-                }
+                Bot.EncaisserDégâts(Joueur);
             }
-        
+
+            if (Bot.EstEnAttaque && Bot.EstEnCollision(Joueur) && (VieilÉtatAttaqueBot != Bot.EstEnAttaque) && !bouclierJoueurAAbsorber)
+            {
+                Joueur.EncaisserDégâts(Bot);
+
+            }
+
             foreach (GameComponent g in Components)
             {
                 if (g is Projectile)
                 {
-                    if ((g as Projectile).EstEnCollision(Joueur))
+                    
+                    if ((g as Projectile).EstEnCollision(Joueur) && (g as Projectile).NumPlayer != Joueur.NumManette)
                     {
                         Joueur.EncaisserDégâts(g as Projectile);
+                        (g as Projectile).ADetruire = true;
                     }
-                    else if ((g as Projectile).EstEnCollision(Bot))
+                    else if ((g as Projectile).EstEnCollision(Bot) && (g as Projectile).NumPlayer != Bot.NumManette)
                     {
                         Bot.EncaisserDégâts(g as Projectile);
+                        (g as Projectile).ADetruire = true;
                     }
                 }
             }
-
             VieilÉtatCollisionPerso = Joueur.EstEnCollision(Bot);
+            VieilÉtatAttaqueJoueur = Joueur.EstEnAttaque;
+            VieilÉtatAttaqueBot = Bot.EstEnAttaque;
         }
 
         protected override void Draw(GameTime gameTime)

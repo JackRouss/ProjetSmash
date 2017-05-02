@@ -46,6 +46,7 @@ namespace AtelierXNA.Menus
         float IntervalleMAJAnimation { get; set; }
         public bool RésumerLaPartie { get; set; }
         public bool RetournerMenuPrincipale { get; set; }
+        public bool PasserMenuPause { get; set; }
 
 
 
@@ -125,7 +126,7 @@ namespace AtelierXNA.Menus
 
                     if(CHOIX == ÉTAT.OPTIONS)
                     {
-
+                        PasserMenuPause = true;
                     }
 
                     if(CHOIX == ÉTAT.QUITTER)

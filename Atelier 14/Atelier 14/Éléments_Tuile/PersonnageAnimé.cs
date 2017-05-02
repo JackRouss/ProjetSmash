@@ -9,6 +9,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Éléments_Tuile;
+using AtelierXNA.AI;
+using AtelierXNA.Autres;
+//using AtelierXNA.Autres;
 
 namespace AtelierXNA
 {
@@ -44,14 +47,14 @@ namespace AtelierXNA
             ÉtatNum = cpt;
         }
         protected int ÉtatNum { get; set; }//Ce même état sous forme numérique (indice du tableau de NomsSprites).
-        string[] NomsSprites { get; set; }
+        public string[] NomsSprites { get; private set; }
         int[] NbFramesSprites { get; set; }
         TuileTexturéeAnimée Frame { get; set; }
         public Vector2 ZoneAffichageDimensions { get; private set; }
 
 
-        public PersonnageAnimé(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles, float intervalleMAJAnimation, string[] nomSprites, string type, int[] nbFramesSprites)
-            : base(game, vitesseDéplacementGaucheDroite, vitesseMaximaleSaut, masse, position, intervalleMAJ, contrôles)
+        public PersonnageAnimé(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles, float intervalleMAJAnimation, string[] nomSprites, string type, int[] nbFramesSprites, PlayerIndex numManette)
+            : base(game, vitesseDéplacementGaucheDroite, vitesseMaximaleSaut, masse, position, intervalleMAJ, contrôles, numManette)
         {
             ZoneAffichageDimensions = new Vector2(5, 10);
             Frame = new TuileTexturéeAnimée(Game, 1, Vector3.Zero, position, new Vector2(2, 2), "Idle__000", intervalleMAJ, ZoneAffichageDimensions, nomSprites, nbFramesSprites, type, intervalleMAJAnimation);
@@ -91,7 +94,9 @@ namespace AtelierXNA
                     État = NomsSprites[8];
                 }
                 else if (ÉTAT_PERSO == ÉTAT.BLOQUER)
-                { }
+                {
+                    État = NomsSprites[4];
+                }
                 else if (ÉTAT_PERSO == ÉTAT.ATTAQUER)
                 {
                     if (VecteurVitesse.Y != 0)
@@ -138,7 +143,11 @@ namespace AtelierXNA
                 Frame.ChangerÉtat(État);
             }
         }
-
+        protected override void AjouterBouclier()
+        {
+            BouclierPersonnage = new Bouclier(Game, 1, Vector3.Zero, Position + Vector3.Up * ZoneAffichageDimensions.Y / 2,RayonDuBouclier, new Vector2(2, 30), "BouclierNinja", Atelier.INTERVALLE_MAJ_STANDARD, NumManette);
+            Game.Components.Add(BouclierPersonnage);
+        }
         public override void Draw(GameTime gameTime)
         {
             if (DIRECTION == ORIENTATION.GAUCHE)
