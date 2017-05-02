@@ -45,6 +45,8 @@ namespace AtelierXNA
         VertexPositionColor[] SommetsBase { get; set; }
         BasicEffect EffetDeBase { get; set; }
         Color Couleur { get; set; }
+        RessourcesManager<Model> GestionnaireDeRessources { get; set; }
+        Model Arbre { get; set; }
 
 
         public Map(Game game, float homothetie, Vector3 rotationInitiale, Vector3 position, Color couleur, int nbPlateformes)
@@ -54,6 +56,7 @@ namespace AtelierXNA
             Origine = position;
             Couleur = couleur;
             NbPlateformes = nbPlateformes;
+            
             if(Couleur == Atelier.CouleurCartes[0])
             {
                 g.ModifierSeed(1);
@@ -79,6 +82,12 @@ namespace AtelierXNA
             Largeur = 50;
             Hitbox = new BoundingBox(new Vector3(-Longueur / coeff_Surface, -Largeur / 2, -10), new Vector3(Longueur / coeff_Surface, Largeur / 2, 10));
 
+            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", 0.045f, Vector3.Zero, new Vector3(-Longueur/2 + 10, -1, -Largeur/2 + 10)));
+            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", 0.055f, Vector3.Zero, new Vector3(-Longueur / 4 + 10, -1, -Largeur / 2 + 10)));
+            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", 0.05f, Vector3.Zero, new Vector3(Longueur / 2 - 10, -1, -Largeur / 2 + 10)));
+            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", 0.06f, Vector3.Zero, new Vector3(Longueur / 4 - 10, -1, -Largeur / 2 + 10)));
+            DrawOrder = 1;
+
             LIMITE_MAP = new Vector4(150, -150, 100, -100);
             LIMITE_PLAQUETTE = new Vector4(Origine.X + Longueur / 2, Origine.X - Longueur / 2,(Origine.Y + LIMITE_MAP.Z)/3, 0);
             Plateformes = new List<Plaquette>();
@@ -98,7 +107,7 @@ namespace AtelierXNA
             //Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X, Origine.Y + 2 * hauteur, Origine.Z), Couleur));
             foreach (Plaquette p in Plateformes)
             {
-                p.Initialize();
+                Game.Components.Add(p);
             }
             CalculerPropriétésPourPersonnages();
 
@@ -256,11 +265,7 @@ namespace AtelierXNA
             GraphicsDevice.RasterizerState = état;
 
             foreach (EffectPass passeEffet in EffetDeBase.CurrentTechnique.Passes)
-            {
-                foreach(Plaquette p in Plateformes)
-                {
-                    p.Draw(gameTime);
-                }
+            {               
                 passeEffet.Apply();
                 GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, Sommets, 0, NB_TRIANGLE_SURFACE);
                 GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, SommetsBase, 0, NB_TRIANGLE_BASE);

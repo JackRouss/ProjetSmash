@@ -46,10 +46,10 @@ namespace AtelierXNA
 
         public override void Initialize()
         {
+            Hitbox = new BoundingBox(new Vector3(Position.X - Longueur / coeff_Surface, Position.Y - HAUTEUR, Position.Z - 10), new Vector3(Position.X + Longueur / coeff_Surface, Position.Y + HAUTEUR, Position.Z + 10));
+            DrawOrder = 3;
             Longueur = LONGUEUR;
             Largeur = LARGEUR;
-            Hitbox = new BoundingBox(new Vector3(Position.X - Longueur/coeff_Surface, Position.Y - HAUTEUR, Position.Z - 10), new Vector3(Position.X+Longueur/coeff_Surface, Position.Y+HAUTEUR, Position.Z + 10));
-            
             Origine = Vector3.Zero;
             InitialiserPtsSommets();
             InitialiserSommets();

@@ -47,6 +47,7 @@ namespace AtelierXNA.Éléments_Tuile
         }
         public override void Initialize()
         {
+            DrawOrder = 4;
             ADetruire = false;
             CalculerMatriceMonde();
             base.Initialize();
