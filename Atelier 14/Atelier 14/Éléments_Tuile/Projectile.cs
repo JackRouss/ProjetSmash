@@ -77,7 +77,7 @@ namespace AtelierXNA.Éléments_Tuile
             {
                 GérerDéplacement();
                 CalculerMatriceMonde();
-                GérerHitbox();
+                CalculerHitbox();
                 TempsÉcouléDepuisMAJ = 0;
             }          
         }
