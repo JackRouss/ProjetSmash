@@ -20,7 +20,7 @@ namespace AtelierXNA.Éléments_Tuile
         Effect julia;
         RessourcesManager<Effect> GestionnaireDeShaders { get; set; }
         VertexBuffer VB;
-
+        CaméraDePoursuite CaméraTuile { get; set; }
 
         Vector2 pan = new Vector2(0.25f, 0);
         float zoom = 3;
@@ -46,11 +46,11 @@ namespace AtelierXNA.Éléments_Tuile
             GestionnaireDeShaders = Game.Services.GetService(typeof(RessourcesManager<Effect>)) as RessourcesManager<Effect>;
 
             julia = GestionnaireDeShaders.Find("Julia");
+         CaméraTuile = Game.Components.First(t => t is CaméraDePoursuite) as CaméraDePoursuite;
 
 
 
-           
-            base.LoadContent();
+         base.LoadContent();
         }
 
         /// <summary>
@@ -76,28 +76,41 @@ namespace AtelierXNA.Éléments_Tuile
 
         public override void Draw(GameTime gameTime)
         {
-            GraphicsDevice device = spriteBatch.GraphicsDevice;
+         Matrix projection = Matrix.CreateOrthographicOffCenter
+            (0,GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, 0, 1);
+         Matrix halfPixelOffset = Matrix.CreateTranslation(-0.5f, -0.5f, 0);
+         //julia.Parameters["MatrixTransform"].SetValue(halfPixelOffset * projection);
+         julia.Parameters["MatrixTransform"].SetValue(GetMonde() * CaméraTuile.Vue * CaméraTuile.Projection);
+         //julia.Parameters["Texture"].SetValue(textureTuile);
+
+         GraphicsDevice device = spriteBatch.GraphicsDevice;
             //VertexBuffer VB = new VertexBuffer(;
             //IndexBuffer IB = new IndexBuffer(;
             //GraphicsDevice.SetRenderTarget(null);
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            //GraphicsDevice.Clear(Color.CornflowerBlue);
             float aspectRatio = (float)device.Viewport.Height / (float)device.Viewport.Width;
             julia.CurrentTechnique.Passes[0].Apply();
             julia.Parameters["Pan"].SetValue(pan);
             julia.Parameters["Zoom"].SetValue(zoom);
             julia.Parameters["Aspect"].SetValue(aspectRatio);
-            //device.SetVertexBuffer(VB);
-            //device.Indices = IB;
-            //spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-            base.Draw(gameTime);
+         //device.SetVertexBuffer(VB);
+         //device.Indices = IB;
+         //spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+         //base.Draw(gameTime);
+            foreach (EffectPass passeEffet in julia.CurrentTechnique.Passes)
+            {
+               passeEffet.Apply();
+               GraphicsDevice.DrawUserPrimitives<VertexPositionTexture>(PrimitiveType.TriangleStrip, Sommets, 0, 2);
+            }
 
-        }
-        protected override void SetUpVertexBuffer()
+
+      }
+      protected override void SetUpVertexBuffer()
         {
             VB = new VertexBuffer(spriteBatch.GraphicsDevice, new VertexDeclaration
               (
                   new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0),
-                  new VertexElement(sizeof(float) * 3, VertexElementFormat.Color, VertexElementUsage.Color, 0)), Sommets.Length, BufferUsage.WriteOnly);
+                  new VertexElement(sizeof(float) * 5, VertexElementFormat.Color, VertexElementUsage.Color, 0)), Sommets.Length, BufferUsage.WriteOnly);
             VB.SetData(Sommets);
         }
         protected override void SetVertexBuffer(GraphicsDevice device)
