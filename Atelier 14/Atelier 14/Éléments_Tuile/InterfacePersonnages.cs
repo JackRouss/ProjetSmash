@@ -62,6 +62,7 @@ namespace AtelierXNA.Éléments_Tuile
             RemplirListePerso();
             RemplirListeCamera();
             RemplirListeTetePersonage();
+            ModifierImage();
 
             base.Initialize();
         }
@@ -91,19 +92,33 @@ namespace AtelierXNA.Éléments_Tuile
                 TetePersonnage.Add(GestionnaireTexture.Find(perso.TypePersonnage + "/" + perso.NomsSprites[4] + (perso.TypePersonnage == "Robot"? "(1)":"0")));
             }
         }
-
-        /// <summary>
-        /// Allows the game component to update itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        public override void Update(GameTime gameTime)
+        private void ModifierImage()
         {
-           
+            int nbTexels;
+            Color[] texels;
+            //Image = new Texture2D(imagelocale.GraphicsDevice, imagelocale.Width, imagelocale.Height);
+            nbTexels = ImageVie.Width * ImageVie.Height;
+            texels = new Color[nbTexels];
+            ImageVie.GetData<Color>(texels);
 
+            for (int noTexel = 0; noTexel < nbTexels; ++noTexel)
+            {
+                if(texels[noTexel].R == 255 && texels[noTexel].G == 255 && texels[noTexel].B == 255)
+                {
+                    texels[noTexel].R = 0;
+                    texels[noTexel].G = 0;
+                    texels[noTexel].B = 0;
+                    texels[noTexel].A = 0;
+                }     
+            }
+            ImageVie.SetData<Color>(texels);
+        }
+
+        public override void Update(GameTime gameTime)
+        {       
             base.Update(gameTime);
         }
         
-
         public override void Draw(GameTime gameTime)
         {
             int redneck = 0;

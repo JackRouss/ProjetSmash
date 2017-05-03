@@ -38,7 +38,6 @@ namespace AtelierXNA.Menus
         InputControllerManager GestionInputManette { get; set; }
         SpriteFont ArialFont { get; set; }
         Color CouleurTexte { get; set; }
-        Color COuleurTexteChoix { get; set; }
 
 
 
@@ -47,11 +46,12 @@ namespace AtelierXNA.Menus
         float Temps…coulÈDepuisMAJ { get; set; }
         float IntervalleMAJAnimation { get; set; }
         public bool Recommencer { get; set; }
+        public bool RetournerMenuPrincipale { get; set; }
+        public bool PasserMenuPause { get; set; }
         float temps { get; set; }
         float TempsAffichageMessageFin { get; set; }
         bool AnimationMessageFinPartie { get; set; }
         bool Fade { get; set; }
-        int cptFade { get; set; }
         string Gagnant { get; set; }
         string Message { get; set; }
 
@@ -76,13 +76,12 @@ namespace AtelierXNA.Menus
             ArialFont = GestionnaireFonts.Find("Arial");
             CouleurTexte = Color.White;
 
-            POSITION_R…SUMER_PARTIE = new Vector2((Game.Window.ClientBounds.Width - ArialFont.MeasureString(R…SUMER_PARTIE).X) / 2, ESPACE_ENTRE_OPTIONS);
-            POSITION_QUITTER = new Vector2((Game.Window.ClientBounds.Width - ArialFont.MeasureString(QUITTER).X) / 2,  ArialFont.MeasureString(QUITTER).Y + ESPACE_ENTRE_OPTIONS);
+            POSITION_R…SUMER_PARTIE = new Vector2((Game.Window.ClientBounds.Width - ArialFont.MeasureString(R…SUMER_PARTIE).X) / 2, 0);
+            POSITION_MENU_PRINCIPAL = new Vector2((Game.Window.ClientBounds.Width - ArialFont.MeasureString(MENU_PRINCIPAL).X) / 2, ArialFont.MeasureString(MENU_PRINCIPAL).Y + ESPACE_ENTRE_OPTIONS);
+            POSITION_OPTIONS = new Vector2((Game.Window.ClientBounds.Width - ArialFont.MeasureString(OPTIONS).X) / 2, POSITION_MENU_PRINCIPAL.Y + ArialFont.MeasureString(OPTIONS).Y + ESPACE_ENTRE_OPTIONS);
+            POSITION_QUITTER = new Vector2((Game.Window.ClientBounds.Width - ArialFont.MeasureString(QUITTER).X) / 2, POSITION_OPTIONS.Y + ArialFont.MeasureString(QUITTER).Y + ESPACE_ENTRE_OPTIONS);
 
             Message = "       " + Gagnant + "\n" + "est le vainqueur";
-            Fade = true;
-            AnimationMessageFinPartie = true;
-            cptFade = 0;
             base.Initialize();
         }
 
@@ -93,7 +92,7 @@ namespace AtelierXNA.Menus
         public override void Update(GameTime gameTime)
         {
             float temps…coulÈ = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            temps += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            temps = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Temps…coulÈDepuisMAJ += temps…coulÈ;
             GÈrerEntrÈes();
             CalculeAnimation();
@@ -102,20 +101,17 @@ namespace AtelierXNA.Menus
             {
                 if (Temps…coulÈDepuisMAJ >= IntervalleMAJAnimation)
                 {
-                    cptFade++;
                     ++CptCouleurs;
                     if (CptCouleurs == COULEURS.Length)
                     {
                         CptCouleurs = 0;
                     }
                     Temps…coulÈDepuisMAJ = 0;
-                    //CouleurTexte = new Color(new Vector4(CouleurTexte.R, CouleurTexte.G, CouleurTexte.B, CouleurTexte.A - cptFade));
-                    //COuleurTexteChoix = new Color(new Vector4(CouleurTexte.R, CouleurTexte.G, CouleurTexte.B, CouleurTexte.A + cptFade));
-                    //if (CouleurTexte.A <= 0)
-                    //{
-                    //    Fade = false;
-                    //}
                 }
+            }
+            else
+            {
+                CptChoix++;
             }
             
 
@@ -139,9 +135,6 @@ namespace AtelierXNA.Menus
                     case 0: CHOIX = …TAT.RECOMMENCER; break;
                     case 1: CHOIX = …TAT.QUITTER; break;
                 }
-
-                CptAuBorne();
-
                 if (GestionInputClavier.EstNouvelleTouche(Keys.Enter) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.A))
                 {
                     if (CHOIX == …TAT.RECOMMENCER)
@@ -158,19 +151,6 @@ namespace AtelierXNA.Menus
             }
         }
 
-        void CptAuBorne()
-        {
-            if(CptChoix > 1)
-            { 
-                CptChoix = 1;
-            }
-
-            if (CptChoix < 0)
-            {
-                CptChoix = 0;
-            }
-        }
-
         void CalculeAnimation()
         {
             AnimationMessageFinPartie = temps >= TempsAffichageMessageFin;
@@ -179,14 +159,9 @@ namespace AtelierXNA.Menus
         public override void Draw(GameTime gameTime)
         {
             GestionSprites.Begin();
-            if(!AnimationMessageFinPartie)
+            if(!AnimationMessageFinPartie || Fade)
             {
-                GestionSprites.DrawString(ArialFont,Message, new Vector2(Game.Window.ClientBounds.Width/2 - ArialFont.MeasureString(Message).X/2, Game.Window.ClientBounds.Height / 2 - ArialFont.MeasureString(Message).Y/2), CouleurTexte);
-            }
-            else
-            {
-                GestionSprites.DrawString(ArialFont, R…SUMER_PARTIE, POSITION_R…SUMER_PARTIE, DÈterminerCouleur(…TAT.RECOMMENCER));
-                GestionSprites.DrawString(ArialFont, QUITTER, POSITION_QUITTER, DÈterminerCouleur(…TAT.QUITTER));
+                GestionSprites.DrawString(ArialFont,Message, new Vector2(Game.Window.ClientBounds.Width/2 - 180, Game.Window.ClientBounds.Height / 2 - 100), CouleurTexte);
             }
             GestionSprites.End();
             base.Draw(gameTime);
