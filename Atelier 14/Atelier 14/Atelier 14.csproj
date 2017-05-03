@@ -117,6 +117,7 @@
     <Compile Include="Autres\CaméraDePoursuite.cs" />
     <Compile Include="AI\Chemin.cs" />
     <Compile Include="AI\Graphe.cs" />
+    <Compile Include="Autres\Générateur.cs" />
     <Compile Include="Autres\InfoModèle.cs" />
     <Compile Include="Autres\InputControllerManager.cs" />
     <Compile Include="AI\Node.cs" />
@@ -135,6 +136,7 @@
     <Compile Include="Menus\MenuPrincipal.cs" />
     <Compile Include="AI\Bot.cs" />
     <Compile Include="Menus\MenuPvP.cs" />
+    <Compile Include="ObjetDeBase.cs" />
     <Compile Include="Éléments_Tuile\InterfacePersonnages.cs" />
     <Compile Include="Éléments_Tuile\Personnage.cs" />
     <Compile Include="Éléments_Tuile\PersonnageAnimé.cs" />

@@ -73,6 +73,7 @@ namespace AtelierXNA
         #region Boucle de jeu.
         public override void Update(GameTime gameTime)
         {
+            
             if (Frame.CptFrame == NbFramesSprites[ÉtatNum] - 1 && EstEnAttaque)
             {
                 ÉTAT_PERSO = ÉTAT.IMMOBILE;

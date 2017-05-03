@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using AtelierXNA.AI;
+using AtelierXNA.Autres;
 
 
 namespace AtelierXNA
@@ -29,9 +30,12 @@ namespace AtelierXNA
 
         //Propriétés utilisées par le personnage.
         public Vector3 VecteurGauche { get; private set; }
+        BoundingBox Hitbox { get; set; }
         public List<Vector3> IntervallesSurfaces { get; private set; }//( MinX, MaxX,Hauteur en Y de la surface )
         public List<Plaquette> Plateformes { get; private set; }
         public List<Node> Nodes { get; private set; }
+        int NbPlateformes { get; set; }
+        Générateur g { get; set; }
 
         float Largeur { get; set; }
         float Longueur { get; set; }
@@ -41,37 +45,128 @@ namespace AtelierXNA
         VertexPositionColor[] SommetsBase { get; set; }
         BasicEffect EffetDeBase { get; set; }
         Color Couleur { get; set; }
+        RessourcesManager<Model> GestionnaireDeRessources { get; set; }
+        Model Arbre { get; set; }
 
 
-        public Map(Game game, float homothetie, Vector3 rotationInitiale, Vector3 position, Color couleur)
+        public Map(Game game, float homothetie, Vector3 rotationInitiale, Vector3 position, Color couleur, int nbPlateformes)
             : base(game, homothetie, rotationInitiale, position)
         {
+            g = Game.Services.GetService(typeof(Générateur)) as Générateur;
             Origine = position;
             Couleur = couleur;
+            NbPlateformes = nbPlateformes;
+            
+            if(Couleur == Atelier.CouleurCartes[0])
+            {
+                g.ModifierSeed(1);
+            }
+            else if(Couleur == Atelier.CouleurCartes[1])
+            {
+                g.ModifierSeed(2);
+            }
+            else if(Couleur == Atelier.CouleurCartes[2])
+            {
+                g.ModifierSeed(3);
+            }
+            else if(Couleur == Atelier.CouleurCartes[3])
+            {
+                g.ModifierSeed(4);
+            }
         }
 
         public override void Initialize()
         {
+           
             Longueur = 100f;
             Largeur = 50;
+            Hitbox = new BoundingBox(new Vector3(-Longueur / coeff_Surface, -Largeur / 2, -10), new Vector3(Longueur / coeff_Surface, Largeur / 2, 10));
+
+            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", 0.045f, Vector3.Zero, new Vector3(-Longueur/2 + 10, -1, -Largeur/2 + 10)));
+            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", 0.055f, Vector3.Zero, new Vector3(-Longueur / 4 + 10, -1, -Largeur / 2 + 10)));
+            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", 0.05f, Vector3.Zero, new Vector3(Longueur / 2 - 10, -1, -Largeur / 2 + 10)));
+            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", 0.06f, Vector3.Zero, new Vector3(Longueur / 4 - 10, -1, -Largeur / 2 + 10)));
+            DrawOrder = 1;
 
             LIMITE_MAP = new Vector4(150, -150, 100, -100);
             LIMITE_PLAQUETTE = new Vector4(Origine.X + Longueur / 2, Origine.X - Longueur / 2,(Origine.Y + LIMITE_MAP.Z)/3, 0);
             Plateformes = new List<Plaquette>();
             InitialiserPtsSommets();
             InitialiserSommets();
+            IntervallesSurfaces = new List<Vector3>();
+            IntervallesSurfaces.Add(new Vector3(PtsSommets[0].X, PtsSommets[4].X, Origine.Y));
             Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
             Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
-            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 2, Origine.Y + 2*hauteur, Origine.Z), Couleur));
-            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 2, Origine.Y + 2 * hauteur, Origine.Z), Couleur));
-            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X, Origine.Y + 2 * hauteur, Origine.Z), Couleur));
-            foreach(Plaquette p in Plateformes)
+            foreach (Plaquette p in Plateformes)
             {
                 p.Initialize();
+            }
+            GénérerPlateformes();
+            //Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 2, Origine.Y + 2*hauteur, Origine.Z), Couleur));
+            //Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 2, Origine.Y + 2 * hauteur, Origine.Z), Couleur));
+            //Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X, Origine.Y + 2 * hauteur, Origine.Z), Couleur));
+            foreach (Plaquette p in Plateformes)
+            {
+                Game.Components.Add(p);
             }
             CalculerPropriétésPourPersonnages();
 
             base.Initialize();
+        }
+        void GénérerPlateformes()
+        {
+            float x;
+            float y;
+            for(int i = 0; i< NbPlateformes; ++i)
+            {
+                do
+                {
+                    x = g.GénérerFloatAléatoire(LIMITE_MAP.X + 25, LIMITE_MAP.W-25);
+                    y = g.GénérerFloatAléatoire(LIMITE_MAP.Z+25, LIMITE_MAP.Y-25);
+                } while (!EmplacementValide(x, y));
+
+                int positifOuNégatif = g.GénérerEntierAléatoire(1, 3);
+                if(positifOuNégatif == 2)
+                    Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + x, Origine.Y + y, Origine.Z), Couleur));
+                else
+                    Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - x, Origine.Y + y, Origine.Z), Couleur));
+                
+            }
+        }
+        bool EmplacementValide(float x, float y)//À REDÉFINIR.
+        {
+            if(Plateformes.Count != 0)
+            {
+                foreach(Plaquette p in Plateformes)
+                {
+                    if ((EstDistanceAcceptable(new Vector3(x, y, 0), new Vector3(p.IntervallesSurfaces.X, p.IntervallesSurfaces.Z, 0))))
+                    {
+                        break;
+                    }
+                }
+               
+                foreach(Plaquette p  in Plateformes)
+                {
+                    if (p.Hitbox.Intersects(new BoundingBox(new Vector3(x - Plaquette.LONGUEUR / 2, y - Plaquette.HAUTEUR, Plaquette.LARGEUR / 2), new Vector3(x + Plaquette.LONGUEUR / 2, y, -Plaquette.LARGEUR / 2))) || y > 50 || y<15)
+                     {
+                        return false;
+                     }
+                }
+                
+                return true;
+            }
+            if ((EstDistanceAcceptable(new Vector3(x, y, 0), Vector3.Zero) && !Hitbox.Intersects(new BoundingBox(new Vector3(x - Plaquette.LONGUEUR / 2, y - Plaquette.HAUTEUR, Plaquette.LARGEUR / 2), new Vector3(x + Plaquette.LONGUEUR / 2, y, -Plaquette.LARGEUR / 2))) && y <= 50 && y >= 15))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        bool EstDistanceAcceptable(Vector3 v, Vector3 u)
+        {
+            return Vector3.Distance(v,u) <= 2*Plaquette.LONGUEUR + Graphe.DISTANCE_MAX && Vector3.Distance(v,u) >= 2*Plaquette.LONGUEUR+ Graphe.DISTANCE_MIN;
         }
         void InitialiserPtsSommets()
         {
@@ -122,17 +217,12 @@ namespace AtelierXNA
         }
         void CalculerPropriétésPourPersonnages()
         { 
-            IntervallesSurfaces = new List<Vector3>();
-            VecteurGauche = PtsSommets[0] - PtsSommets[4];
             
-
+            VecteurGauche = PtsSommets[0] - PtsSommets[4];
             foreach(Plaquette p in Plateformes)//Pour faire que ce sont des obstacles.
             {
                 IntervallesSurfaces.Add(p.IntervallesSurfaces);
             }
-            IntervallesSurfaces.Add(new Vector3(PtsSommets[0].X, PtsSommets[4].X, Origine.Y));
-
-            
             Nodes = new List<Node>();
             for (int i = 0; i < NB_NODES; ++i)
             {
@@ -175,11 +265,7 @@ namespace AtelierXNA
             GraphicsDevice.RasterizerState = état;
 
             foreach (EffectPass passeEffet in EffetDeBase.CurrentTechnique.Passes)
-            {
-                foreach(Plaquette p in Plateformes)
-                {
-                    p.Draw(gameTime);
-                }
+            {               
                 passeEffet.Apply();
                 GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, Sommets, 0, NB_TRIANGLE_SURFACE);
                 GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, SommetsBase, 0, NB_TRIANGLE_BASE);

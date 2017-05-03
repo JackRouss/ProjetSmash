@@ -59,6 +59,7 @@ namespace AtelierXNA.Menus
 
         public override void Initialize()
         {
+            DrawOrder = 6;
             GestionnaireFonts = Game.Services.GetService(typeof(RessourcesManager<SpriteFont>)) as RessourcesManager<SpriteFont>;
             GestionSprites = Game.Services.GetService(typeof(SpriteBatch)) as SpriteBatch;
             GestionInputClavier = Game.Services.GetService(typeof(InputManager)) as InputManager;

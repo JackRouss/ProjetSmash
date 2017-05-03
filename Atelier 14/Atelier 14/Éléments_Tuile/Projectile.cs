@@ -47,6 +47,7 @@ namespace AtelierXNA.Éléments_Tuile
         }
         public override void Initialize()
         {
+            DrawOrder = 4;
             ADetruire = false;
             CalculerMatriceMonde();
             base.Initialize();
@@ -108,6 +109,10 @@ namespace AtelierXNA.Éléments_Tuile
         public bool EstEnCollision(Personnage personnage)
         {
             return SphèreDeCollision.Intersects(personnage.HitBox);
+        }
+        public bool EstEnCollision(BoundingSphere h)
+        {
+            return SphèreDeCollision.Intersects(h);
         }
         protected override void CalculerMatriceMonde()
         {

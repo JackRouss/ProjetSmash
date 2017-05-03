@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Menus;
 using AtelierXNA.Éléments_Tuile;
 using AtelierXNA.AI;
+using AtelierXNA.Autres;
 
 namespace AtelierXNA
 {
@@ -23,7 +24,7 @@ namespace AtelierXNA
         const float INTERVALLE_MAJ_ANIMATION = 1f / 25f;
         readonly string[] NomCartes = { "BackGround1", "BackGround2", "BackGround3", "BackGround4" };
         readonly Vector2[] DimensionCarte = { new Vector2(843, 316),new Vector2(844, 358), new Vector2(844, 364), new Vector2(844, 362) };
-        readonly Color[] CouleurCartes = { Color.ForestGreen, Color.DeepSkyBlue, Color.Beige, Color.YellowGreen };
+        public static readonly Color[] CouleurCartes = { Color.ForestGreen, Color.DeepSkyBlue, Color.Beige, Color.YellowGreen };
         PlayerIndex[] Joueurs = { PlayerIndex.One, PlayerIndex.Two};
         bool[] ConnectionJoueur { get; set; }
         bool PvP { get; set; }
@@ -42,7 +43,7 @@ namespace AtelierXNA
         public int[] NB_FRAMES_SPRITES_ROBOT = { 8, 9, 10, 10, 10, 10, 8, 5, 8, 10, 4 };
         public int[] NB_FRAMES_SPRITES_NINJA = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
 
-
+        const int NB_PLATEFORMES = 10;
         enum GameState { MENU_PRINCIPAL, MENU_PERSONNAGE, MENU_DIFFICULTÉ, MENU_CARTE, MENU_PAUSE, JEU , FIN_JEU, MENU_PvP}
 
 
@@ -56,9 +57,8 @@ namespace AtelierXNA
         RessourcesManager<Model> GestionnaireDeModèles { get; set; }
         RessourcesManager<SoundEffect> GestionnaireDeSons { get; set; }
         RessourcesManager<Song> GestionnaireDeChansons { get; set; }
+        Générateur g { get; set; }
         RessourcesManager<Effect> GestionnaireDeShaders { get; set; }
-
-
 
 
 
@@ -104,8 +104,10 @@ namespace AtelierXNA
             PériphériqueGraphique.SynchronizeWithVerticalRetrace = false;
             IsFixedTimeStep = false;
             IsMouseVisible = true;
+            g = new Générateur();
+            Services.AddService(typeof(Générateur), g);
         }
-        
+
 
         protected override void Initialize()
         {
@@ -115,7 +117,7 @@ namespace AtelierXNA
             ConnectionManette();
             InitialiserJoueur();
             base.Initialize();
-            //MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
+            MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
         }
 
         void InitialiserJoueur()
@@ -153,7 +155,8 @@ namespace AtelierXNA
         }
         private void ChargerModèles()
         {
-
+            GestionnaireDeModèles.Add("LP_tree",this.Content.Load<Model>("Models/LP_tree"));
+            GestionnaireDeModèles.Add("tree", this.Content.Load<Model>("Models/tree"));
         }
         private void ChargerTextures()
         {
@@ -249,7 +252,6 @@ namespace AtelierXNA
                 AjouterJoueursPvBot();
 
             }
-
             base.Initialize();
         }
         void AjouterCaméra()
@@ -260,7 +262,7 @@ namespace AtelierXNA
         }
         void AjouterCarte()
         {
-            Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero, CouleurCartes[MenuCa.ChoixCarte]);
+            Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero, CouleurCartes[MenuCa.ChoixCarte],NB_PLATEFORMES);
             Components.Add(Carte);
 
         }
@@ -368,7 +370,7 @@ namespace AtelierXNA
         {
             ToggleComponentsUpdate();
 
-        }
+            }
 
         void InitialiserMenuPvP()
         {
@@ -460,11 +462,11 @@ namespace AtelierXNA
                         }
                         else
                         {
-                            ÉtatJeu = GameState.MENU_CARTE;
-                            MenuPerso.PasserMenuSuivant = false;
-                            InitialiserMenuCartes();
+                        ÉtatJeu = GameState.MENU_CARTE;
+                        MenuPerso.PasserMenuSuivant = false;
+                        InitialiserMenuCartes();
 
-                        }
+                    }
                        
                     }
                     break;
@@ -557,7 +559,7 @@ namespace AtelierXNA
             if (ÉtatJeu == GameState.JEU && AChangéÉtat)
             {
                 MediaPlayer.Stop();
-                //MediaPlayer.Play(GestionnaireDeChansons.Find("Cyborg Ninja"));
+                MediaPlayer.Play(GestionnaireDeChansons.Find("Cyborg Ninja"));
             }
         }
 

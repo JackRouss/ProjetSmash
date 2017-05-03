@@ -21,6 +21,7 @@ namespace AtelierXNA
 
       protected override void LoadContent()
       {
+            DrawOrder = 5;
          GestionSprites = Game.Services.GetService(typeof(SpriteBatch)) as SpriteBatch;
          GestionnaireDeTextures = Game.Services.GetService(typeof(RessourcesManager<Texture2D>)) as RessourcesManager<Texture2D>;
          Image = GestionnaireDeTextures.Find(NomImage);

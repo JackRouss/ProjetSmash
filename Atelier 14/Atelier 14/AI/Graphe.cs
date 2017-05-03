@@ -9,7 +9,8 @@ namespace AtelierXNA.AI
 {
     public class Graphe
     {
-        const int DISTANCE_MAX = 25;
+        public const float DISTANCE_MAX = 25f;
+        public const float DISTANCE_MIN = 10f;
         List<Node> GrapheComplet { get; set; }
         List<Vector3> Intervalles { get; set; }
         public int[,] MatriceAdjacence { get; private set; }
@@ -24,7 +25,7 @@ namespace AtelierXNA.AI
             List<Node> liste = new List<Node>();
             foreach (Node n in GrapheComplet)
             {
-                Node q = new Node(n.GetPosition(), n.Index);
+                Node q = new Node(n);
                 liste.Add(q);
             }
             return liste;
@@ -33,27 +34,29 @@ namespace AtelierXNA.AI
         {
             GrapheComplet = new List<Node>();
             int cpt = 0;
-            int cptPlaquette = -1;
+            int cptPlaquette = 0;
 
             foreach (Plaquette p in plaquettes)
             {
-                cptPlaquette++;
+                ++cptPlaquette;
                 foreach (Node node in p.Nodes)
                 {
                     node.Index = cpt;
+                    node.DonnéNomPlaquette(cptPlaquette);
                     GrapheComplet.Add(node);
                     ++cpt;
-                    node.DonnéNomPlaquette(cptPlaquette);
+                    
                 }
             }
 
-            cptPlaquette++;
+            ++cptPlaquette;
             foreach (Node node in nodesCarte)
             {
                 node.Index = cpt;
+                node.DonnéNomPlaquette(cptPlaquette);
                 GrapheComplet.Add(node);
                 ++cpt;
-                node.DonnéNomPlaquette(cptPlaquette);
+                
             }
 
             MatriceAdjacence = new int[GrapheComplet.Count, GrapheComplet.Count];
@@ -66,13 +69,18 @@ namespace AtelierXNA.AI
                 {
                     Node nodeActuelle = GrapheComplet.First(t => t.Index == i);
                     Node nodeVerifier = GrapheComplet.First(t => t.Index == j);
+                 
                     MatriceAdjacence[i, j] = nodeActuelle.NomPlaquette == nodeVerifier.NomPlaquette ? 1 : 0;
                     if(MatriceAdjacence[i,j] != 1 && Vector3.Distance(nodeActuelle.GetPosition(), nodeVerifier.GetPosition()) <= DISTANCE_MAX)
                     {
-                        if(nodeActuelle.EstExtremiterGauche || nodeVerifier.EstExtremiterGauche)
+                        if ((nodeActuelle.EstExtremiterGauche ))
+                        {
                             MatriceAdjacence[i, j] = (nodeVerifier.GetPosition().Y <= nodeActuelle.GetPosition().Y && nodeVerifier.GetPosition().X <= nodeActuelle.GetPosition().X) ? 1 : 0;
-                        else if(nodeActuelle.EstExtremiterDroite || nodeVerifier.EstExtremiterDroite)
+                        }
+                        else if(nodeActuelle.EstExtremiterDroite )
+                        {
                             MatriceAdjacence[i, j] = (nodeVerifier.GetPosition().Y <= nodeActuelle.GetPosition().Y && nodeVerifier.GetPosition().X >= nodeActuelle.GetPosition().X) ? 1 : 0;
+                        }
                         else
                              MatriceAdjacence[i, j] = nodeActuelle.GetPosition().Y <= nodeVerifier.GetPosition().Y ? 1 : 0;
                     }

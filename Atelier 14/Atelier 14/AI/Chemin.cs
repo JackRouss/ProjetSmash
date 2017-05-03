@@ -88,18 +88,32 @@ namespace AtelierXNA.AI
         private List<Node> ReconstruireChemin(Node current)
         {
             List<Node> chemin = new List<Node>();
-            Node evaluated = current;
+            Node evaluated = new Node(current);
 
             while (evaluated != null)
             {
                 chemin.Add(evaluated);
-                evaluated = evaluated.GetCameFrom();
+                if (evaluated.CameFrom != null)
+                    evaluated = new Node(evaluated.CameFrom);
+                else
+                    evaluated = null;
             }
             if(chemin.Find(t => t.Index == Départ.Index) == null)
                 chemin.Add(Départ);//PEUT ÊTRE À ENLEVER
             
             chemin.Reverse();
             return chemin;
+        }
+        public List<Node> CopierChemin()
+        {
+            List<Node> c = new List<Node>();
+            Node b;
+            foreach(Node n in CheminLePlusCourt)
+            {
+                b = new Node(n);
+                c.Add(b);
+            }
+            return c;
         }
         private float CalculerG(Node current, Node voisin)
         {
