@@ -21,6 +21,7 @@ namespace AtelierXNA.Éléments_Tuile
         RessourcesManager<Effect> GestionnaireDeShaders { get; set; }
         VertexBuffer VB;
         CaméraDePoursuite CaméraTuile { get; set; }
+        InputManager GestionClavier { get; set; }
 
         Vector2 pan = new Vector2(0.25f, 0);
         float zoom = 3;
@@ -43,14 +44,15 @@ namespace AtelierXNA.Éléments_Tuile
         }
         protected override void LoadContent()
         {
+            GestionClavier = Game.Services.GetService(typeof(InputManager)) as InputManager;
             GestionnaireDeShaders = Game.Services.GetService(typeof(RessourcesManager<Effect>)) as RessourcesManager<Effect>;
 
             julia = GestionnaireDeShaders.Find("Julia");
-         CaméraTuile = Game.Components.First(t => t is CaméraDePoursuite) as CaméraDePoursuite;
+            CaméraTuile = Game.Components.First(t => t is CaméraDePoursuite) as CaméraDePoursuite;
 
 
 
-         base.LoadContent();
+            base.LoadContent();
         }
 
         /// <summary>
@@ -66,6 +68,13 @@ namespace AtelierXNA.Éléments_Tuile
 
             if (pad.Buttons.B == ButtonState.Pressed)
                 zoom *= 1.05f;
+
+            //if(GestionClavier.EstNouvelleTouche(Keys.Q))
+            //    zoom /= 1.05f;
+            //if(GestionClavier.EstNouvelleTouche(Keys.E))
+            //    zoom *= 1.05f;
+
+
 
             float panSensitivity = 0.01f * (float)Math.Log(zoom + 1);
 

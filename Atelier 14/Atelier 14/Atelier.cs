@@ -99,7 +99,11 @@ namespace AtelierXNA
         #region Initialisation.
         public Atelier()
         {
+            
             PériphériqueGraphique = new GraphicsDeviceManager(this);
+            //this.PériphériqueGraphique.PreferredBackBufferWidth = this.Window.ClientBounds.Width;
+            //this.PériphériqueGraphique.PreferredBackBufferHeight = this.Window.ClientBounds.Height;
+            //this.PériphériqueGraphique.IsFullScreen = true;
             Content.RootDirectory = "Content";
             PériphériqueGraphique.SynchronizeWithVerticalRetrace = false;
             IsFixedTimeStep = false;
@@ -544,6 +548,7 @@ namespace AtelierXNA
         void EnleverServices()
         {
             Services.RemoveService(typeof(RessourcesManager<SoundEffect>));
+            Services.RemoveService(typeof(RessourcesManager<Effect>));
             Services.RemoveService(typeof(RessourcesManager<Song>));
             Services.RemoveService(typeof(RessourcesManager<SpriteFont>));
             Services.RemoveService(typeof(RessourcesManager<Texture2D>));
@@ -559,7 +564,7 @@ namespace AtelierXNA
             if (ÉtatJeu == GameState.JEU && AChangéÉtat)
             {
                 MediaPlayer.Stop();
-                MediaPlayer.Play(GestionnaireDeChansons.Find("Cyborg Ninja"));
+                //MediaPlayer.Play(GestionnaireDeChansons.Find("Cyborg Ninja"));
             }
         }
 

@@ -20,25 +20,9 @@ namespace AtelierXNA.AI
 
         //Constantes normales
         const float INTERVALLE_MAJ_BOT = 1 / 240f;
-        const float P_FRAPPER = 0.1f;
-        const float P_SHIELD = 0.1f;
-        const float P_LANCER = 0.1f;
-
-        bool Attente { get; set; }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        const float P_FRAPPER = 0.07f;
+        const float P_SHIELD = 0.05f;
+        const float P_LANCER = 0.01f;
         enum ÉTATS { OFFENSIVE, DÉFENSIVE, NEUTRE };
         ÉTATS ÉtatBot { get; set; }
 
@@ -101,7 +85,6 @@ namespace AtelierXNA.AI
                     Bloquer();
                     Lancer();
                     Survivre();
-
                 }
                 else if (ÉtatBot == ÉTATS.NEUTRE)
                 {
@@ -134,10 +117,27 @@ namespace AtelierXNA.AI
 
         private void RevenirSurSurface()
         {
-            if (Position.X > IntervalleCourante.Y)
-                Gauche();
-            else if (Position.X < IntervalleCourante.X)
-                Droite();
+            if (!EstDansIntervalleSurface(IntervalleCourante, Position))
+            {
+                Node n = CalculerNodeLePlusProche(Position, GrapheDéplacements.GetGrapheComplet());
+                if (CptSaut == 0)
+                {
+                    GérerSauts();
+                }
+                else if (VecteurVitesse.Y == 0)
+                {
+                    GérerSauts();
+                }
+
+                if (n.GetPosition().X < Position.X)
+                {
+                    Gauche();
+                }
+                else if (n.GetPosition().X > Position.X)
+                {
+                    Droite();
+                }
+            }
         }
 
         private void Éviter(Projectile p)
@@ -145,8 +145,7 @@ namespace AtelierXNA.AI
         }
         protected override void Bloquer()
         {
-
-            if ((Joueur.EstEnAttaque && Joueur.EstEnCollision(this)) || ProjectileInRange() && g.NextFloat() <= P_SHIELD)
+            if(((Joueur.EstEnAttaque && Joueur.EstEnCollision(this)) || ProjectileInRange() && g.NextFloat() <= P_SHIELD)&&!EstEnSaut)
                 base.Bloquer();
         }
         private bool ProjectileInRange()
@@ -182,13 +181,15 @@ namespace AtelierXNA.AI
         }
         private void Lancer()
         {
-            if (new BoundingSphere(new Vector3(0, Joueur.GetPositionPersonnage.Y, 0), HAUTEUR_HITBOX).Intersects(new BoundingSphere(new Vector3(0, HitBox.Center.Y, 0), HAUTEUR_HITBOX)) && g.NextFloat() <= P_LANCER)
+            if (new BoundingSphere(new Vector3(0, Joueur.GetPositionPersonnage.Y + 5, 0), HAUTEUR_HITBOX).Intersects(new BoundingSphere(new Vector3(0, HitBox.Center.Y, 0), HAUTEUR_HITBOX)) && g.NextFloat() <= P_LANCER)
             {
                 if (Joueur.GetPositionPersonnage.X <= Position.X)
-                    DIRECTION = ORIENTATION.GAUCHE;
+                    Gauche();
                 else
-                    DIRECTION = ORIENTATION.DROITE;
+                    Droite();
                 GérerLancer();
+                EstEnAttaque = true;
+                ÉTAT_PERSO = ÉTAT.LANCER;
             }
         }
 
@@ -233,7 +234,7 @@ namespace AtelierXNA.AI
             else
             {
                 Position = new Vector3(TargetNode.GetPosition().X, Position.Y, Position.Z);
-                if (TargetNode.EstExtremiterDroite && CheminLePlusCourt.Count >=2)
+                if (TargetNode.EstExtremiterDroite && CheminLePlusCourt.Count >= 2)
                 {
                     Droite();
                 }
