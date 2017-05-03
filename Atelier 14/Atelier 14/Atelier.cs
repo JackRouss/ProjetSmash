@@ -22,9 +22,9 @@ namespace AtelierXNA
         public const float INTERVALLE_CALCUL_FPS = 1f;
         public const float INTERVALLE_MAJ_STANDARD = 1f / 60f;
         const float INTERVALLE_MAJ_ANIMATION = 1f / 25f;
-        readonly string[] NomCartes = { "BackGround1", "BackGround2", "BackGround3", "BackGround4" };
-        readonly Vector2[] DimensionCarte = { new Vector2(843, 316),new Vector2(844, 358), new Vector2(844, 364), new Vector2(844, 362) };
-        public static readonly Color[] CouleurCartes = { Color.ForestGreen, Color.DeepSkyBlue, Color.Beige, Color.YellowGreen };
+        readonly string[] NomCartes = { "BackGround1", "BackGround2", "BackGround3", "BackGround4", "BackGround5", "BackGround6"};
+        readonly Vector2[] DimensionCarte = { new Vector2(843, 316),new Vector2(844, 358), new Vector2(844, 364), new Vector2(844, 362), new Vector2(844, 362) , new Vector2(844, 362) };
+        public static readonly Color[] CouleurCartes = { Color.ForestGreen, Color.DeepSkyBlue, Color.Beige, Color.YellowGreen, Color.AliceBlue, Color.Aquamarine };
         PlayerIndex[] Joueurs = { PlayerIndex.One, PlayerIndex.Two};
         bool[] ConnectionJoueur { get; set; }
         bool PvP { get; set; }
@@ -234,16 +234,23 @@ namespace AtelierXNA
 
         void InitialiserJeu()
         {
-            Components.Remove(MenuDiff);
 
 
 
             AjouterCaméra();
-            //BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], NomCartes[MenuCa.ChoixCarte], 0);
-            //Components.Add(BackGround);
+            if(MenuCa.ChoixCarte == 4)
+            {
+                julia = new TuileTexturéeAniméeJulia(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], "Fond_blanc.svg", 0);
+                Components.Add(julia);
 
-            julia = new TuileTexturéeAniméeJulia(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], "Fond_blanc.svg", 0);
-            Components.Add(julia);
+            }
+            else
+            {
+                BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], NomCartes[MenuCa.ChoixCarte], 0);
+                Components.Add(BackGround);
+
+            }
+
 
 
             AjouterCarte();
@@ -385,7 +392,7 @@ namespace AtelierXNA
 
         void InitialiserFinJeux(PersonnageAnimé mort)
         {
-            Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 0.4f, mort.TypePersonnage);
+            Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 0.4f, mort.NumManette.ToString());
 
             ÉtatJeu = GameState.FIN_JEU;
             ToggleComponentsUpdate();
@@ -423,18 +430,18 @@ namespace AtelierXNA
                     if (Menu.PasserMenuSuivant)
                     {
                         //if (ConnectionJoueur[1])
-                        if(true)
-                        {
+                        //if(true)
+                        //{
                             ÉtatJeu = GameState.MENU_PvP;
                             Menu.PasserMenuSuivant = false;
                             InitialiserMenuPvP();
-                        }
-                        else
-                        {
-                            ÉtatJeu = GameState.MENU_PERSONNAGE;
-                            Menu.PasserMenuSuivant = false;
-                            InitialiserMenuPersonnages(Joueurs[cptJoueur]);
-                        }
+                        //}
+                        //else
+                        //{
+                        //    ÉtatJeu = GameState.MENU_PERSONNAGE;
+                        //    Menu.PasserMenuSuivant = false;
+                        //    InitialiserMenuPersonnages(Joueurs[cptJoueur]);
+                        //}
                        
                     }
                     break;
@@ -477,9 +484,18 @@ namespace AtelierXNA
                 case GameState.MENU_CARTE:
                     if (MenuCa.PasserMenuSuivant)
                     {
-                        ÉtatJeu = GameState.MENU_DIFFICULTÉ;
-                        MenuPerso.PasserMenuSuivant = false;
-                        InitialiserMenuDifficulté();
+                        if (MenuJoueurs.PvBotActiver)
+                        {
+                            ÉtatJeu = GameState.MENU_DIFFICULTÉ;
+                            MenuPerso.PasserMenuSuivant = false;
+                            InitialiserMenuDifficulté();
+                        }
+                        else
+                        {
+                            ÉtatJeu = GameState.JEU;
+                            MenuPerso.PasserMenuSuivant = false;
+                            InitialiserJeu();
+                        }
                     }
                     break;
                 case GameState.MENU_DIFFICULTÉ:
@@ -487,6 +503,7 @@ namespace AtelierXNA
                     {
                         ÉtatJeu = GameState.JEU;
                         MenuDiff.PasserMenuSuivant = false;
+                        Components.Remove(MenuDiff);
                         InitialiserJeu();
                     }
                     break;
@@ -533,6 +550,29 @@ namespace AtelierXNA
                     }
                     break;
                 case GameState.FIN_JEU:
+                    if (Fin.Recommencer)
+                    {
+                        ÉtatJeu = GameState.JEU;
+                        Fin.Recommencer = false;
+                        Components.Remove(Fin);
+                        if (PvP)
+                        {
+                            AjouterJoueursPvP();
+                        }
+                        else
+                        {
+                            AjouterJoueursPvBot();
+
+                        }
+                    }
+                    if (Fin.RetournerMenuPrincipale)
+                    {
+                        ÉtatJeu = GameState.MENU_PRINCIPAL;
+                        Components.Clear();
+                        EnleverServices();
+                        Initialize();
+                        Fin.RetournerMenuPrincipale = false;
+                    }
                     break;
             }
             if (AncienÉtatJeu != ÉtatJeu)
@@ -553,10 +593,40 @@ namespace AtelierXNA
             Services.RemoveService(typeof(RessourcesManager<SpriteFont>));
             Services.RemoveService(typeof(RessourcesManager<Texture2D>));
             Services.RemoveService(typeof(RessourcesManager<Model>));
+            Services.RemoveService(typeof(RessourcesManager<Effect>));
             Services.RemoveService(typeof(InputControllerManager));
             Services.RemoveService(typeof(InputManager));
             Services.RemoveService(typeof(SpriteBatch));
             Services.RemoveService(typeof(Caméra));
+        }
+
+        void EnleverCeQuiFautEnlever()
+        {
+            //Services.RemoveService(typeof(Caméra));
+            //if (MenuCa.ChoixCarte == 4)
+            //{
+            //    Components.Remove(julia);
+            //}
+            //else
+            //{
+            //    Components.Remove(BackGround);
+            //}
+            //Components.Remove(Carte);
+
+            Components.Remove(Joueur);
+            if (PvP)
+            {
+                Components.Remove(Joueur2);
+            }
+            else
+            {
+                Components.Remove(Bot);
+
+            }
+            //Components.Remove(Fin);
+            //Components.Remove(Interface);
+
+
         }
 
         void GérerMusique()

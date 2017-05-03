@@ -113,6 +113,7 @@ namespace AtelierXNA.Menus
             for (int i = 0; i < NomDesCartes.Length; i++)
             {
                 Cartes[i] = GestionnaireDeTextures.Find(NomDesCartes[i]);
+               
             }
             BackGroundChoix = GestionnaireDeTextures.Find("Fond_blanc.svg");
         }
