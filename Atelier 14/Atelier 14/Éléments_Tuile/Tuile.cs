@@ -12,9 +12,11 @@ namespace AtelierXNA
       protected Vector3 Origine { get; private set; }
       protected Vector2 Delta { get; set; }
       protected BasicEffect EffetDeBase { get; private set; }
+        protected SpriteBatch spriteBatch { get; set; }
 
 
-      public Tuile(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, Vector2 étendue, float intervalleMAJ)
+
+        public Tuile(Game jeu, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, Vector2 étendue, float intervalleMAJ)
          : base(jeu, homothétieInitiale, rotationInitiale, positionInitiale, intervalleMAJ)
       {
          Delta = new Vector2(étendue.X, étendue.Y);
@@ -25,7 +27,8 @@ namespace AtelierXNA
       {
          NbSommets = NB_TRIANGLES + 2;
          PtsSommets = new Vector3[2, 2];
-         CréerTableauSommets();
+            spriteBatch = Game.Services.GetService(typeof(SpriteBatch)) as SpriteBatch;
+            CréerTableauSommets();
          CréerTableauPoints();
          base.Initialize();
       }
@@ -36,7 +39,8 @@ namespace AtelierXNA
       {
          EffetDeBase = new BasicEffect(GraphicsDevice);
          InitialiserParamètresEffetDeBase();
-         base.LoadContent();
+
+            base.LoadContent();
       }
 
       protected abstract void InitialiserParamètresEffetDeBase();
@@ -62,6 +66,7 @@ namespace AtelierXNA
             foreach (EffectPass passeEffet in EffetDeBase.CurrentTechnique.Passes)
             {
                 passeEffet.Apply();
+                SetVertexBuffer(spriteBatch.GraphicsDevice);
                 DessinerTriangleStrip();
             }
             base.Draw(gameTime);
@@ -69,6 +74,7 @@ namespace AtelierXNA
             GraphicsDevice.RasterizerState = oldRasterizerState;
         }
         protected abstract void DessinerTriangleStrip();
+        protected abstract void SetVertexBuffer(GraphicsDevice device);
    }
 }
 

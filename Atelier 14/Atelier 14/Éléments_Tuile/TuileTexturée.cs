@@ -48,6 +48,7 @@ namespace AtelierXNA
                Sommets[++NoSommet] = new VertexPositionTexture(PtsSommets[i, j + 1], PtsTexture[i, j + 1]);
             }
          }
+            SetUpVertexBuffer();
       }
 
       protected override void LoadContent()
@@ -78,5 +79,16 @@ namespace AtelierXNA
             PtsSommets[1, 1] = buffer;
             InitialiserSommets();
         }
+        protected virtual void SetUpVertexBuffer()
+        {
+
+        }
+        
+       
+        protected override void SetVertexBuffer(GraphicsDevice device)
+        {
+
+        }
+
     }
 }

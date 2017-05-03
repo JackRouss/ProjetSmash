@@ -56,6 +56,8 @@ namespace AtelierXNA
         RessourcesManager<Model> GestionnaireDeModèles { get; set; }
         RessourcesManager<SoundEffect> GestionnaireDeSons { get; set; }
         RessourcesManager<Song> GestionnaireDeChansons { get; set; }
+        RessourcesManager<Effect> GestionnaireDeShaders { get; set; }
+
 
 
 
@@ -84,6 +86,7 @@ namespace AtelierXNA
         PersonnageAnimé Joueur2 { get; set; }
         PersonnageAnimé Bot { get; set; }
         Map Carte { get; set; }
+        TuileTexturéeAniméeJulia julia { get; set; }
         TuileTexturée BackGround { get; set; }
         ArrièrePlanDéroulant ArrièrePlan { get; set; }
         bool VieilÉtatCollisionPerso { get; set; }
@@ -194,10 +197,12 @@ namespace AtelierXNA
             GestionManettes = new InputControllerManager(this);
             GestionnaireDeChansons = new RessourcesManager<Song>(this, "Songs");
             GestionnaireDeSons = new RessourcesManager<SoundEffect>(this, "Sounds");
+            GestionnaireDeShaders = new RessourcesManager<Effect>(this, "Effets");
 
 
             Services.AddService(typeof(RessourcesManager<SoundEffect>), GestionnaireDeSons);
             Services.AddService(typeof(RessourcesManager<Song>), GestionnaireDeChansons);
+            Services.AddService(typeof(RessourcesManager<Effect>), GestionnaireDeShaders);
             Services.AddService(typeof(RessourcesManager<SpriteFont>), GestionnaireDeFonts);
             Services.AddService(typeof(RessourcesManager<Texture2D>), GestionnaireDeTextures);
             Services.AddService(typeof(RessourcesManager<Model>), GestionnaireDeModèles);
@@ -227,9 +232,11 @@ namespace AtelierXNA
 
 
             AjouterCaméra();
-            BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], NomCartes[MenuCa.ChoixCarte], 0);
-            Components.Add(BackGround);
+            //BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], NomCartes[MenuCa.ChoixCarte], 0);
+            //Components.Add(BackGround);
 
+            julia = new TuileTexturéeAniméeJulia(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], "Fond_blanc.svg", 0);
+            Components.Add(julia);
 
 
             AjouterCarte();
@@ -255,6 +262,7 @@ namespace AtelierXNA
         {
             Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero, CouleurCartes[MenuCa.ChoixCarte]);
             Components.Add(Carte);
+
         }
         void AjouterJoueursPvBot()
         {
@@ -439,6 +447,8 @@ namespace AtelierXNA
                 case GameState.MENU_PERSONNAGE:
                     if (MenuPerso.PasserMenuSuivant)
                     {
+                        Components.Remove(MenuPerso);
+                        
                         ChoixJoueurs[cptJoueur] = MenuPerso.État;
                         cptJoueur++;
                         if (MenuJoueurs.PvPActiver)
