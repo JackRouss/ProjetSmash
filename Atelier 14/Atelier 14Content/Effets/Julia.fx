@@ -4,6 +4,22 @@ float Zoom = 3;
 float Aspect = 1;
 float2 JuliaSeed = float2(0.39, -0.2);
 float3 ColorScale = float3(4, 5, 6);
+float4x4 MatrixTransform;
+//texture Texture;
+//
+////-------------------------------- STRUCTURES --------------------------------
+//
+//// Déclaration de la structure du format de la texture, aucun filtre dans le cas présent
+//sampler FormatTexture = sampler_state
+//{
+//	Texture = (Texture);
+//};
+
+void SpriteVertexShader(inout float2 texCoord : TEXCOORD0,
+	inout float4 position : SV_Position)
+{
+	position = mul(position, MatrixTransform);
+}
 
 float ComputeValue(float2 v, float2 offset)
 {
@@ -53,6 +69,7 @@ technique Mandelbrot
 {
 	pass
 	{
+		VertexShader = compile vs_3_0 SpriteVertexShader();
 		PixelShader = compile ps_3_0 Mandelbrot_PixelShader();
 	}
 }
@@ -61,6 +78,7 @@ technique Julia
 {
 	pass
 	{
+		VertexShader = compile vs_3_0 SpriteVertexShader();
 		PixelShader = compile ps_3_0 Julia_PixelShader();
 	}
 }

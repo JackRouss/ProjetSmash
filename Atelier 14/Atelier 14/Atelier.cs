@@ -117,7 +117,7 @@ namespace AtelierXNA
             ConnectionManette();
             InitialiserJoueur();
             base.Initialize();
-            MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
+            //MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
         }
 
         void InitialiserJoueur()
