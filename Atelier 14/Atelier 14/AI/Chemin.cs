@@ -9,7 +9,6 @@ namespace AtelierXNA.AI
 {
     public class Chemin
     {
-        //https://www.youtube.com/watch?v=KNXfSOx4eEE, https://en.wikipedia.org/wiki/A*_search_algorithm
         //Données initiales.
         Node Départ { get; set; }
         Node Arrivée { get; set; }
@@ -39,7 +38,7 @@ namespace AtelierXNA.AI
 
             Départ.F = Départ.H;
 
-            while (OpenList.Count != 0)
+            while (OpenList.Count != 0)//Tant qu'il y a des nodes à évaluer.
             {
                 Node current = OpenList.OrderBy(n => n.F).First();
 
@@ -81,7 +80,7 @@ namespace AtelierXNA.AI
                 OpenList.Remove(current);
             }
 
-
+            //On vide les listes pour un prochain appel de la fonction. L'extrant CheminLePlusCourt a été calculé.
             ClosedList.Clear();
             OpenList.Clear();
         }
@@ -99,7 +98,7 @@ namespace AtelierXNA.AI
                     evaluated = null;
             }
             if(chemin.Find(t => t.Index == Départ.Index) == null)
-                chemin.Add(Départ);//PEUT ÊTRE À ENLEVER
+                chemin.Add(Départ);
             
             chemin.Reverse();
             return chemin;

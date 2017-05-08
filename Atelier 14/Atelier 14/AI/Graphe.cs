@@ -18,7 +18,6 @@ namespace AtelierXNA.AI
         {
             Intervalles = new List<Vector3>(carte.IntervallesSurfaces);
             InitialiserGraphe(carte.Plateformes, carte.Nodes);
-            
         }
         public List<Node> GetGrapheComplet()
         {
@@ -36,6 +35,7 @@ namespace AtelierXNA.AI
             int cpt = 0;
             int cptPlaquette = 0;
 
+            //Pour les plaquettes secondaires.
             foreach (Plaquette p in plaquettes)
             {
                 ++cptPlaquette;
@@ -50,13 +50,13 @@ namespace AtelierXNA.AI
             }
 
             ++cptPlaquette;
+            //Pour la carte principale.
             foreach (Node node in nodesCarte)
             {
                 node.Index = cpt;
                 node.DonnéNomPlaquette(cptPlaquette);
                 GrapheComplet.Add(node);
                 ++cpt;
-                
             }
 
             MatriceAdjacence = new int[GrapheComplet.Count, GrapheComplet.Count];
@@ -64,8 +64,8 @@ namespace AtelierXNA.AI
         }
         void RelierNode(List<Plaquette> plaquettes)
         {
-            for (int i = 0; i < MatriceAdjacence.GetLength(0); ++i)//Pour chaque rangée
-                for (int j = 0; j < MatriceAdjacence.GetLength(1); ++j)//Pour chaque colonne.
+            for (int i = 0; i < MatriceAdjacence.GetLength(0); ++i)
+                for (int j = 0; j < MatriceAdjacence.GetLength(1); ++j)
                 {
                     Node nodeActuelle = GrapheComplet.First(t => t.Index == i);
                     Node nodeVerifier = GrapheComplet.First(t => t.Index == j);
@@ -84,12 +84,8 @@ namespace AtelierXNA.AI
                         else
                              MatriceAdjacence[i, j] = nodeActuelle.GetPosition().Y <= nodeVerifier.GetPosition().Y ? 1 : 0;
                     }
-                    
                 }
-                    
-
         }
-     
         public void CalculerH(Node arrivée)
         {
             foreach (Node n in GrapheComplet)

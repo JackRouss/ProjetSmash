@@ -17,7 +17,7 @@ namespace AtelierXNA
 
     public class Map : PrimitiveDeBase, IPause
     {
-        const int NB_NODES = 20;
+        const int NB_NODES = 100;
         public Vector4 LIMITE_MAP { get; private set; }// (x a droite, x a gauche, y en haut, y en bas)
         public Vector4 LIMITE_PLAQUETTE { get; private set; }
         const int NB_TRIANGLE_SURFACE = 2;
