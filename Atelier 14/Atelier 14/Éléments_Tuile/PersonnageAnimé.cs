@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Éléments_Tuile;
-using AtelierXNA.AI;
 using AtelierXNA.Autres;
 //using AtelierXNA.Autres;
 
@@ -112,13 +104,17 @@ namespace AtelierXNA
                             État = NomsSprites[9];
                         }
                     }
+                    if (TypePersonnage == "Ninja")
+                        GestionnaireDeSon.Find("steelsword").Play();
+                    else if (TypePersonnage == "Robot")
+                        GestionnaireDeSon.Find("ROBOTATTAQUE").Play();
                     EstEnAttaque = true;
                 }
                 else if (ÉTAT_PERSO == ÉTAT.IMMOBILE)
                 {
                     État = NomsSprites[4];
                 }
-                else if (ÉTAT_PERSO == ÉTAT.LANCER)
+                else if (ÉTAT_PERSO == ÉTAT.LANCER )
                 {
                     if (VecteurVitesse.Y != 0)
                     {
@@ -128,6 +124,11 @@ namespace AtelierXNA
                     {
                         État = NomsSprites[10];
                     }
+                    if (TypePersonnage == "Ninja")
+                        GestionnaireDeSon.Find("Arrow").Play();
+                    else if (TypePersonnage == "Robot")
+                        GestionnaireDeSon.Find("LaserBlasts").Play();
+               
                     EstEnAttaque = true;
                 }
                 else if (ÉTAT_PERSO == ÉTAT.MORT)

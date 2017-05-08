@@ -22,7 +22,6 @@ namespace AtelierXNA
          :base(caméraJeu)
       {
          LumièreJeu = lumièreJeu;
-         //BumpMap = bumpMap;
          CouleurLumièreAmbiante = couleurAmbiante;
          CouleurLumièreDiffuse = couleurDiffuse;
          CouleurLumièreEmissive = couleurEmissive;

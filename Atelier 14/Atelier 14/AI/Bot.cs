@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using AtelierXNA.AI;
 using AtelierXNA.Éléments_Tuile;
 using AtelierXNA.Autres;
 
@@ -37,7 +35,7 @@ namespace AtelierXNA.AI
         float TempsÉcouléDepuisMAJBot { get; set; }
         #endregion
         BoundingSphere SphèreDeRéaction { get; set; }
-        Générateur g { get; set; }
+
 
         #region Éléments du monde.
         Personnage Joueur { get; set; }
@@ -51,8 +49,7 @@ namespace AtelierXNA.AI
 
         public override void Initialize()
         {
-            g = Game.Services.GetService(typeof(Générateur)) as Générateur;
-            g.ResetSeed();
+          
             ÉtatBot = ÉTATS.OFFENSIVE;
 
             base.Initialize();
