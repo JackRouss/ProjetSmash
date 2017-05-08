@@ -43,6 +43,9 @@ namespace AtelierXNA
         public int[] NB_FRAMES_SPRITES_ROBOT = { 8, 9, 10, 10, 10, 10, 8, 5, 8, 10, 4 };
         public int[] NB_FRAMES_SPRITES_NINJA = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
 
+        static int LongueurÉcran = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+        static int LargeurÉcran = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+
         const int NB_PLATEFORMES = 10;
         enum GameState { MENU_PRINCIPAL, MENU_PERSONNAGE, MENU_DIFFICULTÉ, MENU_CARTE, MENU_PAUSE, JEU , FIN_JEU, MENU_PvP}
 
@@ -101,8 +104,9 @@ namespace AtelierXNA
         {
             
             PériphériqueGraphique = new GraphicsDeviceManager(this);
-            //this.PériphériqueGraphique.PreferredBackBufferWidth = this.Window.ClientBounds.Width;
-            //this.PériphériqueGraphique.PreferredBackBufferHeight = this.Window.ClientBounds.Height;
+           
+            this.PériphériqueGraphique.PreferredBackBufferWidth = this.Window.ClientBounds.Width + (LongueurÉcran - this.Window.ClientBounds.Width);
+            this.PériphériqueGraphique.PreferredBackBufferHeight = this.Window.ClientBounds.Height + (LargeurÉcran - this.Window.ClientBounds.Height);
             //this.PériphériqueGraphique.IsFullScreen = true;
             Content.RootDirectory = "Content";
             PériphériqueGraphique.SynchronizeWithVerticalRetrace = false;
@@ -112,16 +116,32 @@ namespace AtelierXNA
             Services.AddService(typeof(Générateur), g);
         }
 
+        public static float GetDimensionÉcran(int coté)
+        {
+            if(coté == 0)
+            {
+                return LongueurÉcran;
+            }
+            else
+            {
+                return LargeurÉcran;
+            }
+
+        }
 
         protected override void Initialize()
         {
             InitialiserServices();
-            Menu = new MenuPrincipal(this);
-            Components.Add(Menu);
+            Commencer();
+            base.Initialize();
+            MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
+        }
+
+        void Commencer()
+        {
+            InitialiserMenuPrincipal();
             ConnectionManette();
             InitialiserJoueur();
-            base.Initialize();
-            //MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
         }
 
         void InitialiserJoueur()
@@ -232,9 +252,14 @@ namespace AtelierXNA
             }
         }
 
+        void InitialiserMenuPrincipal()
+        {
+            Menu = new MenuPrincipal(this);
+            Components.Add(Menu);
+        }
+
         void InitialiserJeu()
         {
-
 
 
             AjouterCaméra();
@@ -429,30 +454,34 @@ namespace AtelierXNA
 
                     if (Menu.PasserMenuSuivant)
                     {
-                        //if (ConnectionJoueur[1])
-                        //if(true)
-                        //{
-                            ÉtatJeu = GameState.MENU_PvP;
-                            Menu.PasserMenuSuivant = false;
-                            InitialiserMenuPvP();
-                        //}
-                        //else
-                        //{
-                        //    ÉtatJeu = GameState.MENU_PERSONNAGE;
-                        //    Menu.PasserMenuSuivant = false;
-                        //    InitialiserMenuPersonnages(Joueurs[cptJoueur]);
-                        //}
-                       
+                        ÉtatJeu = GameState.MENU_PvP;
+                        Menu.PasserMenuSuivant = false;
+                        InitialiserMenuPvP();
+                        if (ConnectionJoueur[1])
+                        {
+                            MenuJoueurs.multiplayer = true;
+                        }
                     }
                     break;
 
                 case GameState.MENU_PvP:
-                    PvP = MenuJoueurs.PvPActiver;
+                    ConnectionManette();
+                    if (ConnectionJoueur[1])
+                    {
+                        MenuJoueurs.multiplayer = true;
+                    }
+                    else
+                    {
+                        MenuJoueurs.multiplayer = false;
+
+                    }
                     if (MenuJoueurs.PasserMenuSuivant)
                     {
+                        PvP = MenuJoueurs.PvPActiver;
                         ÉtatJeu = GameState.MENU_PERSONNAGE;
-                        Menu.PasserMenuSuivant = false;
+                        MenuJoueurs.PasserMenuSuivant = false;
                         InitialiserMenuPersonnages(Joueurs[cptJoueur]);
+                        Components.Remove(MenuJoueurs);
 
                     }
 
@@ -487,13 +516,13 @@ namespace AtelierXNA
                         if (MenuJoueurs.PvBotActiver)
                         {
                             ÉtatJeu = GameState.MENU_DIFFICULTÉ;
-                            MenuPerso.PasserMenuSuivant = false;
+                            MenuCa.PasserMenuSuivant = false;
                             InitialiserMenuDifficulté();
                         }
                         else
                         {
                             ÉtatJeu = GameState.JEU;
-                            MenuPerso.PasserMenuSuivant = false;
+                            MenuCa.PasserMenuSuivant = false;
                             InitialiserJeu();
                         }
                     }
@@ -518,10 +547,12 @@ namespace AtelierXNA
                     if (Joueur.décédé)
                     {
                         InitialiserFinJeux(PersoEnJeux);
+                        Joueur.décédé = false;
                     }
                     if (PersoEnJeux.décédé)
                     {
                         InitialiserFinJeux(Joueur);
+                        PersoEnJeux.décédé = false;
                     }
                    
                     break;
@@ -552,18 +583,14 @@ namespace AtelierXNA
                 case GameState.FIN_JEU:
                     if (Fin.Recommencer)
                     {
-                        ÉtatJeu = GameState.JEU;
-                        Fin.Recommencer = false;
                         Components.Remove(Fin);
-                        if (PvP)
-                        {
-                            AjouterJoueursPvP();
-                        }
-                        else
-                        {
-                            AjouterJoueursPvBot();
-
-                        }
+                        ÉtatJeu = GameState.MENU_DIFFICULTÉ;
+                        MenuDiff.PasserMenuSuivant = true;
+                        Components.Clear();
+                        EnleverServices();
+                        Initialize();
+                        Components.Remove(Menu);
+                        Fin.Recommencer = false;
                     }
                     if (Fin.RetournerMenuPrincipale)
                     {
@@ -600,41 +627,13 @@ namespace AtelierXNA
             Services.RemoveService(typeof(Caméra));
         }
 
-        void EnleverCeQuiFautEnlever()
-        {
-            //Services.RemoveService(typeof(Caméra));
-            //if (MenuCa.ChoixCarte == 4)
-            //{
-            //    Components.Remove(julia);
-            //}
-            //else
-            //{
-            //    Components.Remove(BackGround);
-            //}
-            //Components.Remove(Carte);
-
-            Components.Remove(Joueur);
-            if (PvP)
-            {
-                Components.Remove(Joueur2);
-            }
-            else
-            {
-                Components.Remove(Bot);
-
-            }
-            //Components.Remove(Fin);
-            //Components.Remove(Interface);
-
-
-        }
 
         void GérerMusique()
         {
             if (ÉtatJeu == GameState.JEU && AChangéÉtat)
             {
                 MediaPlayer.Stop();
-                //MediaPlayer.Play(GestionnaireDeChansons.Find("Cyborg Ninja"));
+                MediaPlayer.Play(GestionnaireDeChansons.Find("MEME"));
             }
         }
 

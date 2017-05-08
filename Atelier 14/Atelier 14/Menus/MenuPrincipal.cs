@@ -137,10 +137,7 @@ namespace AtelierXNA
             }
         }
 
-        void AfficherBonneTouche()
-        {
-
-        }
+        
 
         void GérerVisibilité()
         {
