@@ -1079,34 +1079,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Sounds\SoundEffects\punch.wma">
-      <Name>punch</Name>
-      <Importer>WmaImporter</Importer>
-      <Processor>SongProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Sounds\SoundEffects\screaminggoat.wma">
-      <Name>screaminggoat</Name>
-      <Importer>WmaImporter</Importer>
-      <Processor>SongProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Sounds\SoundEffects\wilhelm.wma">
-      <Name>wilhelm</Name>
-      <Importer>WmaImporter</Importer>
-      <Processor>SongProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Sounds\SoundEffects\gameover.wma">
-      <Name>gameover</Name>
-      <Importer>WmaImporter</Importer>
-      <Processor>SongProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Sounds\Songs\MEME.mp3">
       <Name>MEME</Name>
       <Importer>Mp3Importer</Importer>
@@ -1235,6 +1207,49 @@
       <Name>BackGround6</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Sounds\SoundEffects\gameover.wav">
+      <Name>gameover</Name>
+      <Importer>WavImporter</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+    </Compile>
+    <Compile Include="Sounds\SoundEffects\punch.wav">
+      <Name>punch</Name>
+      <Importer>WavImporter</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+    </Compile>
+    <Compile Include="Sounds\SoundEffects\screaminggoat.wav">
+      <Name>screaminggoat</Name>
+      <Importer>WavImporter</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Sounds\SoundEffects\steelsword.wav">
+      <Name>steelsword</Name>
+      <Importer>WavImporter</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Sounds\SoundEffects\ROBOTATTAQUE.wav">
+      <Name>ROBOTATTAQUE</Name>
+      <Importer>WavImporter</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Sounds\SoundEffects\Arrow.wav">
+      <Name>Arrow</Name>
+      <Importer>WavImporter</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+    </Compile>
+    <Compile Include="Sounds\SoundEffects\LaserBlasts.wav">
+      <Name>LaserBlasts</Name>
+      <Importer>WavImporter</Importer>
+      <Processor>SoundEffectProcessor</Processor>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
 namespace AtelierXNA
 {
-   public class TuileTexturée : Tuile
+    public class TuileTexturée : Tuile
    {
       //const int NB_TRIANGLES = 2;
       RessourcesManager<Texture2D> gestionnaireDeTextures;

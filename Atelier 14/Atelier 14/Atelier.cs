@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
@@ -121,7 +116,6 @@ namespace AtelierXNA
             ConnectionManette();
             InitialiserJoueur();
             base.Initialize();
-            //MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
         }
 
         void InitialiserJoueur()
@@ -152,10 +146,15 @@ namespace AtelierXNA
             GestionnaireDeChansons.Add("Pixelland", this.Content.Load<Song>("Sounds/Songs/Pixelland"));
             GestionnaireDeChansons.Add("MEME", this.Content.Load<Song>("Sounds/Songs/MEME"));
 
-            //GestionnaireDeSons.Add("gameover", this.Content.Load<SoundEffect>("Sounds/SoundEffects/gameover"));
-            //GestionnaireDeSons.Add("punch", this.Content.Load<SoundEffect>("Sounds/SoundEffects/punch"));
-            //GestionnaireDeSons.Add("screaminggoat", this.Content.Load<SoundEffect>("Sounds/SoundEffects/screaminggoat"));
-            //GestionnaireDeSons.Add("wilhelm", this.Content.Load<SoundEffect>("Sounds/SoundEffects/wilhelm"));
+            GestionnaireDeSons.Add("gameover", this.Content.Load<SoundEffect>("Sounds/SoundEffects/gameover"));
+            GestionnaireDeSons.Add("punch", this.Content.Load<SoundEffect>("Sounds/SoundEffects/punch"));
+            GestionnaireDeSons.Add("screaminggoat", this.Content.Load<SoundEffect>("Sounds/SoundEffects/screaminggoat"));
+            GestionnaireDeSons.Add("steelsword", this.Content.Load<SoundEffect>("Sounds/SoundEffects/steelsword"));
+            GestionnaireDeSons.Add("Arrow", this.Content.Load<SoundEffect>("Sounds/SoundEffects/Arrow"));
+            GestionnaireDeSons.Add("LaserBlasts", this.Content.Load<SoundEffect>("Sounds/SoundEffects/LaserBlasts"));
+            GestionnaireDeSons.Add("ROBOTATTAQUE", this.Content.Load<SoundEffect>("Sounds/SoundEffects/ROBOTATTAQUE"));
+
+
         }
         private void ChargerModèles()
         {
@@ -234,9 +233,6 @@ namespace AtelierXNA
 
         void InitialiserJeu()
         {
-
-
-
             AjouterCaméra();
             if(MenuCa.ChoixCarte == 4)
             {
@@ -392,6 +388,7 @@ namespace AtelierXNA
 
         void InitialiserFinJeux(PersonnageAnimé mort)
         {
+            GestionnaireDeSons.Find("gameover").Play();
             Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 0.4f, mort.NumManette.ToString());
 
             ÉtatJeu = GameState.FIN_JEU;
@@ -550,6 +547,7 @@ namespace AtelierXNA
                     }
                     break;
                 case GameState.FIN_JEU:
+                    MediaPlayer.Stop();
                     if (Fin.Recommencer)
                     {
                         ÉtatJeu = GameState.JEU;
@@ -634,7 +632,7 @@ namespace AtelierXNA
             if (ÉtatJeu == GameState.JEU && AChangéÉtat)
             {
                 MediaPlayer.Stop();
-                //MediaPlayer.Play(GestionnaireDeChansons.Find("Cyborg Ninja"));
+                MediaPlayer.Play(GestionnaireDeChansons.Find("MEME"));
             }
         }
 
