@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
 namespace AtelierXNA
 {
-   public abstract class Tuile : PrimitiveDeBaseAnimée
+    public abstract class Tuile : PrimitiveDeBaseAnimée
    {
       protected const int NB_TRIANGLES = 2;
       protected Vector3[,] PtsSommets { get; private set; }

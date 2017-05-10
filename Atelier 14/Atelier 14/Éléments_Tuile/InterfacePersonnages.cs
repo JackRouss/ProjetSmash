@@ -1,21 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
 
 
 namespace AtelierXNA.Éléments_Tuile
 {
-    
-    /// <summary>
-    /// This is a game component that implements IUpdateable.
-    /// </summary>
     public class InterfacePersonnages : Microsoft.Xna.Framework.DrawableGameComponent
     {
         const int BORDURE_GAUCHE = 5;
@@ -56,11 +46,6 @@ namespace AtelierXNA.Éléments_Tuile
             TypePersonnage = typePersonnege;
             NumManette = numManette;
         }
-
-        /// <summary>
-        /// Allows the game component to perform any initialization it needs to before starting
-        /// to run.  This is where it can query for any required services and load content.
-        /// </summary>
         public override void Initialize()
         {
             DrawOrder = 6;
@@ -112,7 +97,6 @@ namespace AtelierXNA.Éléments_Tuile
         {
             int nbTexels;
             Color[] texels;
-            //Image = new Texture2D(imagelocale.GraphicsDevice, imagelocale.Width, imagelocale.Height);
             nbTexels = ImageVie.Width * ImageVie.Height;
             texels = new Color[nbTexels];
             ImageVie.GetData<Color>(texels);

@@ -3,15 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Éléments_Tuile;
 using AtelierXNA.AI;
 using AtelierXNA.Autres;
+using Microsoft.Xna.Framework.Audio;
 
 namespace AtelierXNA
 {
@@ -46,13 +42,13 @@ namespace AtelierXNA
         public int VieEnPourcentage { get; private set; }
 
 
-
+        protected Générateur g { get; set; }
         public BoundingSphere HitBox { get; private set; }
         //public BoundingBox HitBox { get; private set; }
         public  Bouclier BouclierPersonnage { get; protected set; }
         protected float RayonDuBouclier { get; private set; }
 
-        float TempsEntreProjectile { get; set; }
+        protected float FrameEntreProjectile { get; private set; }
         protected float VitesseDéplacementGaucheDroite { get; set; }
         protected float VitesseMaximaleSaut { get; private set; }
         public float Masse { get; private set; }
@@ -94,6 +90,7 @@ namespace AtelierXNA
 
         protected InputControllerManager GestionInputManette { get; set; }
         protected InputManager GestionInputClavier { get; set; }
+        protected RessourcesManager<SoundEffect> GestionnaireDeSon { get; set; }
 
         public bool décédé { get; set; }
 
@@ -123,6 +120,10 @@ namespace AtelierXNA
 
         public override void Initialize()
         {
+            FrameEntreProjectile = 0;
+            g = Game.Services.GetService(typeof(Générateur)) as Générateur;
+            g.ResetSeed();
+            GestionnaireDeSon = Game.Services.GetService(typeof(RessourcesManager<SoundEffect>)) as RessourcesManager<SoundEffect>;
             DrawOrder = 4;
             GestionInputClavier = Game.Services.GetService(typeof(InputManager)) as InputManager;
             GestionInputManette = Game.Services.GetService(typeof(InputControllerManager)) as InputControllerManager;
@@ -142,6 +143,7 @@ namespace AtelierXNA
         #region Boucle de jeu.
         public override void Update(GameTime gameTime)
         {
+           
             Suicide();
             AncienVecteurVitesse = VecteurVitesse;
             float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -150,10 +152,12 @@ namespace AtelierXNA
             {
                 --NbVies;
             }
-            if(NbVies == 0)
+            décédé = NbVies == 0;
+            if (EstMort() && !décédé)
             {
-                décédé = true;
+                GestionnaireDeSon.Find("screaminggoat").Play();
             }
+            
             VieEnPourcentage = EstMort() ? 0 : VieEnPourcentage;
             VecteurVitesse = EstMort() ? Vector3.Zero : VecteurVitesse;
             VecteurVitesseGaucheDroite = EstMort() ? Vector3.Zero : VecteurVitesseGaucheDroite;
@@ -163,7 +167,7 @@ namespace AtelierXNA
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
                 RayonDuBouclier = MathHelper.Min(RayonDuBouclier + 0.02f, 6);
-                TempsEntreProjectile--;
+                FrameEntreProjectile--;
                 if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE && !(this is Bot)) //Conditions ici pour gérer l'immobilité.
                 {
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
@@ -230,7 +234,6 @@ namespace AtelierXNA
         private void GénérerHitbox()
         {
             HitBox = new BoundingSphere(new Vector3(Position.X, Position.Y + 5, Position.Z), 3);
-            //HitBox = new BoundingBox(new Vector3(Position.X - LARGEUR_HITBOX/2,Position.Y+HAUTEUR_HITBOX/2,Position.Z + PROFONDEUR_HITBOX/2),new Vector3(Position.X + LARGEUR_HITBOX/2,Position.Y,Position.Z - PROFONDEUR_HITBOX/2));
         }
         protected void GérerAccélérationGravitationnelle()
         {
@@ -336,15 +339,15 @@ namespace AtelierXNA
             {
                 GérerSauts();
             }
-            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]) || GestionInputManette.EstNouvelleTouche(NumManette, Buttons.X)) && !EstBouclierActif)
+            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]) || GestionInputManette.EstNouvelleTouche(NumManette, Buttons.X)) && !EstBouclierActif && FrameEntreProjectile <= 0)
             {
                 GérerLancer();
                 ÉTAT_PERSO = ÉTAT.LANCER;
             }
-            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[5]) || GestionInputManette.EstNouvelleTouche(NumManette, Buttons.A)) && !EstBouclierActif)
+            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[5]) || GestionInputManette.EstNouvelleTouche(NumManette, Buttons.A)) && !EstBouclierActif )
             {
                 GérerAttaque();
-                ÉTAT_PERSO = ÉTAT.ATTAQUER;
+                ÉTAT_PERSO = ÉTAT.ATTAQUER;            
             }
         }
         protected void GérerSauts()
@@ -368,19 +371,19 @@ namespace AtelierXNA
         }
         protected void GérerLancer()
         {
-            if (TempsEntreProjectile <= 0)
+            if (FrameEntreProjectile <= 0)
             {
                 if (this.TypePersonnage == "Ninja")
                 {
                     Projectile p = new Projectile(Game, 1f, new Vector3(0, 0, -MathHelper.Pi / 2), Position, new Vector2(2, 4), "Ninja/Kunai", AtelierXNA.Atelier.INTERVALLE_MAJ_STANDARD, DIRECTION, 0.75f, true, 4, NumManette);
                     Game.Components.Add(p);
-                    TempsEntreProjectile = 30;
+                    FrameEntreProjectile = 30;
                 }
                 if (this.TypePersonnage == "Robot")
                 {
                     Projectile p = new Projectile(Game, 1f, new Vector3(0, 0, 0), Position, new Vector2(4, 2), "Robot/laser", AtelierXNA.Atelier.INTERVALLE_MAJ_STANDARD, DIRECTION, 1f, false, 3,NumManette);
                     Game.Components.Add(p);
-                    TempsEntreProjectile = 40;
+                    FrameEntreProjectile = 40;
                 }
             }
         }
@@ -391,6 +394,7 @@ namespace AtelierXNA
         protected abstract void AjouterBouclier();
         public void EncaisserDégâts(Personnage p)
         {
+            GestionnaireDeSon.Find("punch").Play();   
                 if (p.DIRECTION == ORIENTATION.DROITE)
                 {
                     VecteurVitesse += p.ForceCoup * Vector3.Normalize(new Vector3(1, 0.1f, 0)) * TempsÉcouléDepuisMAJ * (1 + VieEnPourcentage / 100f) / Masse;
@@ -403,7 +407,11 @@ namespace AtelierXNA
             }
         public void GérerRecul(Personnage p)
         {
+            if(VecteurVitesse.Y == 0)
+            {
                 VecteurVitesse += (p.VecteurVitesseGaucheDroite + p.VecteurVitesse) * p.Masse / Masse;
+            }
+           
         }
 
         public void EncaisserDégâts(Projectile p)
@@ -426,7 +434,7 @@ namespace AtelierXNA
         protected bool EstMort()
         {
             return Position.X > Carte.LIMITE_MAP.X || Position.X < Carte.LIMITE_MAP.Y || Position.Y > Carte.LIMITE_MAP.Z || Position.Y < Carte.LIMITE_MAP.W;
-        }//Mettre des constantes en haut.
+        }
         public bool EstEnCollision(Personnage p)
         {
             return p.HitBox.Intersects(HitBox);

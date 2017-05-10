@@ -1,9 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace AtelierXNA
 {
-   public class Matériau
+    public class Matériau
    {
       
       public Caméra CaméraJeu { get; private set; }

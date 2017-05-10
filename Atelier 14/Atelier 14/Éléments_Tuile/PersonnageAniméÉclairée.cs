@@ -1,13 +1,7 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
+﻿//using System.Linq;
 //using Microsoft.Xna.Framework;
-//using Microsoft.Xna.Framework.Audio;
-//using Microsoft.Xna.Framework.Content;
-//using Microsoft.Xna.Framework.GamerServices;
 //using Microsoft.Xna.Framework.Graphics;
 //using Microsoft.Xna.Framework.Input;
-//using Microsoft.Xna.Framework.Media;
 
 
 //namespace AtelierXNA.Éléments_Tuile
@@ -15,7 +9,7 @@
 //    /// <summary>
 //    /// This is a game component that implements IUpdateable.
 //    /// </summary>
-//    public class PersonnageAniméÉclairée :PersonnageAnimé
+//    public class PersonnageAniméÉclairée : PersonnageAnimé
 //    {
 //        string NomEffetAffichage { get; set; }
 
@@ -34,9 +28,9 @@
 //        RessourcesManager<Texture2D> GestionnaireDeTextures { get; set; }
 //        BoundingSphere SphèreDeCollision { get; set; }
 
-//        public PersonnageAniméÉclairée(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, 
+//        public PersonnageAniméÉclairée(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ,
 //            Keys[] contrôles, float intervalleMAJAnimation, string[] nomSprites, string type, int[] nbFramesSprites, PlayerIndex numManette, Lumière lumiereJeu, string nomEffetAffichage)
-//            : base(game, vitesseDéplacementGaucheDroite, vitesseMaximaleSaut, masse, position, intervalleMAJ, contrôles, intervalleMAJAnimation, nomSprites, type, nbFramesSprites,numManette)
+//            : base(game, vitesseDéplacementGaucheDroite, vitesseMaximaleSaut, masse, position, intervalleMAJ, contrôles, intervalleMAJAnimation, nomSprites, type, nbFramesSprites, numManette)
 //        {
 //            LumiereJeu = lumiereJeu;
 //            NomEffetAffichage = nomEffetAffichage;
@@ -81,7 +75,7 @@
 //            {
 //                BoundingSphere sphèreCollisionDuMaillage = Frame.Sommets[i].Position.;
 //                sphèreTotaleTemporaire = BoundingSphere.CreateMerged(sphèreTotaleTemporaire, sphèreCollisionDuMaillage);
-//                BoundingSphere sphèreCollisionDuMaillage = new BoundingSphere(Frame.Sommets[i].Position, Frame.Sommets[i+1].Position.);
+//                BoundingSphere sphèreCollisionDuMaillage = new BoundingSphere(Frame.Sommets[i].Position, Frame.Sommets[i + 1].Position.);
 //            }
 //            for (int i = 0; i < Modèle.Meshes.Count; ++i)
 //            {
