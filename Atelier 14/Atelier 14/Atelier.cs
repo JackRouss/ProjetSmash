@@ -632,7 +632,7 @@ namespace AtelierXNA
             if (ÉtatJeu == GameState.JEU && AChangéÉtat)
             {
                 MediaPlayer.Stop();
-                MediaPlayer.Play(GestionnaireDeChansons.Find("MEME"));
+                MediaPlayer.Play(GestionnaireDeChansons.Find("Pinball Spring 160"));
             }
         }
 

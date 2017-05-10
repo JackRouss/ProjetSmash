@@ -72,11 +72,11 @@ namespace AtelierXNA.AI
                     {
                         if ((nodeActuelle.EstExtremiterGauche ))
                         {
-                            MatriceAdjacence[i, j] = (nodeVerifier.GetPosition().Y <= nodeActuelle.GetPosition().Y && nodeVerifier.GetPosition().X <= nodeActuelle.GetPosition().X) ? 1 : 0;
+                            MatriceAdjacence[i, j] = (nodeVerifier.GetPosition().Y <= nodeActuelle.GetPosition().Y && nodeVerifier.GetPosition().X < nodeActuelle.GetPosition().X) ? 1 : 0;
                         }
                         else if(nodeActuelle.EstExtremiterDroite )
                         {
-                            MatriceAdjacence[i, j] = (nodeVerifier.GetPosition().Y <= nodeActuelle.GetPosition().Y && nodeVerifier.GetPosition().X >= nodeActuelle.GetPosition().X) ? 1 : 0;
+                            MatriceAdjacence[i, j] = (nodeVerifier.GetPosition().Y <= nodeActuelle.GetPosition().Y && nodeVerifier.GetPosition().X > nodeActuelle.GetPosition().X) ? 1 : 0;
                         }
                         else
                              MatriceAdjacence[i, j] = nodeActuelle.GetPosition().Y <= nodeVerifier.GetPosition().Y ? 1 : 0;

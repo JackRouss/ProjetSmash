@@ -31,12 +31,10 @@ namespace AtelierXNA.AI
                 CameFrom = new Node(n.CameFrom);
             Position = n.GetPosition();
         }
-        BoundingSphere Hitbox { get; set; }
         public Node(Vector3 position, int index)
         {
             Index = index;
             Position = position;
-            Hitbox = new BoundingSphere(Position, Bot.DISTANCE_THRESH);
         }
         public void DonnéNomPlaquette(int nomPlaquette)
         {
@@ -46,10 +44,5 @@ namespace AtelierXNA.AI
         {
             H = Vector3.Distance(Position,arrivée.GetPosition());
         }
-        public bool EstEnCollision(Personnage p)
-        {
-            return Hitbox.Intersects(p.HitBox);
-        }
-
     }
 }

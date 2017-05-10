@@ -1,69 +1,113 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using AtelierXNA.Éléments_Tuile;
-using AtelierXNA.Autres;
+using System;
 
 namespace AtelierXNA.AI
 {
     public class Bot : PersonnageAnimé
     {
-        const float TEMPS_UPDATE_PATH = 0.1f;
+        #region Propriétés, constantes et initialisation.
+        #region Constantes.
         const float DISTANCE_ATTAQUE = 5f;
         const float RAYON_RÉACTION = 6;
+        const float VITESSE_PANIQUE = 25f;
 
-        public const float DISTANCE_THRESH = 1f;
-
-        //Constantes normales
+        const float DISTANCE_THRESH = 0.07f;
+        const float INTERVALLE_MAJ_CHEMIN = 0.25f;
         const float INTERVALLE_MAJ_BOT = 1 / 240f;
-        const float P_FRAPPER = 0.07f;
-        const float P_SHIELD = 0.05f;
-        const float P_LANCER = 0.01f;
-        enum ÉTATS { OFFENSIVE, DÉFENSIVE, NEUTRE };
-        ÉTATS ÉtatBot { get; set; }
 
-        //Éléments utilisées dans le A_Star:
-        #region A*
+        const float P_FRAPPER_D = 1f;
+        const float P_BLOQUER_D = 1f;
+        const float P_LANCER_D = 1f;
+        const float P_CHEMIN_D = 1f;
+
+        const float P_FRAPPER_N = 1f;
+        const float P_BLOQUER_N = 1f;
+        const float P_LANCER_N = 1f;
+        const float P_CHEMIN_N = 1f;
+
+        const float P_FRAPPER_F = 1f;
+        const float P_BLOQUER_F = 1f;
+        const float P_LANCER_F = 1f;
+        const float P_CHEMIN_F = 1f;
+        #endregion
+
+        #region Propriétés en lien avec le A*.
         Graphe GrapheDéplacements { get; set; }
         Chemin Path { get; set; }
         Node TargetNode { get; set; }
         Node NodeJoueur { get; set; }
         Node NodeBot { get; set; }
         List<Node> CheminLePlusCourt { get; set; }
-        float TempsÉcouléDepuisMAJBot { get; set; }
         #endregion
-        BoundingSphere SphèreDeRéaction { get; set; }
 
-
-        #region Éléments du monde.
+        #region Éléments extérieurs.
         Personnage Joueur { get; set; }
         Map Carte { get; set; }
         #endregion
 
+        #region Autres Propriétés.
         string Difficulté { get; set; }
+        float PFrapper { get; set; }
+        float PBloquer { get; set; }
+        float PLancer { get; set; }
+        float PChemin { get; set; }
+        float TempsÉcouléDepuisMAJChemin { get; set; }
+        float TempsÉcouléDepuisMAJBot { get; set; }
+        enum ÉTATS { OFFENSIVE, DÉFENSIVE, PASSIF };
+        ÉTATS ÉtatBot { get; set; }
+        #endregion
+
+        #region Initialisation.
         public Bot(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles, float intervalleMAJAnimation, string[] nomSprites, string type, int[] nbFramesSprites, string difficulté, PlayerIndex numManette)
-            : base(game, vitesseDéplacementGaucheDroite, vitesseMaximaleSaut, masse, position, intervalleMAJ, contrôles, intervalleMAJAnimation, nomSprites, type, nbFramesSprites, numManette) { Difficulté = difficulté; TempsÉcouléDepuisMAJ = 0; }
-
-
+            : base(game, vitesseDéplacementGaucheDroite, vitesseMaximaleSaut, masse, position, intervalleMAJ, contrôles, intervalleMAJAnimation, nomSprites, type, nbFramesSprites, numManette) { Difficulté = difficulté; }
         public override void Initialize()
         {
-          
-            ÉtatBot = ÉTATS.OFFENSIVE;
-
             base.Initialize();
+            ÉtatBot = ÉTATS.OFFENSIVE;
+            InitialiserProbabilités();
             Joueur = Game.Components.First(t => t is Personnage && t != this) as Personnage;
             Carte = Game.Components.First(t => t is Map) as Map;
             GrapheDéplacements = new Graphe(Carte);
             Path = new Chemin(GrapheDéplacements);
             CheminLePlusCourt = new List<Node>();
-            SphèreDeRéaction = new BoundingSphere(Position, RAYON_RÉACTION);
         }
+        private void InitialiserProbabilités()
+        {
+            if (Difficulté == "Facile")
+            {
+                PFrapper = P_FRAPPER_F;
+                PBloquer = P_BLOQUER_F;
+                PLancer = P_LANCER_F;
+                PChemin = P_CHEMIN_F;
+            }
+            else if (Difficulté == "Normal")
+            {
+                PFrapper = P_FRAPPER_N;
+                PBloquer = P_BLOQUER_N;
+                PLancer = P_LANCER_N;
+                PChemin = P_CHEMIN_N;
+            }
+            else
+            {
+                PFrapper = P_FRAPPER_D;
+                PBloquer = P_BLOQUER_D;
+                PLancer = P_LANCER_D;
+                PChemin = P_CHEMIN_D;
+            }
+        }
+        #endregion
+        #endregion
+
+        #region Boucle de jeu.
         public override void Update(GameTime gameTime)
         {
             float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
             TempsÉcouléDepuisMAJBot += tempsÉcoulé;
+            TempsÉcouléDepuisMAJChemin += tempsÉcoulé;
 
             if (TempsÉcouléDepuisMAJBot >= INTERVALLE_MAJ_BOT)
             {
@@ -71,38 +115,59 @@ namespace AtelierXNA.AI
                 if (ÉtatBot == ÉTATS.OFFENSIVE)
                 {
                     Attaquer();
-                    Bloquer();
                     Lancer();
-                    Survivre();
-                }
-                else if (ÉtatBot == ÉTATS.NEUTRE)
-                {
-
                 }
                 else if (ÉtatBot == ÉTATS.DÉFENSIVE)
                 {
-                    
+                    Survivre();
+                    Bloquer();
                 }
-                SphèreDeRéaction = new BoundingSphere(Position, SphèreDeRéaction.Radius);
+                else if(ÉtatBot == ÉTATS.PASSIF)
+                {
+                    Patrouiller();
+                }
+
+
+                //À CHANGER D'ENDROIT.///////
+                if(EstMort())
+                {
+                    PathFind(PositionSpawn);
+                }
+                if (VecteurVitesse.Y != 0 && !EstEnAttaque)
+                {
+                    ÉTAT_PERSO = ÉTAT.SAUTER;
+                }
+                ////////////////////////////
                 TempsÉcouléDepuisMAJBot = 0;
+            }
+
+            if ((TempsÉcouléDepuisMAJChemin >= INTERVALLE_MAJ_CHEMIN && !EstDansLesAirs()) || CheminÀCalculer())
+            {
+                PathFind();
+                TempsÉcouléDepuisMAJChemin = 0;
             }
 
             base.Update(gameTime);
         }
-
         private void GérerÉtat()
         {
+            if (Math.Abs(VecteurVitesse.X) > VITESSE_PANIQUE)
+                ÉtatBot = ÉTATS.DÉFENSIVE;
+            if (CheminLePlusCourt.Count == 0 && EstDansLesAirs())
+                ÉtatBot = ÉTATS.PASSIF;
+            else
+                ÉtatBot = ÉTATS.OFFENSIVE;
         }
 
-        #region Défensive.
+        #region Méthodes défensives et passives.
         private void Survivre()
         {
-            //if (Math.Abs(VecteurVitesse.X) > 0)
-            //{
-            //    RevenirSurSurface();
-        //}
-    }
+            RevenirSurSurface();
+        }
+        private void Patrouiller()
+        {
 
+        }
         private void RevenirSurSurface()
         {
             if (!EstDansIntervalleSurface(IntervalleCourante, Position))
@@ -127,13 +192,9 @@ namespace AtelierXNA.AI
                 }
             }
         }
-
-        private void Éviter(Projectile p)
-        {
-        }
         protected override void Bloquer()
         {
-            if(((Joueur.EstEnAttaque && Joueur.EstEnCollision(this)) || ProjectileInRange() && g.NextFloat() <= P_SHIELD)&&!EstDansLesAirs())
+            if (((Joueur.EstEnAttaque && Joueur.EstEnCollision(this)) || ProjectileInRange() && g.NextFloat() <= P_BLOQUER_D) && !EstDansLesAirs())
                 base.Bloquer();
         }
         private bool ProjectileInRange()
@@ -142,8 +203,8 @@ namespace AtelierXNA.AI
             {
                 if (g is Projectile)
                 {
-                    if ((g as Projectile).EstEnCollision(SphèreDeRéaction) && (g as Projectile).NumPlayer != this.NumManette)
-                        return true;
+                    //if ((g as Projectile).EstEnCollision(SphèreDeRéaction) && (g as Projectile).NumPlayer != this.NumManette)
+                    //    return true;
                 }
             }
             return false;
@@ -154,42 +215,28 @@ namespace AtelierXNA.AI
         }
         #endregion
 
-        #region Offensive
+        #region Méthodes offensive.
         private void Attaquer()
         {
-            if(EstEnDéplacement())
+            SeDéplacerSelonLeChemin();
+            if (HitBox.Intersects(Joueur.HitBox) && g.NextFloat() <= P_FRAPPER_D)
             {
-                SeDéplacerSelonLeChemin();
+                GérerAttaque();
             }
-            else
-            {
-                if (g.NextFloat() <= P_FRAPPER)
-                    ÉTAT_PERSO = ÉTAT.ATTAQUER;
-            }
-            if (CheminLePlusCourt.Count == 0)
-            {
-                ÉTAT_PERSO = ÉTAT.IMMOBILE;
-                PathFind();
-             }
-    }
+        }
         private void Lancer()
         {
-            if (new BoundingSphere(new Vector3(0, Joueur.GetPositionPersonnage.Y + 5, 0), HAUTEUR_HITBOX).Intersects(new BoundingSphere(new Vector3(0, HitBox.Center.Y, 0), HAUTEUR_HITBOX)) && g.NextFloat() <= P_LANCER)
+            if (new BoundingSphere(new Vector3(0, Joueur.GetPositionPersonnage.Y + 5, 0), HAUTEUR_HITBOX).Intersects(new BoundingSphere(new Vector3(0, HitBox.Center.Y, 0), HAUTEUR_HITBOX)) && g.NextFloat() <= PLancer && !EstEnAttaque)
             {
                 if (Joueur.GetPositionPersonnage.X <= Position.X)
                     Gauche();
                 else
                     Droite();
                 GérerLancer();
-                EstEnAttaque = true;
-                ÉTAT_PERSO = ÉTAT.LANCER;
             }
         }
 
-
-        #endregion
-
-        #region Méthodes pour le A*
+        #region Méthodes pour le déplacement du bot et pour le A*.
         private void PathFind()
         {
             NodeJoueur = CalculerNodeLePlusProche(Joueur.GetPositionPersonnage, GrapheDéplacements.GetGrapheComplet());
@@ -199,67 +246,64 @@ namespace AtelierXNA.AI
             CheminLePlusCourt = Path.CopierChemin();
         }
 
+        private void PathFind(Vector3 départ)
+        {
+            NodeJoueur = CalculerNodeLePlusProche(Joueur.GetPositionPersonnage, GrapheDéplacements.GetGrapheComplet());
+            NodeBot = CalculerNodeLePlusProche(départ, GrapheDéplacements.GetGrapheComplet());
+
+            Path.A_Star(NodeBot, NodeJoueur);
+            CheminLePlusCourt = Path.CopierChemin();
+        }
+
         private void SeDéplacerSelonLeChemin()
         {
             TargetNode = CheminLePlusCourt[0];
-            if(!EstSurNode())
+            if (EstSurNode())
             {
-                //Déplacements en Y (sauts). Synchronisé pour maximiser le saut.
-                if (!(EstEnAttenteNodeHauteur()))
-                {
-                    if (TargetNode.NomPlaquette != Path.CheminLePlusCourt[0].NomPlaquette && TargetNode.GetPosition().Y >= Position.Y && (float)Math.Abs(TargetNode.GetPosition().Y - Position.Y) >= 10)
-                    {
-                        GérerSauts();
-                    }
-                }
-                else if(TargetNode.GetPosition().Y > Position.Y && Math.Sign(AncienVecteurVitesse.Y) != Math.Sign(VecteurVitesse.Y))
+                ChangerDeNode();
+            }
+            else
+            {
+                SeDéplacerEnHauteur();
+                SeDéplacerEnLargeur();
+            }
+        }
+        private void ChangerDeNode()
+        {
+            Position = new Vector3(TargetNode.GetPosition().X, Position.Y, Position.Z);
+            if (TargetNode.GetPosition().X > Position.X && CheminLePlusCourt.Count != 0)
+                Droite();
+            else if (TargetNode.GetPosition().X < Position.X && CheminLePlusCourt.Count != 0)
+                Gauche();
+            CheminLePlusCourt.Remove(TargetNode);
+        }
+        private void SeDéplacerEnHauteur()
+        {
+            if (!(EstEnSaut()))
+            {
+                if (TargetNode.GetPosition().Y > Position.Y)
                 {
                     GérerSauts();
                 }
-
-                //Déplacements en X.
-                if (TargetNode.GetPosition().X > Position.X && Position.X + 0.1f <= TargetNode.GetPosition().X)
-                {
-                    Droite();
-                }
-                else if (TargetNode.GetPosition().X < Position.X && Position.X - 0.1f >= TargetNode.GetPosition().X)
-                {
-                    Gauche();
-                }
-                else
-                {
-                    Position = new Vector3(TargetNode.GetPosition().X, Position.Y, Position.Z);
-                    if (TargetNode.EstExtremiterDroite)
-                    {
-                        Gauche();
-                    }
-                    else if (TargetNode.EstExtremiterGauche)
-                    {
-                        Droite();
-                    }
-                    CheminLePlusCourt.Remove(TargetNode);
-                }
             }
-            else if(VecteurVitesse.Y == 0)
-            {
-                Position = new Vector3(TargetNode.GetPosition().X, Position.Y, Position.Z);
-                if (TargetNode.EstExtremiterDroite)
-                {
-                    Gauche();
-                }
-                else if (TargetNode.EstExtremiterGauche)
-                {
-                    Droite();
-                }
-                CheminLePlusCourt.Remove(TargetNode);
-            }
-            if(VecteurVitesse.Y != 0)
-            {
-                ÉTAT_PERSO = ÉTAT.SAUTER;
-            }
-
         }
-
+        private void SeDéplacerEnLargeur()
+        {
+            if (TargetNode.GetPosition().X > Position.X  && !EstEnAttaque)
+            {
+                if (Position.X + DISTANCE_THRESH >= TargetNode.GetPosition().X)
+                    Position = new Vector3(TargetNode.GetPosition().X, Position.Y, Position.Z);
+                else
+                    Droite();
+            }
+            else if (TargetNode.GetPosition().X < Position.X  && !EstEnAttaque)
+            {
+                if(Position.X - DISTANCE_THRESH <= TargetNode.GetPosition().X)
+                    Position = new Vector3(TargetNode.GetPosition().X, Position.Y, Position.Z);
+                else
+                    Gauche();
+            }
+        }
         protected override void Droite()
         {
             DIRECTION = ORIENTATION.DROITE;
@@ -295,7 +339,14 @@ namespace AtelierXNA.AI
         }
         #endregion
 
-        #region Booléens de la classe gérant les transitions d'état.
+        #endregion
+
+        #region Booléens de la classe.
+
+        #region Gérant la transition d'états.
+        #endregion
+
+        #region Autres.
         private bool EstEnSaut()
         {
             return VecteurVitesse.Y > 0;
@@ -308,22 +359,22 @@ namespace AtelierXNA.AI
         {
             return EstEnChute() || EstEnSaut();
         }
-        private bool EstEnDéplacement()
-        {
-            return CheminLePlusCourt.Count != 0;
-        }
         private bool CheminÀCalculer()
         {
-            return !EstEnCollision(Joueur) && !EstEnDéplacement() && CheminLePlusCourt.Count == 0;
+            return CheminLePlusCourt.Count == 0 || (!EstDansLesAirs() && CalculerNodeLePlusProche(Joueur.Position,GrapheDéplacements.GetGrapheComplet()).Index != NodeJoueur.Index);
         }
         private bool EstEnAttenteNodeHauteur()
         {
-            return (EstEnSaut())&&EstEnDéplacement();
+            return (EstDansLesAirs());
         }
         private bool EstSurNode()
         {
-            return TargetNode.Index == CalculerNodeLePlusProche(Position, GrapheDéplacements.GetGrapheComplet()).Index && (float)Math.Round(VecteurVitesse.Y)==0;
+            return TargetNode.Index == CalculerNodeLePlusProche(Position, GrapheDéplacements.GetGrapheComplet()).Index && !EstEnAttenteNodeHauteur();
         }
+        #endregion
+
+        #endregion
+
         #endregion
     }
 }

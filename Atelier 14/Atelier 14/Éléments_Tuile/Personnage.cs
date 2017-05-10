@@ -168,7 +168,7 @@ namespace AtelierXNA
             {
                 RayonDuBouclier = MathHelper.Min(RayonDuBouclier + 0.02f, 6);
                 FrameEntreProjectile--;
-                if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE && !(this is Bot)) //Conditions ici pour gérer l'immobilité.
+                if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE) //Conditions ici pour gérer l'immobilité.
                 {
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
                 }
@@ -346,8 +346,7 @@ namespace AtelierXNA
             }
             if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[5]) || GestionInputManette.EstNouvelleTouche(NumManette, Buttons.A)) && !EstBouclierActif )
             {
-                GérerAttaque();
-                ÉTAT_PERSO = ÉTAT.ATTAQUER;            
+                GérerAttaque();         
             }
         }
         protected void GérerSauts()
@@ -387,9 +386,9 @@ namespace AtelierXNA
                 }
             }
         }
-        private void GérerAttaque()
+        protected void GérerAttaque()
         {
-
+            ÉTAT_PERSO = ÉTAT.ATTAQUER;
         }
         protected abstract void AjouterBouclier();
         public void EncaisserDégâts(Personnage p)
