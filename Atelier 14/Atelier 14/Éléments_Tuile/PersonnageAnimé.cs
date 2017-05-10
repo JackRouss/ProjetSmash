@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using AtelierXNA.Éléments_Tuile;
 using AtelierXNA.Autres;
+using Microsoft.Xna.Framework.Media;
 //using AtelierXNA.Autres;
 
 namespace AtelierXNA
@@ -12,7 +13,6 @@ namespace AtelierXNA
     {
         public const int NB_ANIMATIONS = 11;
         protected const float ÉCHELLE_PERSONNAGE = 4;
-
         //Données de base.
         string état;
         protected string État
@@ -85,6 +85,11 @@ namespace AtelierXNA
                 if (ÉTAT_PERSO == ÉTAT.COURRIR)
                 {
                     État = NomsSprites[8];
+                    if(FrameCourir <= 0)
+                    {
+                        GestionnaireDeSon.Find("Run").Play(); 
+                        FrameCourir = 15;
+                    }
                 }
                 else if (ÉTAT_PERSO == ÉTAT.BLOQUER)
                 {

@@ -174,7 +174,8 @@ namespace AtelierXNA
             GestionnaireDeSons.Add("Arrow", this.Content.Load<SoundEffect>("Sounds/SoundEffects/Arrow"));
             GestionnaireDeSons.Add("LaserBlasts", this.Content.Load<SoundEffect>("Sounds/SoundEffects/LaserBlasts"));
             GestionnaireDeSons.Add("ROBOTATTAQUE", this.Content.Load<SoundEffect>("Sounds/SoundEffects/ROBOTATTAQUE"));
-
+            GestionnaireDeSons.Add("Run", this.Content.Load<SoundEffect>("Sounds/SoundEffects/Run"));
+            
 
         }
         private void ChargerModèles()
