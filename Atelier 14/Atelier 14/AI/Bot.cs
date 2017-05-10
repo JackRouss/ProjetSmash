@@ -185,8 +185,6 @@ namespace AtelierXNA.AI
                 else
                     Droite();
                 GérerLancer();
-                EstEnAttaque = true;
-                ÉTAT_PERSO = ÉTAT.LANCER;
             }
         }
 

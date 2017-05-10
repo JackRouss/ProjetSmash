@@ -167,7 +167,6 @@ namespace AtelierXNA
         {
             Frame.DéplacerTuile(Position);
         }
-
         protected override bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position)
         {
             return (intervalle.X <= position.X) && (intervalle.Y >= position.X);
