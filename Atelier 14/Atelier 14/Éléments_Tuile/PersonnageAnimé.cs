@@ -49,7 +49,7 @@ namespace AtelierXNA
         protected int ÉtatNum { get; set; }//Ce même état sous forme numérique (indice du tableau de NomsSprites).
         public string[] NomsSprites { get; private set; }
         int[] NbFramesSprites { get; set; }
-        TuileTexturéeAnimée Frame { get; set; }
+        protected TuileTexturéeAnimée Frame { get; set; }
         public Vector2 ZoneAffichageDimensions { get; private set; }
 
 
@@ -73,6 +73,7 @@ namespace AtelierXNA
         #region Boucle de jeu.
         public override void Update(GameTime gameTime)
         {
+            
             if (Frame.CptFrame == NbFramesSprites[ÉtatNum] - 1 && EstEnAttaque)
             {
                 ÉTAT_PERSO = ÉTAT.IMMOBILE;

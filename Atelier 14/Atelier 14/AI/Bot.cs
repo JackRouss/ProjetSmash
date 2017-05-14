@@ -6,13 +6,39 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using AtelierXNA.AI;
 using AtelierXNA.Éléments_Tuile;
+using AtelierXNA.Autres;
 
 namespace AtelierXNA.AI
 {
     public class Bot : PersonnageAnimé
     {
-        const float TIME_STEP = 0.5f;
+        const float TEMPS_UPDATE_PATH = 0.1f;
         const float DISTANCE_ATTAQUE = 5f;
+        const float RAYON_RÉACTION = 6;
+
+        public const float DISTANCE_THRESH = 1f;
+
+        //Constantes normales
+        const float INTERVALLE_MAJ_BOT = 1 / 240f;
+        const float P_FRAPPER = 0.1f;
+        const float P_SHIELD = 0.1f;
+        const float P_LANCER = 0.1f;
+
+        bool Attente { get; set; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         enum ÉTATS { OFFENSIVE, DÉFENSIVE, NEUTRE };
         ÉTATS ÉtatBot { get; set; }
 
@@ -20,9 +46,16 @@ namespace AtelierXNA.AI
         #region A*
         Graphe GrapheDéplacements { get; set; }
         Chemin Path { get; set; }
+        Node TargetNode { get; set; }
+        Node NodeJoueur { get; set; }
+        Node NodeBot { get; set; }
+        List<Node> CheminLePlusCourt { get; set; }
         bool EstEnModeDéplacement { get; set; }
+        bool EstEnSaut { get; set; }
+        float TempsÉcouléDepuisMAJBot { get; set; }
         #endregion
         BoundingSphere SphèreDeRéaction { get; set; }
+        Générateur g { get; set; }
 
         #region Éléments du monde.
         Personnage Joueur { get; set; }
@@ -36,110 +69,127 @@ namespace AtelierXNA.AI
 
         public override void Initialize()
         {
+            g = Game.Services.GetService(typeof(Générateur)) as Générateur;
+            g.ResetSeed();
             ÉtatBot = ÉTATS.OFFENSIVE;
+
             base.Initialize();
             Joueur = Game.Components.First(t => t is Personnage && t != this) as Personnage;
             Carte = Game.Components.First(t => t is Map) as Map;
             GrapheDéplacements = new Graphe(Carte);
             Path = new Chemin(GrapheDéplacements);
+            CheminLePlusCourt = new List<Node>();
+            SphèreDeRéaction = new BoundingSphere(Position, RAYON_RÉACTION);
+            PathFind();
         }
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
-            GérerÉtat();
-            if (ÉtatBot == ÉTATS.OFFENSIVE)
-            {
-                Attaquer();
-            }
-            else if (ÉtatBot == ÉTATS.NEUTRE)
-            {
+            float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            TempsÉcouléDepuisMAJBot += tempsÉcoulé;
 
-            }
-            else if (ÉtatBot == ÉTATS.DÉFENSIVE)
+            if (TempsÉcouléDepuisMAJBot >= INTERVALLE_MAJ_BOT)
             {
-                Survivre();
+                GérerÉtat();
+                if (ÉtatBot == ÉTATS.OFFENSIVE)
+                {
+                    if (!EstEnModeDéplacement)
+                    {
+                        PathFind();
+                    }
+                   
+                    Attaquer();
+                    Bloquer();
+                    Lancer();
+                    Survivre();
+
+                }
+                else if (ÉtatBot == ÉTATS.NEUTRE)
+                {
+
+                }
+                else if (ÉtatBot == ÉTATS.DÉFENSIVE)
+                {
+                    
+                }
+                SphèreDeRéaction = new BoundingSphere(Position, SphèreDeRéaction.Radius);
+                TempsÉcouléDepuisMAJBot = 0;
             }
+
+            base.Update(gameTime);
         }
 
         private void GérerÉtat()
         {
-            if (VieEnPourcentage <= 50)
-            {
-                ÉtatBot = ÉTATS.OFFENSIVE;
-            }
-            if (VieEnPourcentage > 50 && VieEnPourcentage < 150)
-            {
-                ÉtatBot = ÉTATS.NEUTRE;
-            }
-            if (VieEnPourcentage > 150)
-            {
-                ÉtatBot = ÉTATS.DÉFENSIVE;
-            }
         }
 
 
         #region Défensive.
         private void Survivre()
         {
-            if (!EstDansIntervalleSurface(IntervalleCourante, Position))
+            if(Math.Abs(VecteurVitesse.X) > 0)
             {
                 RevenirSurSurface();
             }
         }
+
+        private void RevenirSurSurface()
+        {
+            if (Position.X > IntervalleCourante.Y)
+                Gauche();
+            else if (Position.X < IntervalleCourante.X)
+                Droite();
+        }
+
         private void Éviter(Projectile p)
         {
-            //List<Vector3> positionsIntermédiaires = new List<Vector3>();
-            //Vector3 positionProjectile = p.Position;
-            //float vitesse = p.Direction == Personnage.ORIENTATION.DROITE ? p.Vitesse : p.Vitesse * -1;
-
-            //int cpt = 0;
-            //float buffer = positionProjectile.X;
-            //Vector3 posActuelle = positionProjectile;
-            //while(!EstDansIntervalleSurface(new Vector3(buffer,posActuelle.X,0),new Vector3(Position.X, 0, 0)))//de la marde
-            //{
-            //    buffer = posActuelle.X;
-            //}
         }
-        private void Bloquer()
+        protected override void Bloquer()
         {
 
+            if ((Joueur.EstEnAttaque && Joueur.EstEnCollision(this)) || ProjectileInRange() && g.NextFloat() <= P_SHIELD)
+                base.Bloquer();
+        }
+        private bool ProjectileInRange()
+        {
+            foreach (GameComponent g in Game.Components)
+            {
+                if (g is Projectile)
+                {
+                    if ((g as Projectile).EstEnCollision(SphèreDeRéaction) && (g as Projectile).NumPlayer != this.NumManette)
+                        return true;
+                }
+            }
+            return false;
         }
         private void Fuite()
         {
 
-        }
-        private void RevenirSurSurface()
-        {
-            Node n = CalculerNodeLePlusProche(Position, GrapheDéplacements.GetGrapheComplet());
-            if (CptSaut == 0)
-            {
-                GérerSauts();
-            }
-            else if (VecteurVitesse.Y == 0)
-            {
-                GérerSauts();
-            }
-
-            if (n.GetPosition().X < Position.X)
-            {
-                Gauche();
-            }
-            else if (n.GetPosition().X > Position.X)
-            {
-                Droite();
-            }
         }
         #endregion
 
         #region Offensive
         private void Attaquer()
         {
-            PathFind();
-            SeDéplacerSelonLeChemin();
+            if (!Joueur.EstEnCollision(this))
+            {
+                SeDéplacerSelonLeChemin();
+            }
+            else
+            {
+                if (g.NextFloat() <= P_FRAPPER)
+                    ÉTAT_PERSO = ÉTAT.ATTAQUER;
+            }
         }
         private void Lancer()
         {
-            //S'occupe de viser et de lancer un projectile au bon moment.
+            if (new BoundingSphere(new Vector3(0, Joueur.GetPositionPersonnage.Y, 0), HAUTEUR_HITBOX).Intersects(new BoundingSphere(new Vector3(0, HitBox.Center.Y, 0), HAUTEUR_HITBOX)) && g.NextFloat() <= P_LANCER)
+            {
+                if (Joueur.GetPositionPersonnage.X <= Position.X)
+                    DIRECTION = ORIENTATION.GAUCHE;
+                else
+                    DIRECTION = ORIENTATION.DROITE;
+                GérerLancer();
+            }
         }
 
 
@@ -148,48 +198,77 @@ namespace AtelierXNA.AI
         #region Méthodes pour le A*
         private void PathFind()
         {
-            Node nodeJoueur = CalculerNodeLePlusProche(Joueur.GetPositionPersonnage, GrapheDéplacements.GetGrapheComplet());
-            Node nodeBot = CalculerNodeLePlusProche(Position, GrapheDéplacements.GetGrapheComplet());
+            NodeJoueur = CalculerNodeLePlusProche(Joueur.GetPositionPersonnage, GrapheDéplacements.GetGrapheComplet());
+            NodeBot = CalculerNodeLePlusProche(Position, GrapheDéplacements.GetGrapheComplet());
 
-            Path.A_Star(nodeBot, nodeJoueur);
+            Path.A_Star(NodeBot, NodeJoueur);
             if (Path.CheminLePlusCourt != null)
                 EstEnModeDéplacement = true;
+            CheminLePlusCourt = Path.CopierChemin();
         }
 
         private void SeDéplacerSelonLeChemin()
         {
-            if (Path.CheminLePlusCourt != null)
+            EstEnSaut = VecteurVitesse.Y > 0;
+            TargetNode = CheminLePlusCourt[0];
+
+            //Déplacements en Y (sauts). Synchronisé pour maximiser le saut.
+            if (Math.Abs(TargetNode.GetPosition().Y - Position.Y) > DISTANCE_THRESH && !EstEnSaut)
             {
-                List<Node> CheminLePlusCourt = Path.CheminLePlusCourt;
-                Node nodeActuel = CalculerNodeLePlusProche(Position, CheminLePlusCourt);//Ne fonctionnera pas toujours je crois bien: il peut exister un node plus proche, mais il ne sera pas nécessairment celui qui mènera au chemin le plus court.
-
-                if (CheminLePlusCourt.IndexOf(nodeActuel) != CheminLePlusCourt.Count - 1)//Si on n'est pas arrivé à destination.
+                 if (TargetNode.NomPlaquette != Path.CheminLePlusCourt[0].NomPlaquette && TargetNode.GetPosition().Y >= Position.Y && (float)Math.Abs(TargetNode.GetPosition().Y - Position.Y) >= 10)
                 {
-                    if (nodeActuel.GetPosition().X > CheminLePlusCourt[CheminLePlusCourt.IndexOf(nodeActuel) + 1].GetPosition().X)
-                    {
-                        Gauche();
-                    }
-                    else if (nodeActuel.GetPosition().X < CheminLePlusCourt[CheminLePlusCourt.IndexOf(nodeActuel) + 1].GetPosition().X)
-                    {
-                        Droite();
-                    }
-
-                    if (nodeActuel.GetPosition().Y > CheminLePlusCourt[CheminLePlusCourt.IndexOf(nodeActuel) + 1].GetPosition().Y)//RAJOUTER DES CONDITIONS + MODIFIER MÉTHODE BAS
-                    {
-                        //Bas();
-                    }
-                    else if (nodeActuel.GetPosition().Y < CheminLePlusCourt[CheminLePlusCourt.IndexOf(nodeActuel) + 1].GetPosition().Y)//S'ARRANGER POUR QU'IL SAUTE INTELLIGEMENT
-                    {
-                        if (VecteurVitesse.Y == 0)
-                        {
-                            GérerSauts();
-                        }
-                    }
+                    GérerSauts();
                 }
-
             }
+
+            //Déplacements en X.
+            if (TargetNode.GetPosition().X > Position.X && Position.X + 0.1f <= TargetNode.GetPosition().X)
+            {
+                Droite();
+            }
+            else if (TargetNode.GetPosition().X < Position.X && Position.X - 0.1f >= TargetNode.GetPosition().X)
+            {
+                Gauche();
+            }
+            else
+            {
+                Position = new Vector3(TargetNode.GetPosition().X, Position.Y, Position.Z);
+                if (TargetNode.EstExtremiterDroite && CheminLePlusCourt.Count >=2)
+                {
+                    Droite();
+                }
+                if (TargetNode.EstExtremiterGauche && CheminLePlusCourt.Count >= 2)
+                {
+                    Gauche();
+                }
+                CheminLePlusCourt.Remove(TargetNode);
+                ÉTAT_PERSO = ÉTAT.IMMOBILE;
+            }
+            if (CheminLePlusCourt.Count == 0)
+            {
+                EstEnModeDéplacement = false;
+            }
+
         }
 
+        protected override void Droite()
+        {
+            DIRECTION = ORIENTATION.DROITE;
+            ÉTAT_PERSO = ÉTAT.COURRIR;
+            if (VecteurVitesse.Y != 0)
+                Position += 0.1f * Vector3.Right;
+            else
+                Position += 0.1f * Vector3.Right;
+        }
+        protected override void Gauche()
+        {
+            DIRECTION = ORIENTATION.GAUCHE;
+            ÉTAT_PERSO = ÉTAT.COURRIR;
+            if (VecteurVitesse.Y != 0)
+                Position -= 0.1f * Vector3.Right;
+            else
+                Position -= 0.1f * Vector3.Right;
+        }
         private Node CalculerNodeLePlusProche(Vector3 position, List<Node> listeÀParcourir)
         {
             Node node = listeÀParcourir[0];

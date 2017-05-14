@@ -19,20 +19,18 @@ namespace AtelierXNA
     {
 
         #region Propriétés, constantes et initialisation.
-        const float LARGEUR_HITBOX = 5f;
-        const float HAUTEUR_HITBOX = 5f;
-        const float PROFONDEUR_HITBOX = 5f;
+        protected const float LARGEUR_HITBOX = 5f;
+        protected const float HAUTEUR_HITBOX = 5f;
+        protected const float PROFONDEUR_HITBOX = 5f;
 
 
         //Ces constantes seront à ajouter en propriétés.
-        const float VITESSE_MAX_GAUCHE_DROITE = 50f;
+        protected const float VITESSE_MAX_GAUCHE_DROITE = 50f;
         const float DURÉE_BOUCLIER = 1f;
-        const float ACCÉLÉRATION_SOL = 500f;
-        const float ACCÉLÉRATION_AIR = 500f;
+        protected const float ACCÉLÉRATION_SOL = 500f;
+        protected const float ACCÉLÉRATION_AIR = 500f;
         const int DOMMAGE_ATTAQUE = 12;
         const float FORCE_COUP = 500000f;
-
-
 
 
         protected Keys[] CONTRÔLES { get; private set; }
@@ -73,17 +71,18 @@ namespace AtelierXNA
 
 
         //Données propres au personnages, qui seront variables.
-        protected Vector3 Position { get; set; }
+        public Vector3 Position { get; protected set; }
         public Vector3 GetPositionPersonnage
         {
             get { return new Vector3(Position.X, Position.Y, Position.Z); }
         }
         protected Vector3 PositionSpawn { get; set; }
-        protected Vector3 AnciennePosition { get; set; }
+        public  Vector3 AnciennePosition { get; protected set; }
         Vector3 VecteurGauche { get; set; }
         protected Vector3 VecteurVitesse { get; private set; }
         protected Vector3 AncienVecteurVitesse { get; private set; }
-        protected Vector3 VecteurVitesseGaucheDroite { get; private set; }
+        protected Vector3 AncienVecteurVitesseGaucheDroite { get; set; }
+        protected Vector3 VecteurVitesseGaucheDroite { get; set; }
         public abstract void DéplacerFrame();
         protected int CptSaut { get; set; }
         public string tag { get; private set; }
@@ -95,6 +94,8 @@ namespace AtelierXNA
 
         protected InputControllerManager GestionInputManette { get; set; }
         protected InputManager GestionInputClavier { get; set; }
+
+        public bool décédé { get; set; }
 
         public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles, PlayerIndex numManette)
             : base(game)
@@ -122,6 +123,7 @@ namespace AtelierXNA
 
         public override void Initialize()
         {
+            DrawOrder = 4;
             GestionInputClavier = Game.Services.GetService(typeof(InputManager)) as InputManager;
             GestionInputManette = Game.Services.GetService(typeof(InputControllerManager)) as InputControllerManager;
 
@@ -131,6 +133,8 @@ namespace AtelierXNA
             VecteurGauche = Vector3.Normalize(Carte.VecteurGauche);
             VecteurVitesse = Vector3.Zero;
 
+            décédé = false;
+
             base.Initialize();
         }
         #endregion
@@ -138,11 +142,18 @@ namespace AtelierXNA
         #region Boucle de jeu.
         public override void Update(GameTime gameTime)
         {
+            Suicide();
             AncienVecteurVitesse = VecteurVitesse;
             float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
             TempsÉcouléDepuisMAJ += tempsÉcoulé;
-
-            NbVies = EstMort() ? --NbVies : NbVies;
+            if (EstMort())
+            {
+                --NbVies;
+            }
+            if(NbVies == 0)
+            {
+                décédé = true;
+            }
             VieEnPourcentage = EstMort() ? 0 : VieEnPourcentage;
             VecteurVitesse = EstMort() ? Vector3.Zero : VecteurVitesse;
             VecteurVitesseGaucheDroite = EstMort() ? Vector3.Zero : VecteurVitesseGaucheDroite;
@@ -153,7 +164,7 @@ namespace AtelierXNA
             {
                 RayonDuBouclier = MathHelper.Min(RayonDuBouclier + 0.02f, 6);
                 TempsEntreProjectile--;
-                if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE) //Conditions ici pour gérer l'immobilité.
+                if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE && !(this is Bot)) //Conditions ici pour gérer l'immobilité.
                 {
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
                 }
@@ -169,7 +180,7 @@ namespace AtelierXNA
                 GérerTouchesEnfoncées();
                 GérerAccélérationGravitationnelle();
                 GérerFriction();
-
+                AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
                 Position += (VecteurVitesse + VecteurVitesseGaucheDroite) * TempsÉcouléDepuisMAJ;
                 GénérerHitbox();
 
@@ -177,6 +188,16 @@ namespace AtelierXNA
             }
             GérerNouvellesTouches();
         }
+
+        void Suicide()
+        {
+            if (GestionInputClavier.EstNouvelleTouche(Keys.B))
+            {
+                décédé = true;
+            }
+        }
+
+
         private void GérerFriction()
         {
             float mu_air = 0.1f;
@@ -238,16 +259,16 @@ namespace AtelierXNA
         #region Méthodes évenementielles.
         protected void GérerTouchesEnfoncées()
         {
-            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[0]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.LeftThumbstickRight)) && ((!EstEnAttaque || VecteurVitesse.Y != 0)) && !EstBouclierActif)
+            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[0]) || GestionInputManette.EstToucheEnfoncée(NumManette, Buttons.LeftThumbstickRight)) && ((!EstEnAttaque || VecteurVitesse.Y != 0)) && !EstBouclierActif)
             {
                 Droite();
             }
-            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[1]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.LeftThumbstickLeft)) && ((!EstEnAttaque || VecteurVitesse.Y != 0)) && !EstBouclierActif)
+            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[1]) || GestionInputManette.EstToucheEnfoncée(NumManette, Buttons.LeftThumbstickLeft)) && ((!EstEnAttaque || VecteurVitesse.Y != 0)) && !EstBouclierActif)
             {
                 Gauche();
             }
 
-            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[2]) || GestionInputManette.EstToucheEnfoncée(PlayerIndex.One, Buttons.RightShoulder)) && VecteurVitesse.Y ==0 )
+            if ((GestionInputClavier.EstEnfoncée(CONTRÔLES[2]) || GestionInputManette.EstToucheEnfoncée(NumManette, Buttons.RightTrigger)) && VecteurVitesse.Y ==0 )
             {
                 Bloquer();
             }
@@ -262,7 +283,7 @@ namespace AtelierXNA
             }
         }
 
-        protected void Droite()
+        protected virtual void Droite()
         {
                 DIRECTION = ORIENTATION.DROITE;
                 if (VecteurVitesse.Y == 0)
@@ -279,7 +300,7 @@ namespace AtelierXNA
                 }
             }
 
-        protected void Gauche()
+        protected virtual void Gauche()
         {
                 DIRECTION = ORIENTATION.GAUCHE;
                 if (VecteurVitesse.Y == 0)
@@ -295,7 +316,7 @@ namespace AtelierXNA
                     VecteurVitesseGaucheDroite -= new Vector3(ACCÉLÉRATION_AIR * TempsÉcouléDepuisMAJ, 0, 0);
                 }
             }
-        private void Bloquer()
+        protected virtual void Bloquer()
         {      
                 EstBouclierActif = true;
                 if ((BouclierPersonnage == null || !Game.Components.Contains(BouclierPersonnage)))
@@ -307,16 +328,16 @@ namespace AtelierXNA
 
         private void GérerNouvellesTouches()
         {
-            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[3]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.Y)) && CptSaut < 2 && !EstEnAttaque && !EstBouclierActif)
+            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[3]) || GestionInputManette.EstNouvelleTouche(NumManette, Buttons.Y)) && CptSaut < 2 && !EstEnAttaque && !EstBouclierActif)
             {
                 GérerSauts();
             }
-            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.X)) && !EstBouclierActif)
+            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]) || GestionInputManette.EstNouvelleTouche(NumManette, Buttons.X)) && !EstBouclierActif)
             {
                 GérerLancer();
                 ÉTAT_PERSO = ÉTAT.LANCER;
             }
-            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[5]) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.A)) && !EstBouclierActif)
+            if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[5]) || GestionInputManette.EstNouvelleTouche(NumManette, Buttons.A)) && !EstBouclierActif)
             {
                 GérerAttaque();
                 ÉTAT_PERSO = ÉTAT.ATTAQUER;
@@ -341,7 +362,7 @@ namespace AtelierXNA
                 ++CptSaut;
             }
         }
-        private void GérerLancer()
+        protected void GérerLancer()
         {
             if (TempsEntreProjectile <= 0)
             {

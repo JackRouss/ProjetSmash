@@ -16,6 +16,7 @@ namespace AtelierXNA
         Vector3 Latéral { get; set; }
         Vector3 Angle { get; set; }
         float VitesseTranslation { get; set; }
+        public Vector3 PositionInitial { get; set; }
 
         float IntervalleMAJ { get; set; }
         float TempsÉcouléDepuisMAJ { get; set; }
@@ -27,6 +28,7 @@ namespace AtelierXNA
            : base(jeu)
         {
             IntervalleMAJ = intervalleMAJ;
+            PositionInitial = positionCaméra;
             CréerVolumeDeVisualisation(OUVERTURE_OBJECTIF, DISTANCE_PLAN_RAPPROCHÉ, DISTANCE_PLAN_ÉLOIGNÉ);
             CréerPointDeVue(positionCaméra, cible, orientation);
         }
@@ -111,5 +113,6 @@ namespace AtelierXNA
                 Position = new Vector3(Position.X, MathHelper.Max(moyennePosY, Carte.LIMITE_PLAQUETTE.W), Position.Z);
             }
         }
+       
     }
 }

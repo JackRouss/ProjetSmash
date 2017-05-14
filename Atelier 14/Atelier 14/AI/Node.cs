@@ -18,57 +18,59 @@ namespace AtelierXNA.AI
         public float H { get; set; }//Reste constant durant toute l'exécution.
         public float G { get; set; }
         public float F { get; set; }
-        public Node CameFrom { private get; set; }
-        public Node GetCameFrom()
+        public bool EstExtremiterDroite { get; set; }
+        public bool EstExtremiterGauche { get; set; }
+        public int NomPlaquette { get; private set; }
+        public Node CameFrom { get; set; }
+        //public Node GetCameFrom()
+        //{
+        //    if (CameFrom != null)
+        //    {
+        //        Node machin = new Node(CameFrom.GetPosition(), CameFrom.Index);
+        //        machin.DonnéNomPlaquette(CameFrom.NomPlaquette);
+        //        machin.G = CameFrom.G;
+        //        machin
+        //        machin.EstExtremiterDroite = CameFrom.EstExtremiterDroite;
+        //        machin.EstExtremiterGauche = CameFrom.EstExtremiterGauche;
+        //        return machin;
+        //    }
+        //    else
+        //        return null;
+
+        //}
+        public Node(Node n)
         {
-            if (CameFrom != null)
-                return new Node(CameFrom.GetPosition(), CameFrom.Index);
-            else
-                return null;
-
+            H = n.H;
+            G = n.G;
+            F = n.F;
+            EstExtremiterDroite = n.EstExtremiterDroite;
+            EstExtremiterGauche = n.EstExtremiterGauche;
+            NomPlaquette = n.NomPlaquette;
+            Index = n.Index;
+            if(n.CameFrom != null)
+                CameFrom = new Node(n.CameFrom);
+            Position = n.GetPosition();
         }
-
+        BoundingSphere Hitbox { get; set; }
         public Node(Vector3 position, int index)
         {
             Index = index;
             Position = position;
+            Hitbox = new BoundingSphere(Position, Bot.DISTANCE_THRESH);
         }
-        public bool EstAdjacent(Node n,List<Vector3> intervalles)//À DÉFINIR, DIFFICILE À DÉFINIR//
+        public void DonnéNomPlaquette(int nomPlaquette)
         {
-            //(intervalle.X <= position.X) && (intervalle.Y >= position.X);
-
-            bool estAdjacent = false;
-            int cpt = 0;
-            float extrémiter = 0; // 0 : pas extremiter, 1 : extremiter gauche, 2 : extremiter droite 
-            foreach(Vector3 v in intervalles)
-            {
-                if(Position.Y == intervalles[cpt].Z)
-                {
-                    if (Position.X == intervalles[cpt].X)
-                    {
-                        extrémiter = 1;
-                    }
-                    else if(Position.X == intervalles[cpt].Y)
-                    {
-                        extrémiter = 2;
-                    }
-                }
-                cpt++;                       
-            }
-            if (Vector3.Distance(n.Position, Position) <= 25)
-            {
-                if (extrémiter == 0)
-                    estAdjacent = Position.Y <= n.Position.Y;
-                if (extrémiter == 1)
-                    estAdjacent = Position.Y <= n.Position.Y || Position.X > n.Position.X;
-                if(extrémiter == 2)
-                    estAdjacent = Position.Y <= n.Position.Y || Position.X < n.Position.X;
-            }
-            return estAdjacent;
+            NomPlaquette = nomPlaquette;
         }
+  
         public void CalculerH(Node arrivée)
         {
-            H = Math.Abs(arrivée.Position.X - Position.X) + Math.Abs(arrivée.Position.Y - Position.Y);
+            //H = Math.Abs(arrivée.Position.X - Position.X) + Math.Abs(arrivée.Position.Y - Position.Y);
+            H = Vector3.Distance(Position,arrivée.GetPosition());
+        }
+        public bool EstEnCollision(Personnage p)
+        {
+            return Hitbox.Intersects(p.HitBox);
         }
 
     }

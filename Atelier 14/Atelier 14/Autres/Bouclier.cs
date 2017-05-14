@@ -60,6 +60,7 @@ namespace AtelierXNA.Autres
         }
         public override void Initialize()
         {
+            DrawOrder = 4;
             SphèreDeCollision = new BoundingSphere(PositionInitiale, Rayon);
             GestionnaireDeTextures = Game.Services.GetService(typeof(RessourcesManager<Texture2D>)) as RessourcesManager<Texture2D>;
             TextureSphère = GestionnaireDeTextures.Find(NomTexture);
