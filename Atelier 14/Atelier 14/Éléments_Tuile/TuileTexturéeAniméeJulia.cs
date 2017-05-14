@@ -59,10 +59,10 @@ namespace AtelierXNA.Éléments_Tuile
             GamePadState pad = GamePad.GetState(PlayerIndex.One);
 
             if (pad.Buttons.A == ButtonState.Pressed)
-                zoom /= 1.05f;
+                zoom /= 1.0005f;
 
-            if (pad.Buttons.B == ButtonState.Pressed)
-                zoom *= 1.05f;
+            if (pad.Buttons.X == ButtonState.Pressed)
+                zoom *= 1.0005f;
 
             //if(GestionClavier.EstNouvelleTouche(Keys.Q))
             //    zoom /= 1.05f;
@@ -71,7 +71,7 @@ namespace AtelierXNA.Éléments_Tuile
 
 
 
-            float panSensitivity = 0.01f * (float)Math.Log(zoom + 1);
+            float panSensitivity = 0.001f * (float)Math.Log(zoom + 1);
 
             pan += new Vector2(pad.ThumbSticks.Left.X, -pad.ThumbSticks.Left.Y) * panSensitivity;
 

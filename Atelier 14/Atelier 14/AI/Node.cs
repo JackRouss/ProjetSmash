@@ -10,14 +10,19 @@ namespace AtelierXNA.AI
         {
             return new Vector3(Position.X, Position.Y, Position.Z);
         }
-        public int Index { get; set; }
-        public float H { get; set; }
+        public int Index { get; set; }//Cette propriété n'est pas encapsulée mais c'est nécessaire.
+        public float H { get; private set; }
         public float G { get; set; }
         public float F { get; set; }
-        public bool EstExtremiterDroite { get; set; }
-        public bool EstExtremiterGauche { get; set; }
+        public bool EstExtremiterDroite { get; set; }//Cette propriété n'est pas encapsulée mais c'est nécessaire.
+        public bool EstExtremiterGauche { get; set; }//Cette propriété n'est pas encapsulée mais c'est nécessaire.
         public int NomPlaquette { get; private set; }
-        public Node CameFrom { get; set; }
+        public Node CameFrom { get; set; }//Cette propriété n'est pas encapsulée mais c'est nécessaire pour le A*. De plus, cette classe n'est utilisée qu'exclkusivement pour le A*.
+
+        /// <summary>
+        /// Constructeur de copie.
+        /// </summary>
+        /// <param name="n"></param>
         public Node(Node n)
         {
             H = n.H;
@@ -36,7 +41,12 @@ namespace AtelierXNA.AI
             Index = index;
             Position = position;
         }
-        public void DonnéNomPlaquette(int nomPlaquette)
+        /// <summary>
+        /// Méthode qui sert à identifier le node à une plaquette. Il est nécessaire de le faire à part de la construction car lors
+        /// de la construction des premiers nodes, on ignore 
+        /// </summary>
+        /// <param name="nomPlaquette"></param>
+        public void DonnerNomPlaquette(int nomPlaquette)
         {
             NomPlaquette = nomPlaquette;
         }

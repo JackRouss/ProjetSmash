@@ -12,7 +12,7 @@ namespace AtelierXNA
     {
         public const int NB_ANIMATIONS = 11;
         protected const float ÉCHELLE_PERSONNAGE = 4;
-
+        int FrameCourir { get; set; }
         //Données de base.
         string état;
         protected string État
@@ -65,7 +65,7 @@ namespace AtelierXNA
         #region Boucle de jeu.
         public override void Update(GameTime gameTime)
         {
-            
+
             if (Frame.CptFrame == NbFramesSprites[ÉtatNum] - 1 && EstEnAttaque)
             {
                 ÉTAT_PERSO = ÉTAT.IMMOBILE;
@@ -85,6 +85,8 @@ namespace AtelierXNA
                 if (ÉTAT_PERSO == ÉTAT.COURRIR)
                 {
                     État = NomsSprites[8];
+
+                    //GestionnaireDeSon.Find("Run").Play();
                 }
                 else if (ÉTAT_PERSO == ÉTAT.BLOQUER)
                 {
@@ -95,7 +97,7 @@ namespace AtelierXNA
                     if (VecteurVitesse.Y != 0)
                     {
                         État = NomsSprites[6];
-                    }          
+                    }
                     else
                     {
                         État = NomsSprites[0];
@@ -114,7 +116,7 @@ namespace AtelierXNA
                 {
                     État = NomsSprites[4];
                 }
-                else if (ÉTAT_PERSO == ÉTAT.LANCER )
+                else if (ÉTAT_PERSO == ÉTAT.LANCER)
                 {
                     if (VecteurVitesse.Y != 0)
                     {
@@ -128,7 +130,7 @@ namespace AtelierXNA
                         GestionnaireDeSon.Find("Arrow").Play();
                     else if (TypePersonnage == "Robot")
                         GestionnaireDeSon.Find("LaserBlasts").Play();
-               
+
                     EstEnAttaque = true;
                 }
                 else if (ÉTAT_PERSO == ÉTAT.MORT)
@@ -147,7 +149,7 @@ namespace AtelierXNA
         }
         protected override void AjouterBouclier()
         {
-            BouclierPersonnage = new Bouclier(Game, 1, Vector3.Zero, Position + Vector3.Up * ZoneAffichageDimensions.Y / 2,RayonDuBouclier, new Vector2(2, 30), "BouclierNinja", Atelier.INTERVALLE_MAJ_STANDARD, NumManette);
+            BouclierPersonnage = new Bouclier(Game, 1, Vector3.Zero, Position + Vector3.Up * ZoneAffichageDimensions.Y / 2, RayonDuBouclier, new Vector2(2, 30), "BouclierNinja", Atelier.INTERVALLE_MAJ_STANDARD, NumManette);
             Game.Components.Add(BouclierPersonnage);
         }
         public override void Draw(GameTime gameTime)
@@ -167,7 +169,6 @@ namespace AtelierXNA
         {
             Frame.DéplacerTuile(Position);
         }
-
         protected override bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position)
         {
             return (intervalle.X <= position.X) && (intervalle.Y >= position.X);

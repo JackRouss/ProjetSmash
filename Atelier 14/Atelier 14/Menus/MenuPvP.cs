@@ -16,6 +16,7 @@ namespace AtelierXNA.Menus
         const float ESPACE_ENTRE_OPTIONS = 40;
         public enum ÉTAT { PvP , PvBot }
         public ÉTAT CHOIX;
+        public bool multiplayer { get; set; }
 
         Vector2 POSITION_PvP { get; set; }
         Vector2 POSITION_PvBot { get; set; }
@@ -76,6 +77,7 @@ namespace AtelierXNA.Menus
             PvPActiver = false;
             PvBotActiver = false;
             PasserMenuSuivant = false;
+            multiplayer = false;
 
             base.Initialize();
         }
@@ -118,7 +120,14 @@ namespace AtelierXNA.Menus
                 {
                     CptChoix += 1;
                 }
-                maxCpt();
+                if (!multiplayer)
+                {
+                    CptChoix = 1;
+                }
+                else
+                {
+                    maxCpt();
+                }
                 switch (CptChoix)
                 {
                     case 0: CHOIX = ÉTAT.PvP; break;
@@ -150,10 +159,17 @@ namespace AtelierXNA.Menus
         {
             ArrièrePlan.Draw(gameTime);
             GestionSprites.Begin();
+            if (multiplayer)
+            {
+                GestionSprites.DrawString(ArialFont, PvP, POSITION_PvP, DéterminerCouleur(ÉTAT.PvP));
+                GestionSprites.DrawString(ArialFont, PvBot, POSITION_PvBot, DéterminerCouleur(ÉTAT.PvBot));
+            }else
+            {
+                GestionSprites.DrawString(ArialFont, PvP, POSITION_PvP, Color.DarkGray);
+                GestionSprites.DrawString(ArialFont, PvBot, POSITION_PvBot, DéterminerCouleur(ÉTAT.PvBot));
+            }
 
-
-            GestionSprites.DrawString(ArialFont, PvP, POSITION_PvP, DéterminerCouleur(ÉTAT.PvP));
-            GestionSprites.DrawString(ArialFont, PvBot, POSITION_PvBot, DéterminerCouleur(ÉTAT.PvBot));
+           
 
             GestionSprites.DrawString(ArialFont, MESSAGE, POSITION_MESSAGE, CouleurTexte);
             GestionSprites.End();

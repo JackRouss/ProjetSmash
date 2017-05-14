@@ -16,7 +16,7 @@ namespace AtelierXNA.AI
         const float VITESSE_PANIQUE = 25f;
 
         const float DISTANCE_THRESH = 0.07f;
-        const float INTERVALLE_MAJ_CHEMIN = 0.25f;
+        const float INTERVALLE_MAJ_CHEMIN = 0.5f;
         const float INTERVALLE_MAJ_BOT = 1 / 240f;
 
         const float P_FRAPPER_D = 1f;
@@ -24,24 +24,26 @@ namespace AtelierXNA.AI
         const float P_LANCER_D = 1f;
         const float P_CHEMIN_D = 1f;
 
-        const float P_FRAPPER_N = 1f;
-        const float P_BLOQUER_N = 1f;
-        const float P_LANCER_N = 1f;
-        const float P_CHEMIN_N = 1f;
+        const float P_FRAPPER_N = 0.5f;
+        const float P_BLOQUER_N = 0.05f;
+        const float P_LANCER_N = 0.005f;
+        const float P_CHEMIN_N = 0.05f;
 
-        const float P_FRAPPER_F = 1f;
-        const float P_BLOQUER_F = 1f;
-        const float P_LANCER_F = 1f;
-        const float P_CHEMIN_F = 1f;
+        const float P_FRAPPER_F = 0.005f;
+        const float P_BLOQUER_F = 0.05f;
+        const float P_LANCER_F = 0.005f;
+        const float P_CHEMIN_F = 0.1f;
         #endregion
 
         #region Propriétés en lien avec le A*.
         Graphe GrapheDéplacements { get; set; }
         Chemin Path { get; set; }
         Node TargetNode { get; set; }
+        Node AncienTargetNode { get; set; }
         Node NodeJoueur { get; set; }
         Node NodeBot { get; set; }
         List<Node> CheminLePlusCourt { get; set; }
+        BoundingSphere SphèreDeRéaction { get; set; }
         #endregion
 
         #region Éléments extérieurs.
@@ -74,6 +76,7 @@ namespace AtelierXNA.AI
             GrapheDéplacements = new Graphe(Carte);
             Path = new Chemin(GrapheDéplacements);
             CheminLePlusCourt = new List<Node>();
+            SphèreDeRéaction = new BoundingSphere(Position + Vector3.Up * 5, 6);
         }
         private void InitialiserProbabilités()
         {
@@ -108,14 +111,19 @@ namespace AtelierXNA.AI
             float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
             TempsÉcouléDepuisMAJBot += tempsÉcoulé;
             TempsÉcouléDepuisMAJChemin += tempsÉcoulé;
-
+            base.Update(gameTime);
             if (TempsÉcouléDepuisMAJBot >= INTERVALLE_MAJ_BOT)
             {
                 GérerÉtat();
                 if (ÉtatBot == ÉTATS.OFFENSIVE)
                 {
                     Attaquer();
-                    Lancer();
+                    if(!HitBox.Intersects(Joueur.HitBox))
+                        Lancer();
+                    if (EstMort())
+                    {
+                        PathFind(PositionSpawn);
+                    }
                 }
                 else if (ÉtatBot == ÉTATS.DÉFENSIVE)
                 {
@@ -129,14 +137,8 @@ namespace AtelierXNA.AI
 
 
                 //À CHANGER D'ENDROIT.///////
-                if(EstMort())
-                {
-                    PathFind(PositionSpawn);
-                }
-                if (VecteurVitesse.Y != 0 && !EstEnAttaque)
-                {
-                    ÉTAT_PERSO = ÉTAT.SAUTER;
-                }
+                if (CheminLePlusCourt.Count == 0)
+                    ÉTAT_PERSO = ÉTAT.IMMOBILE;
                 ////////////////////////////
                 TempsÉcouléDepuisMAJBot = 0;
             }
@@ -147,13 +149,14 @@ namespace AtelierXNA.AI
                 TempsÉcouléDepuisMAJChemin = 0;
             }
 
-            base.Update(gameTime);
+            
+            SphèreDeRéaction = new BoundingSphere(Position,SphèreDeRéaction.Radius);
         }
         private void GérerÉtat()
         {
-            if (Math.Abs(VecteurVitesse.X) > VITESSE_PANIQUE)
+            if (Math.Abs(VecteurVitesse.X) > VITESSE_PANIQUE || Joueur.EstEnAttaque)
                 ÉtatBot = ÉTATS.DÉFENSIVE;
-            if (CheminLePlusCourt.Count == 0 && EstDansLesAirs())
+            else if (CheminLePlusCourt.Count == 0 && EstDansLesAirs())
                 ÉtatBot = ÉTATS.PASSIF;
             else
                 ÉtatBot = ÉTATS.OFFENSIVE;
@@ -166,7 +169,6 @@ namespace AtelierXNA.AI
         }
         private void Patrouiller()
         {
-
         }
         private void RevenirSurSurface()
         {
@@ -194,7 +196,7 @@ namespace AtelierXNA.AI
         }
         protected override void Bloquer()
         {
-            if (((Joueur.EstEnAttaque && Joueur.EstEnCollision(this)) || ProjectileInRange() && g.NextFloat() <= P_BLOQUER_D) && !EstDansLesAirs())
+            if ((((Joueur.EstEnCollision(this)&&Joueur.EstEnAttaque) || ProjectileInRange()) && g.NextFloat() <= PBloquer) && !EstDansLesAirs())
                 base.Bloquer();
         }
         private bool ProjectileInRange()
@@ -203,26 +205,23 @@ namespace AtelierXNA.AI
             {
                 if (g is Projectile)
                 {
-                    //if ((g as Projectile).EstEnCollision(SphèreDeRéaction) && (g as Projectile).NumPlayer != this.NumManette)
-                    //    return true;
+                    if ((g as Projectile).EstEnCollision(SphèreDeRéaction) && (g as Projectile).NumPlayer != this.NumManette)
+                        return true;
                 }
             }
             return false;
-        }
-        private void Fuite()
-        {
-
         }
         #endregion
 
         #region Méthodes offensive.
         private void Attaquer()
         {
-            SeDéplacerSelonLeChemin();
-            if (HitBox.Intersects(Joueur.HitBox) && g.NextFloat() <= P_FRAPPER_D)
+            if (HitBox.Intersects(Joueur.HitBox) && g.NextFloat() <= PFrapper)
             {
                 GérerAttaque();
             }
+            else if(!EstEnAttaque && CheminLePlusCourt.Count != 0)
+                SeDéplacerSelonLeChemin();
         }
         private void Lancer()
         {
@@ -244,6 +243,7 @@ namespace AtelierXNA.AI
 
             Path.A_Star(NodeBot, NodeJoueur);
             CheminLePlusCourt = Path.CopierChemin();
+            TargetNode = CheminLePlusCourt[0];
         }
 
         private void PathFind(Vector3 départ)
@@ -253,11 +253,11 @@ namespace AtelierXNA.AI
 
             Path.A_Star(NodeBot, NodeJoueur);
             CheminLePlusCourt = Path.CopierChemin();
+            TargetNode = CheminLePlusCourt[0];
         }
 
         private void SeDéplacerSelonLeChemin()
         {
-            TargetNode = CheminLePlusCourt[0];
             if (EstSurNode())
             {
                 ChangerDeNode();
@@ -276,6 +276,9 @@ namespace AtelierXNA.AI
             else if (TargetNode.GetPosition().X < Position.X && CheminLePlusCourt.Count != 0)
                 Gauche();
             CheminLePlusCourt.Remove(TargetNode);
+            if(CheminLePlusCourt.Count != 0)
+                TargetNode = CheminLePlusCourt[0];
+            AncienTargetNode = new Node(TargetNode);
         }
         private void SeDéplacerEnHauteur()
         {
@@ -307,20 +310,16 @@ namespace AtelierXNA.AI
         protected override void Droite()
         {
             DIRECTION = ORIENTATION.DROITE;
-            ÉTAT_PERSO = ÉTAT.COURRIR;
-            if (VecteurVitesse.Y != 0)
-                Position += 0.1f * Vector3.Right;
-            else
-                Position += 0.1f * Vector3.Right;
+            if (VecteurVitesse.Y == 0)
+                ÉTAT_PERSO = ÉTAT.COURRIR;
+            Position += 0.1f * Vector3.Right;
         }
         protected override void Gauche()
         {
             DIRECTION = ORIENTATION.GAUCHE;
-            ÉTAT_PERSO = ÉTAT.COURRIR;
             if (VecteurVitesse.Y != 0)
-                Position -= 0.1f * Vector3.Right;
-            else
-                Position -= 0.1f * Vector3.Right;
+                ÉTAT_PERSO = ÉTAT.COURRIR;
+            Position -= 0.1f * Vector3.Right;
         }
         private Node CalculerNodeLePlusProche(Vector3 position, List<Node> listeÀParcourir)
         {
@@ -343,8 +342,6 @@ namespace AtelierXNA.AI
 
         #region Booléens de la classe.
 
-        #region Gérant la transition d'états.
-        #endregion
 
         #region Autres.
         private bool EstEnSaut()
@@ -361,7 +358,7 @@ namespace AtelierXNA.AI
         }
         private bool CheminÀCalculer()
         {
-            return CheminLePlusCourt.Count == 0 || (!EstDansLesAirs() && CalculerNodeLePlusProche(Joueur.Position,GrapheDéplacements.GetGrapheComplet()).Index != NodeJoueur.Index);
+            return CheminLePlusCourt.Count == 0 || AncienTargetNode.NomPlaquette != TargetNode.NomPlaquette;
         }
         private bool EstEnAttenteNodeHauteur()
         {
