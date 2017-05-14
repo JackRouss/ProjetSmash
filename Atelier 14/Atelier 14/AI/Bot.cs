@@ -96,7 +96,7 @@ namespace AtelierXNA.AI
                     {
                         PathFind();
                     }
-                   
+
                     Attaquer();
                     Bloquer();
                     Lancer();
@@ -145,8 +145,7 @@ namespace AtelierXNA.AI
         }
         protected override void Bloquer()
         {
-
-            if ((Joueur.EstEnAttaque && Joueur.EstEnCollision(this)) || ProjectileInRange() && g.NextFloat() <= P_SHIELD)
+            if ((!EstEnSaut && (Joueur.EstEnAttaque && Joueur.EstEnCollision(this)) || ProjectileInRange() && g.NextFloat() <= P_SHIELD))
                 base.Bloquer();
         }
         private bool ProjectileInRange()
