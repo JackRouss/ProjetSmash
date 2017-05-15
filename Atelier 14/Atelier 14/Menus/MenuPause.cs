@@ -96,6 +96,7 @@ namespace AtelierXNA.Menus
                 {
                     CptChoix += 1;
                 }
+                TestMaximunCpt();
                 switch (CptChoix)
                 {
                     case 0: CHOIX = ÉTAT.RÉSUMER_PARTIE; break;
@@ -126,6 +127,18 @@ namespace AtelierXNA.Menus
                     }
                 }
                 
+            }
+        }
+
+        private void TestMaximunCpt()
+        {
+            if (CptChoix >= 3)
+            {
+                CptChoix = 3;
+            }
+            if (CptChoix < 0)
+            {
+                CptChoix = 0;
             }
         }
 
