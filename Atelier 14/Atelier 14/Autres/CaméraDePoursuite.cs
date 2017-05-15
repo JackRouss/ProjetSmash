@@ -21,7 +21,7 @@ namespace AtelierXNA
         float TempsÉcouléDepuisMAJ { get; set; }
         List<PersonnageAnimé> ListesPerso { get; set; }
         Map Carte { get; set; }
-        bool DoIt { get; set; }
+        bool InitialiserPropriétéCarte { get; set; }
 
         public CaméraDePoursuite(Game jeu, Vector3 positionCaméra, Vector3 cible, Vector3 orientation, float intervalleMAJ)
            : base(jeu)
@@ -39,7 +39,7 @@ namespace AtelierXNA
             base.Initialize();
             Angle = Vector3.Zero;
             ListesPerso = new List<PersonnageAnimé>();
-            DoIt = true;
+            InitialiserPropriétéCarte = true;
         }
 
         protected override void CréerPointDeVue()
@@ -79,10 +79,10 @@ namespace AtelierXNA
         }
         void InitialiserPropCarte()
         {   
-            if(DoIt)
+            if(InitialiserPropriétéCarte)
             {
                 Carte = Game.Components.First(t => t is Map) as Map;
-                DoIt = false;
+                InitialiserPropriétéCarte = false;
             }                           
         }
         void RemplirListePerso()
