@@ -20,15 +20,12 @@ namespace AtelierXNA
         protected const float HAUTEUR_HITBOX = 5f;
         protected const float PROFONDEUR_HITBOX = 5f;
 
-
-        //Ces constantes seront à ajouter en propriétés.
         protected const float VITESSE_MAX_GAUCHE_DROITE = 50f;
         const float DURÉE_BOUCLIER = 1f;
         protected const float ACCÉLÉRATION_SOL = 500f;
         protected const float ACCÉLÉRATION_AIR = 500f;
         const int DOMMAGE_ATTAQUE = 12;
         const float FORCE_COUP = 500000f;
-
 
         protected Keys[] CONTRÔLES { get; private set; }
         public enum ORIENTATION { DROITE, GAUCHE };
@@ -48,7 +45,6 @@ namespace AtelierXNA
         //public BoundingBox HitBox { get; private set; }
         public  Bouclier BouclierPersonnage { get; protected set; }
         protected float RayonDuBouclier { get; private set; }
-
         protected float FrameEntreProjectile { get; private set; }
         protected float VitesseDéplacementGaucheDroite { get; set; }
         protected float VitesseMaximaleSaut { get; private set; }
@@ -59,15 +55,11 @@ namespace AtelierXNA
         public bool EstBouclierActif { get; private set; }
         bool ASautéDuneSurface { get; set; }
 
-        //Copies de certains éléments de l'environnement importants pour le personnage.
         Map Carte { get; set; }
         protected List<Vector3> IntervallesSurfaces { get; set; }
         protected List<Vector3> IntervallesPossibles { get; set; }
         public Vector3 IntervalleCourante { get; private set; }
 
-
-
-        //Données propres au personnages, qui seront variables.
         public Vector3 Position { get; protected set; }
         public Vector3 GetPositionPersonnage
         {
@@ -93,7 +85,7 @@ namespace AtelierXNA
         protected InputManager GestionInputClavier { get; set; }
         protected RessourcesManager<SoundEffect> GestionnaireDeSon { get; set; }
 
-        public bool décédé { get; set; }
+        public bool VraimentMort { get; set; }
         int FramesCrier { get; set; }
         protected int FrameCourir { get; set; }
 
@@ -101,12 +93,10 @@ namespace AtelierXNA
             : base(game)
         {
             RayonDuBouclier = 6;
-            //Propriétés pour le combat (à définir dans le constructeur)
             DommageAttaque = DOMMAGE_ATTAQUE;
             ForceCoup = FORCE_COUP;
             NumManette = numManette;
-
-
+        
             CONTRÔLES = contrôles;
             ÉTAT_PERSO = ÉTAT.IMMOBILE;
             DIRECTION = ORIENTATION.DROITE;
@@ -137,44 +127,27 @@ namespace AtelierXNA
             VecteurGauche = Vector3.Normalize(Carte.VecteurGauche);
             VecteurVitesse = Vector3.Zero;
 
-            décédé = false;
+            VraimentMort = false;
 
             base.Initialize();
         }
         #endregion
-
         #region Boucle de jeu.
         public override void Update(GameTime gameTime)
         {
-            
-            Suicide();
             AncienVecteurVitesse = VecteurVitesse;
             float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
             TempsÉcouléDepuisMAJ += tempsÉcoulé;
-            if (EstMort())
-            {
-                --NbVies;
 
-            }
-            décédé = NbVies == 0;
-
-            VieEnPourcentage = EstMort() ? 0 : VieEnPourcentage;
-            VecteurVitesse = EstMort() ? Vector3.Zero : VecteurVitesse;
-            VecteurVitesseGaucheDroite = EstMort() ? Vector3.Zero : VecteurVitesseGaucheDroite;
-            Position = EstMort()? PositionSpawn : Position;
-            RayonDuBouclier = EstMort() ? 6 : RayonDuBouclier;
-            if (EstModePeur() && !décédé && FramesCrier <= 0)
-            {
-                GestionnaireDeSon.Find("screaminggoat").Play();
-                FramesCrier = 120;
-            }
+            MéthodeEnLienAvecMortPersonnage();
+             
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
                 FramesCrier--;
                 FrameCourir--;
                 RayonDuBouclier = MathHelper.Min(RayonDuBouclier + 0.02f, 6);
                 FrameEntreProjectile--;
-                if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE && !(this is Bot)) //Conditions ici pour gérer l'immobilité.
+                if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE && !(this is Bot))
                 {
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
                 }
@@ -183,31 +156,42 @@ namespace AtelierXNA
                     ÉTAT_PERSO = ÉTAT.SAUTER;
                 }
 
-
                 AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
 
-                //Toutes les actions qui peuvent modifier le vecteur vitesse du personnage.
                 GérerTouchesEnfoncées();
                 GérerAccélérationGravitationnelle();
                 GérerFriction();
+
                 AnciennePosition = new Vector3(Position.X, Position.Y, Position.Z);
                 Position += (VecteurVitesse + VecteurVitesseGaucheDroite) * TempsÉcouléDepuisMAJ;
+
                 GénérerHitbox();
 
                 TempsÉcouléDepuisMAJ = 0;
             }
             GérerNouvellesTouches();
         }
-
-        void Suicide()
+        void MéthodeEnLienAvecMortPersonnage()
         {
-            if (GestionInputClavier.EstNouvelleTouche(Keys.B))
+            if (EstMort())
             {
-                décédé = true;
+                --NbVies;
+
+            }
+            VraimentMort = NbVies == 0;
+
+            VieEnPourcentage = EstMort() ? 0 : VieEnPourcentage;
+            VecteurVitesse = EstMort() ? Vector3.Zero : VecteurVitesse;
+            VecteurVitesseGaucheDroite = EstMort() ? Vector3.Zero : VecteurVitesseGaucheDroite;
+            Position = EstMort() ? PositionSpawn : Position;
+            RayonDuBouclier = EstMort() ? 6 : RayonDuBouclier;
+
+            if (EstModePeur() && !VraimentMort && FramesCrier <= 0)
+            {
+                GestionnaireDeSon.Find("screaminggoat").Play();
+                FramesCrier = 120;
             }
         }
-
-
         private void GérerFriction()
         {
             float mu_air = 0.1f;
@@ -451,6 +435,5 @@ namespace AtelierXNA
         }
         protected abstract bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position);
         #endregion
-
     }
 }

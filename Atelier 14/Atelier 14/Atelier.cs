@@ -546,15 +546,15 @@ namespace AtelierXNA
                         InitialiserMenuPause();
                         MediaPlayer.Pause();
                     }
-                    if (Joueur.décédé)
+                    if (Joueur.VraimentMort)
                     {
                         InitialiserFinJeux(PersoEnJeux);
-                        Joueur.décédé = false;
+                        Joueur.VraimentMort = false;
                     }
-                    if (PersoEnJeux.décédé)
+                    if (PersoEnJeux.VraimentMort)
                     {
                         InitialiserFinJeux(Joueur);
-                        PersoEnJeux.décédé = false;
+                        PersoEnJeux.VraimentMort = false;
                     }
                    
                     break;
