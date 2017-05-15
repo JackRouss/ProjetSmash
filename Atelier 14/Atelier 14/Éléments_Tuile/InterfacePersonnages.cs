@@ -17,10 +17,14 @@ namespace AtelierXNA.Éléments_Tuile
         const int DIMENSION_TETE_PERSO_LONGUEUR_TOTALE = DIMENSION_TETE_PERSO_LONGUEUR + BORDURE_GAUCHE;
         const int DIMENSION_TETE_PERSO_LARGEUR_TOTALE = DIMENSION_TETE_PERSO_LARGEUR + BORDURE_BAS;
 
-
         string TypePersonnage { get; set; }
         PlayerIndex NumManette { get; set; }
 
+        int DécalementImagePerso { get; set; }
+        int DécalementPoucentageVie { get; set; }
+        Rectangle[] PositionTete { get; set; }
+        Vector2[] PositionTypePersonage { get; set; }
+        
         List<Texture2D> TetePersonnage { get; set; }
         Texture2D ImageVie { get; set; }
         RessourcesManager<SpriteFont> GestionnaireFonts { get; set; }
@@ -30,14 +34,7 @@ namespace AtelierXNA.Éléments_Tuile
         Color CouleurTexte { get; set; }
         List<PersonnageAnimé> ListesPerso { get; set; }
         CaméraDePoursuite Caméra { get; set; }
-
         TuileTexturée NomJoueur { get; set; }
-
-
-        int DécalementImagePerso { get; set; }
-        int DÉcalementPoucentageVie { get; set; }
-        Rectangle[] PositionTete { get; set; }
-        Vector2[] PositionTypePersonage { get; set; }
 
 
         public InterfacePersonnages(Game game, string typePersonnege, PlayerIndex numManette)
@@ -49,16 +46,11 @@ namespace AtelierXNA.Éléments_Tuile
         public override void Initialize()
         {
             DrawOrder = 6;
-            GestionnaireFonts = Game.Services.GetService(typeof(RessourcesManager<SpriteFont>)) as RessourcesManager<SpriteFont>;
-            GestionnaireTexture = Game.Services.GetService(typeof(RessourcesManager<Texture2D>)) as RessourcesManager<Texture2D>;
-            GestionSprites = Game.Services.GetService(typeof(SpriteBatch)) as SpriteBatch;
+            Services();
             ArialFont = GestionnaireFonts.Find("Arial");
             ImageVie = GestionnaireTexture.Find("vie");
             CouleurTexte = Color.White;
-            ListesPerso = new List<PersonnageAnimé>();
-            TetePersonnage = new List<Texture2D>();
-            PositionTete = new Rectangle[2];
-            PositionTypePersonage = new Vector2[2];
+            CréerListeEtTableau();
             RemplirListePerso();
             RemplirListeCamera();
             RemplirListeTetePersonage();
@@ -66,6 +58,21 @@ namespace AtelierXNA.Éléments_Tuile
             Calculer();
             CréerPosition();
             base.Initialize();
+        }
+
+        void Services()
+        {
+            GestionnaireFonts = Game.Services.GetService(typeof(RessourcesManager<SpriteFont>)) as RessourcesManager<SpriteFont>;
+            GestionnaireTexture = Game.Services.GetService(typeof(RessourcesManager<Texture2D>)) as RessourcesManager<Texture2D>;
+            GestionSprites = Game.Services.GetService(typeof(SpriteBatch)) as SpriteBatch;
+        }
+
+        void CréerListeEtTableau()
+        {
+            ListesPerso = new List<PersonnageAnimé>();
+            TetePersonnage = new List<Texture2D>();
+            PositionTete = new Rectangle[2];
+            PositionTypePersonage = new Vector2[2];
         }
 
         void RemplirListePerso()
@@ -143,23 +150,23 @@ namespace AtelierXNA.Éléments_Tuile
         
         public override void Draw(GameTime gameTime)
         {
-            int rocket = 0;
+            int cpt = 0;
             GestionSprites.Begin();
             foreach(PersonnageAnimé perso in ListesPerso)
             {
                 Vector3 positionPerso = perso.GetPositionPersonnage;
-                GestionSprites.Draw(TetePersonnage[rocket],PositionTete[rocket], CouleurTexte);
-                GestionSprites.DrawString(ArialFont, perso.TypePersonnage, PositionTypePersonage[rocket], CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
+                GestionSprites.Draw(TetePersonnage[cpt],PositionTete[cpt], CouleurTexte);
+                GestionSprites.DrawString(ArialFont, perso.TypePersonnage, PositionTypePersonage[cpt], CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
                 GestionSprites.DrawString(ArialFont, perso.VieEnPourcentage.ToString(), 
-                                            new Vector2(DIMENSION_TETE_PERSO_LONGUEUR_TOTALE + rocket * (DécalementImagePerso - ArialFont.MeasureString(perso.VieEnPourcentage.ToString()).X - DIMENSION_TETE_PERSO_LONGUEUR_TOTALE)
+                                            new Vector2(DIMENSION_TETE_PERSO_LONGUEUR_TOTALE + cpt * (DécalementImagePerso - ArialFont.MeasureString(perso.VieEnPourcentage.ToString()).X - DIMENSION_TETE_PERSO_LONGUEUR_TOTALE)
                                           , Game.Window.ClientBounds.Height - ArialFont.MeasureString(TypePersonnage).Y), CouleurTexte);
                 for (int i = 0; i < perso.NbVies; i++)
                 {
-                    AfficherNombreVie(i, rocket, perso);
+                    AfficherNombreVie(i, cpt, perso);
                 }
                 Vector3 PositionÉcran = GestionSprites.GraphicsDevice.Viewport.Project(positionPerso, Caméra.Projection, Caméra.Vue, Matrix.Identity);
-                GestionSprites.DrawString(ArialFont, perso.NumManette.ToString(), new Vector2(PositionÉcran.X - 15, PositionÉcran.Y - 100), CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
-                rocket++;
+                GestionSprites.DrawString(ArialFont, perso.NumManette.ToString(), new Vector2(PositionÉcran.X - perso.ZoneAffichageDimensions.X/2, PositionÉcran.Y - perso.ZoneAffichageDimensions.Y), CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
+                cpt++;
             }
             
             GestionSprites.End();

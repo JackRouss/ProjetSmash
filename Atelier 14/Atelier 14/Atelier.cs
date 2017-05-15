@@ -540,7 +540,7 @@ namespace AtelierXNA
                     break;
                 
                 case GameState.JEU:
-                    if (GestionInput.EstNouvelleTouche(Keys.Escape))
+                    if (GestionInput.EstNouvelleTouche(Keys.Escape) || GestionManettes.EstNouvelleTouche(PlayerIndex.One, Buttons.Back) || GestionManettes.EstNouvelleTouche(PlayerIndex.Two, Buttons.Back))
                     {
                         ÉtatJeu = GameState.MENU_PAUSE;
                         InitialiserMenuPause();
