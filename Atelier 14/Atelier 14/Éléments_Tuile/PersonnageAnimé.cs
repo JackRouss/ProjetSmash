@@ -13,6 +13,7 @@ namespace AtelierXNA
     {
         public const int NB_ANIMATIONS = 11;
         protected const float ÉCHELLE_PERSONNAGE = 4;
+        int FrameCourir { get; set; }
         //Données de base.
         string état;
         protected string État
@@ -119,7 +120,7 @@ namespace AtelierXNA
                 {
                     État = NomsSprites[4];
                 }
-                else if (ÉTAT_PERSO == ÉTAT.LANCER )
+                else if (ÉTAT_PERSO == ÉTAT.LANCER)
                 {
                     if (VecteurVitesse.Y != 0)
                     {

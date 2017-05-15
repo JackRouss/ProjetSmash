@@ -30,7 +30,8 @@ namespace AtelierXNA.Autres
 
         public float NextFloat()
         {
-            return (float)g.NextDouble();
+            float aléatoire = (float)g.NextDouble();
+            return aléatoire;
         }
     }
 }

@@ -129,7 +129,7 @@ namespace AtelierXNA
             InitialiserServices();
             Commencer();
             base.Initialize();
-            MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
+            //MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
         }
 
         void Commencer()

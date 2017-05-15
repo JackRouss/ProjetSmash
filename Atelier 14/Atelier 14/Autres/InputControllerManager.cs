@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 namespace AtelierXNA
 {
-
     public class InputControllerManager : Microsoft.Xna.Framework.GameComponent
     {
         int JoueurMax { get; set; }
@@ -31,8 +30,6 @@ namespace AtelierXNA
         {
             Initialize();
         }
-
-
         public override void Initialize()
         {
             ÉtatManette = new GamePadState[2];
@@ -48,16 +45,11 @@ namespace AtelierXNA
             
             base.Initialize();
         }
-
-
-
         public override void Update(GameTime gameTime)
         {
             LesAncinneTouche = new List<Buttons> { LesNouvelleTouche[0] ,  LesNouvelleTouche[1]  };
             AncienÉtatManette = ÉtatManette;
         }
-
-
         public bool EstManetteActivée(PlayerIndex numManette)
         {
             int Case = TrouverNumManette(numManette);
