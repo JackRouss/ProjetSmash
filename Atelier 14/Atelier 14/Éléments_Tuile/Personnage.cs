@@ -144,7 +144,6 @@ namespace AtelierXNA
         public override void Update(GameTime gameTime)
         {
            
-            Suicide();
             AncienVecteurVitesse = VecteurVitesse;
             float tempsÉcoulé = (float)gameTime.ElapsedGameTime.TotalSeconds;
             TempsÉcouléDepuisMAJ += tempsÉcoulé;
@@ -196,15 +195,6 @@ namespace AtelierXNA
             }
             GérerNouvellesTouches();
         }
-
-        void Suicide()
-        {
-            if (GestionInputClavier.EstNouvelleTouche(Keys.B))
-            {
-                décédé = true;
-            }
-        }
-
 
         private void GérerFriction()
         {
