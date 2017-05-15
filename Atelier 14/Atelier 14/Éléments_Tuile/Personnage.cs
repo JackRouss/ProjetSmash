@@ -8,14 +8,13 @@ using AtelierXNA.Éléments_Tuile;
 using AtelierXNA.AI;
 using AtelierXNA.Autres;
 using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Media;
 
 
 namespace AtelierXNA
 {
     public abstract class Personnage : Microsoft.Xna.Framework.DrawableGameComponent, IPause
     {
-
+        
         #region Propriétés, constantes et initialisation.
         protected const float LARGEUR_HITBOX = 5f;
         protected const float HAUTEUR_HITBOX = 5f;
@@ -96,6 +95,7 @@ namespace AtelierXNA
 
         public bool décédé { get; set; }
         int FramesCrier { get; set; }
+        protected int FrameCourir { get; set; }
 
         public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles, PlayerIndex numManette)
             : base(game)
@@ -171,6 +171,7 @@ namespace AtelierXNA
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
                 FramesCrier--;
+                FrameCourir--;
                 RayonDuBouclier = MathHelper.Min(RayonDuBouclier + 0.02f, 6);
                 FrameEntreProjectile--;
                 if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE && !(this is Bot)) //Conditions ici pour gérer l'immobilité.

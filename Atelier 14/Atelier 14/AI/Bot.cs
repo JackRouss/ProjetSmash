@@ -119,7 +119,7 @@ namespace AtelierXNA.AI
                 {
                     Attaquer();
                     if(!HitBox.Intersects(Joueur.HitBox))
-                        Lancer();
+                    Lancer();
                     if (EstMort())
                     {
                         PathFind(PositionSpawn);
@@ -135,7 +135,7 @@ namespace AtelierXNA.AI
                     Patrouiller();
                 }
 
-
+                    
                 //À CHANGER D'ENDROIT.///////
                 if (CheminLePlusCourt.Count == 0)
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
@@ -147,7 +147,7 @@ namespace AtelierXNA.AI
             {
                 PathFind();
                 TempsÉcouléDepuisMAJChemin = 0;
-            }
+        }
 
             
             SphèreDeRéaction = new BoundingSphere(Position,SphèreDeRéaction.Radius);
@@ -165,8 +165,8 @@ namespace AtelierXNA.AI
         #region Méthodes défensives et passives.
         private void Survivre()
         {
-            RevenirSurSurface();
-        }
+                RevenirSurSurface();
+            }
         private void Patrouiller()
         {
         }
@@ -222,7 +222,7 @@ namespace AtelierXNA.AI
             }
             else if(!EstEnAttaque && CheminLePlusCourt.Count != 0)
                 SeDéplacerSelonLeChemin();
-        }
+            }
         private void Lancer()
         {
             if (new BoundingSphere(new Vector3(0, Joueur.GetPositionPersonnage.Y + 5, 0), HAUTEUR_HITBOX).Intersects(new BoundingSphere(new Vector3(0, HitBox.Center.Y, 0), HAUTEUR_HITBOX)) && g.NextFloat() <= PLancer && !EstEnAttaque)
@@ -257,11 +257,11 @@ namespace AtelierXNA.AI
         }
 
         private void SeDéplacerSelonLeChemin()
-        {
-            if (EstSurNode())
             {
+            if (EstSurNode())
+                {
                 ChangerDeNode();
-            }
+                }
             else
             {
                 SeDéplacerEnHauteur();
@@ -269,7 +269,7 @@ namespace AtelierXNA.AI
             }
         }
         private void ChangerDeNode()
-        {
+            {
             Position = new Vector3(TargetNode.GetPosition().X, Position.Y, Position.Z);
             if (TargetNode.GetPosition().X > Position.X && CheminLePlusCourt.Count != 0)
                 Droite();
@@ -279,47 +279,47 @@ namespace AtelierXNA.AI
             if(CheminLePlusCourt.Count != 0)
                 TargetNode = CheminLePlusCourt[0];
             AncienTargetNode = new Node(TargetNode);
-        }
+            }
         private void SeDéplacerEnHauteur()
         {
             if (!(EstEnSaut()))
             {
                 if (TargetNode.GetPosition().Y > Position.Y)
-                {
+            {
                     GérerSauts();
                 }
             }
-        }
+            }
         private void SeDéplacerEnLargeur()
         {
             if (TargetNode.GetPosition().X > Position.X  && !EstEnAttaque)
             {
                 if (Position.X + DISTANCE_THRESH >= TargetNode.GetPosition().X)
-                    Position = new Vector3(TargetNode.GetPosition().X, Position.Y, Position.Z);
+                Position = new Vector3(TargetNode.GetPosition().X, Position.Y, Position.Z);
                 else
                     Droite();
-            }
+                }
             else if (TargetNode.GetPosition().X < Position.X  && !EstEnAttaque)
-            {
+                {
                 if(Position.X - DISTANCE_THRESH <= TargetNode.GetPosition().X)
                     Position = new Vector3(TargetNode.GetPosition().X, Position.Y, Position.Z);
                 else
                     Gauche();
-            }
+                }
         }
         protected override void Droite()
         {
             DIRECTION = ORIENTATION.DROITE;
             if (VecteurVitesse.Y == 0)
-                ÉTAT_PERSO = ÉTAT.COURRIR;
+            ÉTAT_PERSO = ÉTAT.COURRIR;
             Position += 0.1f * Vector3.Right;
         }
         protected override void Gauche()
         {
             DIRECTION = ORIENTATION.GAUCHE;
             if (VecteurVitesse.Y != 0)
-                ÉTAT_PERSO = ÉTAT.COURRIR;
-            Position -= 0.1f * Vector3.Right;
+            ÉTAT_PERSO = ÉTAT.COURRIR;
+                Position -= 0.1f * Vector3.Right;
         }
         private Node CalculerNodeLePlusProche(Vector3 position, List<Node> listeÀParcourir)
         {
@@ -335,7 +335,7 @@ namespace AtelierXNA.AI
                 }
             }
             return node;
-        }
+            }
         #endregion
 
         #endregion

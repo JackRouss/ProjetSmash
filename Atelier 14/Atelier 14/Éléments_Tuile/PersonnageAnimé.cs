@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using AtelierXNA.Éléments_Tuile;
 using AtelierXNA.Autres;
+using Microsoft.Xna.Framework.Media;
 //using AtelierXNA.Autres;
 
 namespace AtelierXNA
@@ -65,7 +66,7 @@ namespace AtelierXNA
         #region Boucle de jeu.
         public override void Update(GameTime gameTime)
         {
-
+            
             if (Frame.CptFrame == NbFramesSprites[ÉtatNum] - 1 && EstEnAttaque)
             {
                 ÉTAT_PERSO = ÉTAT.IMMOBILE;
@@ -85,8 +86,11 @@ namespace AtelierXNA
                 if (ÉTAT_PERSO == ÉTAT.COURRIR)
                 {
                     État = NomsSprites[8];
-
-                    //GestionnaireDeSon.Find("Run").Play();
+                    if(FrameCourir <= 0)
+                    {
+                        GestionnaireDeSon.Find("Run").Play(); 
+                        FrameCourir = 15;
+                    }
                 }
                 else if (ÉTAT_PERSO == ÉTAT.BLOQUER)
                 {
@@ -97,7 +101,7 @@ namespace AtelierXNA
                     if (VecteurVitesse.Y != 0)
                     {
                         État = NomsSprites[6];
-                    }
+                    }          
                     else
                     {
                         État = NomsSprites[0];
@@ -130,7 +134,7 @@ namespace AtelierXNA
                         GestionnaireDeSon.Find("Arrow").Play();
                     else if (TypePersonnage == "Robot")
                         GestionnaireDeSon.Find("LaserBlasts").Play();
-
+               
                     EstEnAttaque = true;
                 }
                 else if (ÉTAT_PERSO == ÉTAT.MORT)

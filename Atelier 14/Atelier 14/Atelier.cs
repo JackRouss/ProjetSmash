@@ -99,7 +99,7 @@ namespace AtelierXNA
         {
             
             PériphériqueGraphique = new GraphicsDeviceManager(this);
-
+           
             this.PériphériqueGraphique.PreferredBackBufferWidth = this.Window.ClientBounds.Width + (LongueurÉcran - this.Window.ClientBounds.Width);
             this.PériphériqueGraphique.PreferredBackBufferHeight = this.Window.ClientBounds.Height + (LargeurÉcran - this.Window.ClientBounds.Height);
             //this.PériphériqueGraphique.IsFullScreen = true;
@@ -174,6 +174,9 @@ namespace AtelierXNA
             GestionnaireDeSons.Add("Arrow", this.Content.Load<SoundEffect>("Sounds/SoundEffects/Arrow"));
             GestionnaireDeSons.Add("LaserBlasts", this.Content.Load<SoundEffect>("Sounds/SoundEffects/LaserBlasts"));
             GestionnaireDeSons.Add("ROBOTATTAQUE", this.Content.Load<SoundEffect>("Sounds/SoundEffects/ROBOTATTAQUE"));
+            GestionnaireDeSons.Add("Run", this.Content.Load<SoundEffect>("Sounds/SoundEffects/Run"));
+            
+
         }
         private void ChargerModèles()
         {
@@ -633,7 +636,7 @@ namespace AtelierXNA
             if (ÉtatJeu == GameState.JEU && AChangéÉtat)
             {
                 MediaPlayer.Stop();
-                //MediaPlayer.Play(GestionnaireDeChansons.Find("Pinball Spring 160"));
+                MediaPlayer.Play(GestionnaireDeChansons.Find("MEME"));
             }
         }
 
