@@ -13,7 +13,6 @@ namespace AtelierXNA
     {
         public const int NB_ANIMATIONS = 11;
         protected const float ÉCHELLE_PERSONNAGE = 4;
-        int FrameCourir { get; set; }
         //Données de base.
         string état;
         protected string État
@@ -44,6 +43,7 @@ namespace AtelierXNA
         int[] NbFramesSprites { get; set; }
         protected TuileTexturéeAnimée Frame { get; set; }
         public Vector2 ZoneAffichageDimensions { get; private set; }
+        protected Générateur g { get; set; }
 
 
         public PersonnageAnimé(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles, float intervalleMAJAnimation, string[] nomSprites, string type, int[] nbFramesSprites, PlayerIndex numManette)
@@ -61,6 +61,8 @@ namespace AtelierXNA
         {
             base.Initialize();
             Frame.Initialize();
+            g = Game.Services.GetService(typeof(Générateur)) as Générateur;
+            g.ResetSeed();
         }
 
         #region Boucle de jeu.

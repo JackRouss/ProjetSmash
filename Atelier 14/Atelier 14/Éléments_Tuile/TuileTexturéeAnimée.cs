@@ -40,7 +40,6 @@ namespace AtelierXNA.Éléments_Tuile
         RessourcesManager<Texture2D> GestionnaireDeTextures { get; set; }
         List<List<Texture2D>> Textures { get; set; }
         Texture2D TextureCourante { get; set; }
-        VertexPositionTexture[] Sommets { get; set; }
         Vector2[,] PtsTexture { get; set; }
         BlendState GestionAlpha { get; set; }
         Vector3 p;

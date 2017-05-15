@@ -222,8 +222,8 @@ namespace AtelierXNA
             for (int i = 0; i < NB_NODES; ++i)
             {
                 Node nodeATesterExtremiter = new Node(new Vector3(PtsSommets[0].X + i * (PtsSommets[4].X - PtsSommets[0].X) / (NB_NODES - 1), Origine.Y, Origine.Z), i);
-                nodeATesterExtremiter.EstExtremiterGauche = i == 0;
-                nodeATesterExtremiter.EstExtremiterDroite = i == NB_NODES - 1;                          
+                nodeATesterExtremiter.EstExtrémitéeGauche = i == 0;
+                nodeATesterExtremiter.EstExtrémitéeDroite = i == NB_NODES - 1;                          
                 Nodes.Add(nodeATesterExtremiter);
             }
                 
