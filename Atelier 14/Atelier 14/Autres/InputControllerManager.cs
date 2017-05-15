@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Input;
 
 namespace AtelierXNA
 {
-
     public class InputControllerManager : Microsoft.Xna.Framework.GameComponent
     {
         int JoueurMax { get; set; }
@@ -19,22 +18,15 @@ namespace AtelierXNA
             : base(game)
         {
         }
-
-
         public override void Initialize()
         {
             Déconnection = false;
             base.Initialize();
         }
-
-
-
         public override void Update(GameTime gameTime)
         {
             AncienÉtatManette = ÉtatManette;
         }
-
-
         public bool EstManetteActivée(PlayerIndex numManette)
         {
             ÉtatManette = GamePad.GetState(numManette);
@@ -57,7 +49,5 @@ namespace AtelierXNA
         //    ÉtatManette = GamePad.GetState(numManette);
         //    return ÉtatManette.ThumbSticks;
         //}
-
-
     }
 }

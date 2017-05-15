@@ -6,7 +6,7 @@ using AtelierXNA.Éléments_Tuile;
 
 namespace AtelierXNA.Autres
 {
-    public class Bouclier : PrimitiveDeBaseAnimée
+    public class Bouclier : PrimitiveDeBaseAnimée, IPause
     {
         
         #region NOUVEAU CODE HORS DE SPHÈRETEXTURÉE.
