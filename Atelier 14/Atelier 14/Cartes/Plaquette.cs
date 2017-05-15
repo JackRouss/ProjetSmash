@@ -101,10 +101,10 @@ namespace AtelierXNA
             Nodes = new List<Node>();
             for (int i = 0; i < NB_NODES; ++i)
             {
-                Node UnAutreBidonVilleDeMerde = new Node(new Vector3(IntervallesSurfaces.X + i * (IntervallesSurfaces.Y - IntervallesSurfaces.X) / (NB_NODES - 1), IntervallesSurfaces.Z, Position.Z), i);
-                UnAutreBidonVilleDeMerde.EstExtrémitéeGauche = i == 0;
-                UnAutreBidonVilleDeMerde.EstExtrémitéeDroite = NB_NODES -1 == i;
-                Nodes.Add(UnAutreBidonVilleDeMerde);//Le i est bidon ici; il faut le redéfinir lorsque l'on créé le graphe.
+                Node nodeATesterExtremiter = new Node(new Vector3(IntervallesSurfaces.X + i * (IntervallesSurfaces.Y - IntervallesSurfaces.X) / (NB_NODES - 1), IntervallesSurfaces.Z, Position.Z), i);
+                nodeATesterExtremiter.EstExtremiterGauche = i == 0;
+                nodeATesterExtremiter.EstExtremiterDroite = NB_NODES -1 == i;
+                Nodes.Add(nodeATesterExtremiter);
             }
                 
         }

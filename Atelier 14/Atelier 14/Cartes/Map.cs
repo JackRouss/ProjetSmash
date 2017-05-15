@@ -6,20 +6,25 @@ using AtelierXNA.Autres;
 
 
 namespace AtelierXNA
-{// Partit Jack
+{
 
     public class Map : PrimitiveDeBase, IPause
     {
         const int NB_NODES = 20;
+        int[] Seeds = new int[] { 99, 67, 666, 5924725};
+
+
         public Vector4 LIMITE_MAP { get; private set; }// (x a droite, x a gauche, y en haut, y en bas)
         public Vector4 LIMITE_PLAQUETTE { get; private set; }
         const int NB_TRIANGLE_SURFACE = 2;
         const int NB_TRIANGLE_BASE = 8;
         const int NB_SOMMETS_LIST = 3;
-        const int coeff_Surface = 2;
-        const int coeff_Base = 4;
-        const int hauteur = 15;
-
+        const int COEFF_SURFACE = 2;
+        const int COEFF_BASE = 4;
+        const int HAUTEUR = 15;
+        const int HAUTEURBOX = 10;
+        const int TRANSLATION_MODELE = 10;
+        const float GROSSEUR_MODELE = 0.05f;
 
         //Propriétés utilisées par le personnage.
         public Vector3 VecteurGauche { get; private set; }
@@ -38,7 +43,7 @@ namespace AtelierXNA
         VertexPositionColor[] SommetsBase { get; set; }
         BasicEffect EffetDeBase { get; set; }
         Color Couleur { get; set; }
-        RessourcesManager<Model> GestionnaireDeRessources { get; set; }
+        RessourcesManager<Model> GestionnaireDeModele { get; set; }
         Model Arbre { get; set; }
 
 
@@ -49,37 +54,24 @@ namespace AtelierXNA
             Origine = position;
             Couleur = couleur;
             NbPlateformes = nbPlateformes;
-            
-            if(Couleur == Atelier.CouleurCartes[0])
+                 
+            for(int i =0; i < Seeds.Length -1; ++i)
             {
-                g.ModifierSeed(99);
-            }
-            else if(Couleur == Atelier.CouleurCartes[1])
-            {
-                g.ModifierSeed(67);
-            }
-            else if(Couleur == Atelier.CouleurCartes[2])
-            {
-                g.ModifierSeed(666);//Exemple si le bot.
-            }
-            else if(Couleur == Atelier.CouleurCartes[3])
-            {
-                g.ModifierSeed(5924725);
-            }
+                if(Couleur == Atelier.CouleurCartes[i])
+                {
+                    g.ModifierSeed(Seeds[i]);
+                }            
+           }       
         }
 
         public override void Initialize()
         {
-           
+            DrawOrder = 1;
             Longueur = 100f;
             Largeur = 50;
-            Hitbox = new BoundingBox(new Vector3(-Longueur / coeff_Surface, -Largeur / 2, -10), new Vector3(Longueur / coeff_Surface, Largeur / 2, 10));
+            Hitbox = new BoundingBox(new Vector3(-Longueur / COEFF_SURFACE, -Largeur / COEFF_SURFACE, -HAUTEURBOX), new Vector3(Longueur / COEFF_SURFACE, Largeur / COEFF_SURFACE, HAUTEURBOX));
 
-            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", 0.045f, Vector3.Zero, new Vector3(-Longueur/2 + 10, -1, -Largeur/2 + 10)));
-            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", 0.055f, Vector3.Zero, new Vector3(-Longueur / 4 + 10, -1, -Largeur / 2 + 10)));
-            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", 0.05f, Vector3.Zero, new Vector3(Longueur / 2 - 10, -1, -Largeur / 2 + 10)));
-            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", 0.06f, Vector3.Zero, new Vector3(Longueur / 4 - 10, -1, -Largeur / 2 + 10)));
-            DrawOrder = 1;
+            AjouterModele3D();        
 
             LIMITE_MAP = new Vector4(150, -150, 100, -100);
             LIMITE_PLAQUETTE = new Vector4(Origine.X + Longueur / 2, Origine.X - Longueur / 2,(Origine.Y + LIMITE_MAP.Z)/3, 0);
@@ -88,20 +80,33 @@ namespace AtelierXNA
             InitialiserSommets();
             IntervallesSurfaces = new List<Vector3>();
             IntervallesSurfaces.Add(new Vector3(PtsSommets[0].X, PtsSommets[4].X, Origine.Y));
-            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
-            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
-                foreach (Plaquette p in Plateformes)
-                {
-                    p.Initialize();
-                }
-                GénérerPlateformes();
+            InitialisationPlaquettes();
+
+            CalculerPropriétésPourPersonnages();
+
+            base.Initialize();
+        }
+        void InitialisationPlaquettes()
+        {
+            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 4, Origine.Y + HAUTEUR, Origine.Z), Couleur));
+            Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 4, Origine.Y + HAUTEUR, Origine.Z), Couleur));
+
+            foreach (Plaquette p in Plateformes)
+            {
+                p.Initialize();
+            }
+            GénérerPlateformes();
             foreach (Plaquette p in Plateformes)
             {
                 Game.Components.Add(p);
             }
-            CalculerPropriétésPourPersonnages();
-
-            base.Initialize();
+        }
+        void AjouterModele3D()
+        {
+            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", GROSSEUR_MODELE, Vector3.Zero, new Vector3(-Longueur / 2 + TRANSLATION_MODELE, -2, -Largeur / 2 + TRANSLATION_MODELE)));
+            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", GROSSEUR_MODELE, Vector3.Zero, new Vector3(-Longueur / 4 + TRANSLATION_MODELE, -2, -Largeur / 2 + TRANSLATION_MODELE)));
+            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", GROSSEUR_MODELE, Vector3.Zero, new Vector3(Longueur / 2 - TRANSLATION_MODELE, -2, -Largeur / 2 + TRANSLATION_MODELE)));
+            Game.Components.Add(new ObjetDeBase(Game, "LP_tree", GROSSEUR_MODELE, Vector3.Zero, new Vector3(Longueur / 4 - TRANSLATION_MODELE, -2, -Largeur / 2 + TRANSLATION_MODELE)));
         }
         void GénérerPlateformes()
         {
@@ -123,7 +128,7 @@ namespace AtelierXNA
                 
             }
         }
-        bool EmplacementValide(float x, float y)//À REDÉFINIR.
+        bool EmplacementValide(float x, float y)
         {
             if(Plateformes.Count != 0)
             {
@@ -164,20 +169,20 @@ namespace AtelierXNA
             PtsSommets = new Vector3[(NB_TRIANGLE_SURFACE + NB_TRIANGLE_BASE) * NB_SOMMETS_LIST];
 
             //Plaque Du dessus
-            PtsSommets[0] = new Vector3(Origine.X - Longueur / coeff_Surface, Origine.Y, Origine.Z - Largeur / coeff_Surface);
-            PtsSommets[1] = new Vector3(Origine.X + Longueur / coeff_Surface, Origine.Y, Origine.Z + Largeur / coeff_Surface);
-            PtsSommets[2] = new Vector3(Origine.X - Longueur / coeff_Surface, Origine.Y, Origine.Z + Largeur / coeff_Surface);
+            PtsSommets[0] = new Vector3(Origine.X - Longueur / COEFF_SURFACE, Origine.Y, Origine.Z - Largeur / COEFF_SURFACE);
+            PtsSommets[1] = new Vector3(Origine.X + Longueur / COEFF_SURFACE, Origine.Y, Origine.Z + Largeur / COEFF_SURFACE);
+            PtsSommets[2] = new Vector3(Origine.X - Longueur / COEFF_SURFACE, Origine.Y, Origine.Z + Largeur / COEFF_SURFACE);
             PtsSommets[3] = PtsSommets[0];
-            PtsSommets[4] = new Vector3(Origine.X + Longueur / coeff_Surface, Origine.Y, Origine.Z - Largeur / coeff_Surface);
+            PtsSommets[4] = new Vector3(Origine.X + Longueur / COEFF_SURFACE, Origine.Y, Origine.Z - Largeur / COEFF_SURFACE);
             PtsSommets[5] = PtsSommets[1];
 
             //Plaque du dessous
-            PtsSommets[6] = new Vector3(Origine.X - Longueur / coeff_Base, Origine.Y - hauteur, Origine.Z - Largeur / coeff_Base);
-            PtsSommets[7] = new Vector3(Origine.X - Longueur / coeff_Base, Origine.Y - hauteur, Origine.Z + Largeur / coeff_Base);
-            PtsSommets[8] = new Vector3(Origine.X + Longueur / coeff_Base, Origine.Y - hauteur, Origine.Z + Largeur / coeff_Base);
+            PtsSommets[6] = new Vector3(Origine.X - Longueur / COEFF_BASE, Origine.Y - HAUTEUR, Origine.Z - Largeur / COEFF_BASE);
+            PtsSommets[7] = new Vector3(Origine.X - Longueur / COEFF_BASE, Origine.Y - HAUTEUR, Origine.Z + Largeur / COEFF_BASE);
+            PtsSommets[8] = new Vector3(Origine.X + Longueur / COEFF_BASE, Origine.Y - HAUTEUR, Origine.Z + Largeur / COEFF_BASE);
             PtsSommets[9] = PtsSommets[6];
             PtsSommets[10] = PtsSommets[8];
-            PtsSommets[11] = new Vector3(Origine.X + Longueur / 3, Origine.Y - hauteur, Origine.Z - Largeur / 3);
+            PtsSommets[11] = new Vector3(Origine.X + Longueur / 3, Origine.Y - HAUTEUR, Origine.Z - Largeur / 3);
 
             //Coter Face
             PtsSommets[12] = PtsSommets[7];
@@ -209,17 +214,17 @@ namespace AtelierXNA
         { 
             
             VecteurGauche = PtsSommets[0] - PtsSommets[4];
-            foreach(Plaquette p in Plateformes)//Pour faire que ce sont des obstacles.
+            foreach(Plaquette p in Plateformes)
             {
                 IntervallesSurfaces.Add(p.IntervallesSurfaces);
             }
             Nodes = new List<Node>();
             for (int i = 0; i < NB_NODES; ++i)
             {
-                Node bidonVilleDeMerde = new Node(new Vector3(PtsSommets[0].X + i * (PtsSommets[4].X - PtsSommets[0].X) / (NB_NODES - 1), Origine.Y, Origine.Z), i);
-                bidonVilleDeMerde.EstExtrémitéeGauche = i == 0;
-                bidonVilleDeMerde.EstExtrémitéeDroite = i == NB_NODES - 1;               
-                Nodes.Add(bidonVilleDeMerde);//Le i est bidon ici; il faut le redéfinir lorsque l'on créé le graphe.
+                Node nodeATesterExtremiter = new Node(new Vector3(PtsSommets[0].X + i * (PtsSommets[4].X - PtsSommets[0].X) / (NB_NODES - 1), Origine.Y, Origine.Z), i);
+                nodeATesterExtremiter.EstExtremiterGauche = i == 0;
+                nodeATesterExtremiter.EstExtremiterDroite = i == NB_NODES - 1;                          
+                Nodes.Add(nodeATesterExtremiter);
             }
                 
         }

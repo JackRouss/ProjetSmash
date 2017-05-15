@@ -75,13 +75,10 @@ namespace AtelierXNA.Autres
             TrouverIndex();
             
         }
-        void ReInitialize()
+        void ReInitialize() //Se fait car son rayon diminu.
         {
             SphèreDeCollision = new BoundingSphere(PositionInitiale, Rayon);
             Sommets = new VertexPositionTexture[NbSommets];
-            PtsTexture = new Vector2[(int)Charpente.Y + 1, (int)Charpente.X + 1];
-            PtsEspace = new Vector3[(int)Charpente.Y + 1, (int)Charpente.X + 1];
-            Deltas = new Vector2(TextureSphère.Width / Charpente.X, TextureSphère.Height / Charpente.Y);
             InitialiserPtsTexture();
             InitialiserPtsEspace();
             base.Initialize();
