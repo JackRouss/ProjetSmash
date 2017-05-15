@@ -164,8 +164,8 @@ namespace AtelierXNA.Éléments_Tuile
                 {
                     AfficherNombreVie(i, cpt, perso);
                 }
-                Vector3 PositionÉcran = GestionSprites.GraphicsDevice.Viewport.Project(positionPerso, Caméra.Projection, Caméra.Vue, Matrix.Identity);
-                GestionSprites.DrawString(ArialFont, perso.NumManette.ToString(), new Vector2(PositionÉcran.X - perso.ZoneAffichageDimensions.X/2, PositionÉcran.Y - perso.ZoneAffichageDimensions.Y), CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
+                Vector3 PositionÉcran = GestionSprites.GraphicsDevice.Viewport.Project(new Vector3(positionPerso.X - perso.ZoneAffichageDimensions.X/2, positionPerso.Y + perso.ZoneAffichageDimensions.Y + 2, positionPerso.Z), Caméra.Projection, Caméra.Vue, Matrix.Identity);
+                GestionSprites.DrawString(ArialFont, perso.NumManette.ToString(), new Vector2(PositionÉcran.X, PositionÉcran.Y), CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
                 cpt++;
             }
             

@@ -1,15 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 
 namespace AtelierXNA.Éléments_Tuile
 {
-    /// <summary>
-    /// This is a game component that implements IUpdateable.
-    /// </summary>
     public class TuileTexturéeAniméeJulia :TuileTexturée
     {
         Effect julia;
@@ -24,17 +19,10 @@ namespace AtelierXNA.Éléments_Tuile
         public TuileTexturéeAniméeJulia(Game game, float homothétieInitiale, Vector3 rotationInitiale, Vector3 positionInitiale, Vector2 étendue, string nomTextureTuile, float intervalleMAJ)
             : base(game, homothétieInitiale, rotationInitiale,positionInitiale, étendue, nomTextureTuile, intervalleMAJ)
         {
-            // TODO: Construct any child components here
         }
 
-        /// <summary>
-        /// Allows the game component to perform any initialization it needs to before starting
-        /// to run.  This is where it can query for any required services and load content.
-        /// </summary>
         public override void Initialize()
         {
-            // TODO: Add your initialization code here
-
             base.Initialize();
         }
         protected override void LoadContent()
@@ -45,24 +33,18 @@ namespace AtelierXNA.Éléments_Tuile
             julia = GestionnaireDeShaders.Find("Julia");
             CaméraTuile = Game.Components.First(t => t is CaméraDePoursuite) as CaméraDePoursuite;
 
-
-
             base.LoadContent();
         }
 
-        /// <summary>
-        /// Allows the game component to update itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public override void Update(GameTime gameTime)
         {
-            GamePadState pad = GamePad.GetState(PlayerIndex.One);
+           // GamePadState pad = GamePad.GetState(PlayerIndex.One);
 
-            if (pad.Buttons.A == ButtonState.Pressed)
-                zoom /= 1.0005f;
+            //if (pad.Buttons.A == ButtonState.Pressed)
+            //    zoom /= 1.0005f;
 
-            if (pad.Buttons.X == ButtonState.Pressed)
-                zoom *= 1.0005f;
+            //if (pad.Buttons.X == ButtonState.Pressed)
+            //    zoom *= 1.0005f;
 
             //if(GestionClavier.EstNouvelleTouche(Keys.Q))
             //    zoom /= 1.05f;
@@ -71,36 +53,25 @@ namespace AtelierXNA.Éléments_Tuile
 
 
 
-            float panSensitivity = 0.001f * (float)Math.Log(zoom + 1);
+            //float panSensitivity = 0.001f * (float)Math.Log(zoom + 1);
 
-            pan += new Vector2(pad.ThumbSticks.Left.X, -pad.ThumbSticks.Left.Y) * panSensitivity;
+            //pan += new Vector2(pad.ThumbSticks.Left.X, -pad.ThumbSticks.Left.Y) * panSensitivity;
 
             base.Update(gameTime);
         }
 
         public override void Draw(GameTime gameTime)
         {
-         Matrix projection = Matrix.CreateOrthographicOffCenter
+             Matrix projection = Matrix.CreateOrthographicOffCenter
             (0,GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, 0, 1);
-         Matrix halfPixelOffset = Matrix.CreateTranslation(-0.5f, -0.5f, 0);
-         //julia.Parameters["MatrixTransform"].SetValue(halfPixelOffset * projection);
-         julia.Parameters["MatrixTransform"].SetValue(GetMonde() * CaméraTuile.Vue * CaméraTuile.Projection);
-         //julia.Parameters["Texture"].SetValue(textureTuile);
-
-         GraphicsDevice device = spriteBatch.GraphicsDevice;
-            //VertexBuffer VB = new VertexBuffer(;
-            //IndexBuffer IB = new IndexBuffer(;
-            //GraphicsDevice.SetRenderTarget(null);
-            //GraphicsDevice.Clear(Color.CornflowerBlue);
+             Matrix halfPixelOffset = Matrix.CreateTranslation(-0.5f, -0.5f, 0);
+             julia.Parameters["MatrixTransform"].SetValue(GetMonde() * CaméraTuile.Vue * CaméraTuile.Projection);
+            GraphicsDevice device = spriteBatch.GraphicsDevice;
             float aspectRatio = (float)device.Viewport.Height / (float)device.Viewport.Width;
             julia.CurrentTechnique.Passes[0].Apply();
             julia.Parameters["Pan"].SetValue(pan);
             julia.Parameters["Zoom"].SetValue(zoom);
             julia.Parameters["Aspect"].SetValue(aspectRatio);
-         //device.SetVertexBuffer(VB);
-         //device.Indices = IB;
-         //spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-         //base.Draw(gameTime);
             foreach (EffectPass passeEffet in julia.CurrentTechnique.Passes)
             {
                passeEffet.Apply();

@@ -206,7 +206,7 @@ namespace AtelierXNA.Menus
         {
             Fond…cran.Draw(gameTime);
             GestionSprites.Begin();
-            GestionSprites.Draw(BackGroundChoix, new Rectangle((int)PositionsCartes[TranspositionTableau(), autre()].X-4, (int)PositionsCartes[TranspositionTableau(), autre()].Y-4, (int)LongueurRectangle + 8, (int)HauteurRectangle + 8), COULEURS[CptCouleur]);
+            GestionSprites.Draw(BackGroundChoix, new Rectangle((int)PositionsCartes[TranspositionTableau(), Arrondir()].X-4, (int)PositionsCartes[TranspositionTableau(), Arrondir()].Y-4, (int)LongueurRectangle + 8, (int)HauteurRectangle + 8), COULEURS[CptCouleur]);
             for (int i = 0; i < EmplacementDesCartres.GetLength(1); i++)
             {
                 for (int j = 0; j < EmplacementDesCartres.GetLength(0); j++)
@@ -236,7 +236,7 @@ namespace AtelierXNA.Menus
                 
         }
 
-        int autre()
+        int Arrondir()
         {
             return (int)Math.Round((double)NumChoixCarte / nbCarte + 0.05);
         }
