@@ -24,10 +24,10 @@ namespace AtelierXNA.AI
         const float P_LANCER_D = 1f;
         const float P_CHEMIN_D = 1f;
 
-        const float P_FRAPPER_N = 0.5f;
-        const float P_BLOQUER_N = 0.05f;
-        const float P_LANCER_N = 0.005f;
-        const float P_CHEMIN_N = 0.05f;
+        const float P_FRAPPER_N = 0.1f;
+        const float P_BLOQUER_N = 0.5f;
+        const float P_LANCER_N = 0.1f;
+        const float P_CHEMIN_N = 0.5f;
 
         const float P_FRAPPER_F = 0.005f;
         const float P_BLOQUER_F = 0.05f;
@@ -70,6 +70,7 @@ namespace AtelierXNA.AI
         {
             base.Initialize();
             ÉtatBot = ÉTATS.OFFENSIVE;
+            //ÉtatBot = ÉTATS.PASSIF;
             InitialiserProbabilités();
             Joueur = Game.Components.First(t => t is Personnage && t != this) as Personnage;
             Carte = Game.Components.First(t => t is Map) as Map;
@@ -112,6 +113,7 @@ namespace AtelierXNA.AI
             TempsÉcouléDepuisMAJBot += tempsÉcoulé;
             TempsÉcouléDepuisMAJChemin += tempsÉcoulé;
             base.Update(gameTime);
+
             if (TempsÉcouléDepuisMAJBot >= INTERVALLE_MAJ_BOT)
             {
                 GérerÉtat();
@@ -132,22 +134,25 @@ namespace AtelierXNA.AI
                 }
                 else if(ÉtatBot == ÉTATS.PASSIF)
                 {
-                    Patrouiller();
+                    //if (CheminÀCalculer())
+                    //    Patrouiller();
+                    //if(!EstEnAttaque && CheminLePlusCourt.Count != 0)
+                    //    SeDéplacerSelonLeChemin();
                 }
 
-                    
                 //À CHANGER D'ENDROIT.///////
                 if (CheminLePlusCourt.Count == 0)
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
                 ////////////////////////////
+
                 TempsÉcouléDepuisMAJBot = 0;
             }
 
-            if ((TempsÉcouléDepuisMAJChemin >= INTERVALLE_MAJ_CHEMIN && !EstDansLesAirs()) || CheminÀCalculer())
+            if (((TempsÉcouléDepuisMAJChemin >= INTERVALLE_MAJ_CHEMIN && !EstDansLesAirs()) || CheminÀCalculer()) && ÉtatBot == ÉTATS.OFFENSIVE)
             {
                 PathFind();
                 TempsÉcouléDepuisMAJChemin = 0;
-        }
+            }
 
             
             SphèreDeRéaction = new BoundingSphere(Position,SphèreDeRéaction.Radius);
@@ -156,7 +161,7 @@ namespace AtelierXNA.AI
         {
             if (Math.Abs(VecteurVitesse.X) > VITESSE_PANIQUE || Joueur.EstEnAttaque)
                 ÉtatBot = ÉTATS.DÉFENSIVE;
-            else if (CheminLePlusCourt.Count == 0 && EstDansLesAirs())
+            else if (CheminLePlusCourt.Count == 0)
                 ÉtatBot = ÉTATS.PASSIF;
             else
                 ÉtatBot = ÉTATS.OFFENSIVE;
@@ -165,10 +170,16 @@ namespace AtelierXNA.AI
         #region Méthodes défensives et passives.
         private void Survivre()
         {
-                RevenirSurSurface();
-            }
+           RevenirSurSurface();
+        }
         private void Patrouiller()
         {
+            Node n1 = CalculerNodeLePlusProche(Position, GrapheDéplacements.GetGrapheComplet());
+            Node n2 = GrapheDéplacements.GetGrapheComplet().First(n => n.NomPlaquette == n1.NomPlaquette && (n.Index > n1.Index + 4 || n.Index < n1.Index - 4));
+
+            Path.A_Star(n1, n2);
+            CheminLePlusCourt = Path.CopierChemin();
+            TargetNode = CheminLePlusCourt[0];
         }
         private void RevenirSurSurface()
         {
@@ -196,8 +207,16 @@ namespace AtelierXNA.AI
         }
         protected override void Bloquer()
         {
-            if ((((Joueur.EstEnCollision(this)&&Joueur.EstEnAttaque) || ProjectileInRange()) && g.NextFloat() <= PBloquer) && !EstDansLesAirs())
+            if ((((Joueur.EstEnCollision(this) && Joueur.EstEnAttaque) || ProjectileInRange()) && g.NextFloat() <= PBloquer) && !EstDansLesAirs())
                 base.Bloquer();
+            //else if (EstBouclierActif && (Joueur.EstEnCollision(this) && Joueur.EstEnAttaque) && !EstDansLesAirs())
+            //    EstBouclierActif = true;
+            //else
+            //{
+            //    EstBouclierActif = false;
+            //    RayonDuBouclier = BouclierPersonnage.Rayon;
+            //    Game.Components.Remove(BouclierPersonnage);
+            //}
         }
         private bool ProjectileInRange()
         {

@@ -217,8 +217,8 @@ namespace AtelierXNA
             for (int i = 0; i < NB_NODES; ++i)
             {
                 Node bidonVilleDeMerde = new Node(new Vector3(PtsSommets[0].X + i * (PtsSommets[4].X - PtsSommets[0].X) / (NB_NODES - 1), Origine.Y, Origine.Z), i);
-                bidonVilleDeMerde.EstExtremiterGauche = i == 0;
-                bidonVilleDeMerde.EstExtremiterDroite = i == NB_NODES - 1;               
+                bidonVilleDeMerde.EstExtrémitéeGauche = i == 0;
+                bidonVilleDeMerde.EstExtrémitéeDroite = i == NB_NODES - 1;               
                 Nodes.Add(bidonVilleDeMerde);//Le i est bidon ici; il faut le redéfinir lorsque l'on créé le graphe.
             }
                 

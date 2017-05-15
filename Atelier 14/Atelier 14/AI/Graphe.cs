@@ -86,22 +86,18 @@ namespace AtelierXNA.AI
             for (int i = 0; i < MatriceAdjacence.GetLength(0); ++i)
                 for (int j = 0; j < MatriceAdjacence.GetLength(1); ++j)
                 {
-                    Node nodeActuelle = GrapheComplet.First(t => t.Index == i);
-                    Node nodeVerifier = GrapheComplet.First(t => t.Index == j);
+                    Node nodeActuel = GrapheComplet.First(t => t.Index == i);
+                    Node nodeVérifié = GrapheComplet.First(t => t.Index == j);
 
-                    MatriceAdjacence[i, j] = nodeActuelle.NomPlaquette == nodeVerifier.NomPlaquette ? 1 : 0;
-                    if (MatriceAdjacence[i, j] != 1 && Vector3.Distance(nodeActuelle.GetPosition(), nodeVerifier.GetPosition()) <= DISTANCE_MAX)
+                    MatriceAdjacence[i, j] = nodeActuel.NomPlaquette == nodeVérifié.NomPlaquette ? 1 : 0;
+                    if (!EstConnecté(i,j) && EstDistanceAcceptable(nodeActuel.GetPosition(),nodeVérifié.GetPosition()))
                     {
-                        if ((nodeActuelle.EstExtremiterGauche))
-                        {
-                            MatriceAdjacence[i, j] = (nodeVerifier.GetPosition().Y <= nodeActuelle.GetPosition().Y && nodeVerifier.GetPosition().X < nodeActuelle.GetPosition().X) ? 1 : 0;
-                        }
-                        else if (nodeActuelle.EstExtremiterDroite)
-                        {
-                            MatriceAdjacence[i, j] = (nodeVerifier.GetPosition().Y <= nodeActuelle.GetPosition().Y && nodeVerifier.GetPosition().X > nodeActuelle.GetPosition().X) ? 1 : 0;
-                        }
+                        if ((nodeActuel.EstExtrémitéeGauche))
+                            MatriceAdjacence[i, j] = (EstPlusBasOuÉgal(nodeVérifié.GetPosition(),nodeActuel.GetPosition()) && nodeVérifié.GetPosition().X < nodeActuel.GetPosition().X) ? 1 : 0;
+                        else if (nodeActuel.EstExtrémitéeDroite)
+                            MatriceAdjacence[i, j] = (EstPlusBasOuÉgal(nodeVérifié.GetPosition(),nodeActuel.GetPosition()) && nodeVérifié.GetPosition().X > nodeActuel.GetPosition().X) ? 1 : 0;
                         else
-                            MatriceAdjacence[i, j] = nodeActuelle.GetPosition().Y <= nodeVerifier.GetPosition().Y ? 1 : 0;
+                            MatriceAdjacence[i, j] = EstPlusBasOuÉgal(nodeActuel.GetPosition(), nodeVérifié.GetPosition()) ? 1 : 0;
                     }
                 }
         }
@@ -117,6 +113,22 @@ namespace AtelierXNA.AI
                 n.CalculerH(arrivée);
             }
         }
+
+        #region Booléens.
+        private bool EstPlusBasOuÉgal(Vector3 pos1, Vector3 pos2)
+        {
+            return pos1.Y <= pos2.Y;
+        }
+        private bool EstConnecté(int i, int j)
+        {
+            return MatriceAdjacence[i, j] == 1;
+        }
+        private bool EstDistanceAcceptable(Vector3 pos1, Vector3 pos2)
+        {
+            return Vector3.Distance(pos1, pos2) <= DISTANCE_MAX;
+        }
+        #endregion
+        
         #endregion
     }
 }

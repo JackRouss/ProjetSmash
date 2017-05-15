@@ -47,7 +47,7 @@ namespace AtelierXNA
         public BoundingSphere HitBox { get; private set; }
         //public BoundingBox HitBox { get; private set; }
         public Bouclier BouclierPersonnage { get; protected set; }
-        protected float RayonDuBouclier { get; private set; }
+        protected float RayonDuBouclier { get; set; }
 
         protected float FrameEntreProjectile { get; private set; }
         protected float VitesseDéplacementGaucheDroite { get; set; }
@@ -56,7 +56,7 @@ namespace AtelierXNA
         public float ForceCoup { get; set; }
         public int DommageAttaque { get; private set; }
         public bool EstEnAttaque { get; protected set; }
-        public bool EstBouclierActif { get; private set; }
+        public bool EstBouclierActif { get; protected set; }
         bool ASautéDuneSurface { get; set; }
 
         //Copies de certains éléments de l'environnement importants pour le personnage.
@@ -281,7 +281,7 @@ namespace AtelierXNA
             {
                 Bloquer();
             }
-            else
+            else if(!(this is Bot))
             {
                 if (EstBouclierActif)
                 {

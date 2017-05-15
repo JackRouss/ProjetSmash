@@ -12,10 +12,10 @@ namespace AtelierXNA.AI
         }
         public int Index { get; set; }//Cette propriété n'est pas encapsulée mais c'est nécessaire.
         public float H { get; private set; }
-        public float G { get; set; }
-        public float F { get; set; }
-        public bool EstExtremiterDroite { get; set; }//Cette propriété n'est pas encapsulée mais c'est nécessaire.
-        public bool EstExtremiterGauche { get; set; }//Cette propriété n'est pas encapsulée mais c'est nécessaire.
+        public float G { get; set; }//Cette propriété n'est pas encapsulée mais c'est nécessaire.
+        public float F { get; set; }//Cette propriété n'est pas encapsulée mais c'est nécessaire.
+        public bool EstExtrémitéeDroite { get; set; }//Cette propriété n'est pas encapsulée mais c'est nécessaire.
+        public bool EstExtrémitéeGauche { get; set; }//Cette propriété n'est pas encapsulée mais c'est nécessaire.
         public int NomPlaquette { get; private set; }
         public Node CameFrom { get; set; }//Cette propriété n'est pas encapsulée mais c'est nécessaire pour le A*. De plus, cette classe n'est utilisée qu'exclkusivement pour le A*.
 
@@ -28,8 +28,8 @@ namespace AtelierXNA.AI
             H = n.H;
             G = n.G;
             F = n.F;
-            EstExtremiterDroite = n.EstExtremiterDroite;
-            EstExtremiterGauche = n.EstExtremiterGauche;
+            EstExtrémitéeDroite = n.EstExtrémitéeDroite;
+            EstExtrémitéeGauche = n.EstExtrémitéeGauche;
             NomPlaquette = n.NomPlaquette;
             Index = n.Index;
             if(n.CameFrom != null)
