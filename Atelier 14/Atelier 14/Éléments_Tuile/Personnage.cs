@@ -9,11 +9,12 @@ using AtelierXNA.AI;
 using AtelierXNA.Autres;
 using Microsoft.Xna.Framework.Audio;
 
+
 namespace AtelierXNA
 {
     public abstract class Personnage : Microsoft.Xna.Framework.DrawableGameComponent, IPause
     {
-
+        
         #region Propriétés, constantes et initialisation.
         protected const float LARGEUR_HITBOX = 5f;
         protected const float HAUTEUR_HITBOX = 5f;
@@ -93,6 +94,8 @@ namespace AtelierXNA
         protected RessourcesManager<SoundEffect> GestionnaireDeSon { get; set; }
 
         public bool décédé { get; set; }
+        int FramesCrier { get; set; }
+        protected int FrameCourir { get; set; }
 
         public Personnage(Game game, float vitesseDéplacementGaucheDroite, float vitesseMaximaleSaut, float masse, Vector3 position, float intervalleMAJ, Keys[] contrôles, PlayerIndex numManette)
             : base(game)
@@ -150,30 +153,29 @@ namespace AtelierXNA
             if (EstMort())
             {
                 --NbVies;
+
             }
             décédé = NbVies == 0;
-            if (EstMort() && !décédé)
-            {
-                GestionnaireDeSon.Find("screaminggoat").Play();
-            }
-            
+
             VieEnPourcentage = EstMort() ? 0 : VieEnPourcentage;
             VecteurVitesse = EstMort() ? Vector3.Zero : VecteurVitesse;
             VecteurVitesseGaucheDroite = EstMort() ? Vector3.Zero : VecteurVitesseGaucheDroite;
-            Position = EstMort() ? PositionSpawn : Position;
+            Position = EstMort()? PositionSpawn : Position;
             RayonDuBouclier = EstMort() ? 6 : RayonDuBouclier;
-
+            if (EstModePeur() && !décédé && FramesCrier <= 0)
+            {
+                GestionnaireDeSon.Find("screaminggoat").Play();
+                FramesCrier = 120;
+            }
             if (TempsÉcouléDepuisMAJ >= IntervalleMAJ)
             {
+                FramesCrier--;
+                FrameCourir--;
                 RayonDuBouclier = MathHelper.Min(RayonDuBouclier + 0.02f, 6);
                 FrameEntreProjectile--;
                 if (VecteurVitesse.Y == 0 && VecteurVitesse.X == 0 && ÉTAT_PERSO != ÉTAT.IMMOBILE && !(this is Bot)) //Conditions ici pour gérer l'immobilité.
                 {
                     ÉTAT_PERSO = ÉTAT.IMMOBILE;
-                }
-                else if (VecteurVitesse.Y < -1)
-                {
-                    ÉTAT_PERSO = ÉTAT.SAUTER;
                 }
                 else if (VecteurVitesse.Y != 0)
                 {
@@ -332,12 +334,10 @@ namespace AtelierXNA
             if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[4]) || GestionInputManette.EstNouvelleTouche(NumManette, Buttons.X)) && !EstBouclierActif && FrameEntreProjectile <= 0)
             {
                 GérerLancer();
-                ÉTAT_PERSO = ÉTAT.LANCER;
             }
             if ((GestionInputClavier.EstNouvelleTouche(CONTRÔLES[5]) || GestionInputManette.EstNouvelleTouche(NumManette, Buttons.A)) && !EstBouclierActif )
             {
-                GérerAttaque();
-                ÉTAT_PERSO = ÉTAT.ATTAQUER;            
+                GérerAttaque();          
             }
         }
         protected void GérerSauts()
@@ -368,18 +368,20 @@ namespace AtelierXNA
                     Projectile p = new Projectile(Game, 1f, new Vector3(0, 0, -MathHelper.Pi / 2), Position, new Vector2(2, 4), "Ninja/Kunai", AtelierXNA.Atelier.INTERVALLE_MAJ_STANDARD, DIRECTION, 0.75f, true, 4, NumManette);
                     Game.Components.Add(p);
                     FrameEntreProjectile = 30;
+                    ÉTAT_PERSO = ÉTAT.LANCER;
                 }
                 if (this.TypePersonnage == "Robot")
                 {
                     Projectile p = new Projectile(Game, 1f, new Vector3(0, 0, 0), Position, new Vector2(4, 2), "Robot/laser", AtelierXNA.Atelier.INTERVALLE_MAJ_STANDARD, DIRECTION, 1f, false, 3,NumManette);
                     Game.Components.Add(p);
                     FrameEntreProjectile = 40;
+                    ÉTAT_PERSO = ÉTAT.LANCER;
                 }
             }
         }
         private void GérerAttaque()
         {
-
+            ÉTAT_PERSO = ÉTAT.ATTAQUER;
         }
         protected abstract void AjouterBouclier();
         public void EncaisserDégâts(Personnage p)
@@ -423,7 +425,11 @@ namespace AtelierXNA
         #region Booléens de la classe.
         protected bool EstMort()
         {
-            return Position.X > Carte.LIMITE_MAP.X || Position.X < Carte.LIMITE_MAP.Y || Position.Y > Carte.LIMITE_MAP.Z || Position.Y < Carte.LIMITE_MAP.W;
+            return FramesCrier <= 0 && (Position.X > Carte.LIMITE_MAP.X || Position.X < Carte.LIMITE_MAP.Y || Position.Y > Carte.LIMITE_MAP.Z || Position.Y < Carte.LIMITE_MAP.W);
+        }
+        protected bool EstModePeur()
+        {
+            return (Position.X > Carte.LIMITE_MAP.X - 40 || Position.X < Carte.LIMITE_MAP.Y + 40 || Position.Y > Carte.LIMITE_MAP.Z - 30 || Position.Y < Carte.LIMITE_MAP.W + 70);
         }
         public bool EstEnCollision(Personnage p)
         {

@@ -77,7 +77,7 @@ namespace AtelierXNA.AI
                     {
                         PathFind();
                     }
-                   
+
                     Attaquer();
                     Bloquer();
                     Lancer();
@@ -185,8 +185,6 @@ namespace AtelierXNA.AI
                 else
                     Droite();
                 GérerLancer();
-                EstEnAttaque = true;
-                ÉTAT_PERSO = ÉTAT.LANCER;
             }
         }
 
@@ -252,20 +250,16 @@ namespace AtelierXNA.AI
         protected override void Droite()
         {
             DIRECTION = ORIENTATION.DROITE;
-            ÉTAT_PERSO = ÉTAT.COURRIR;
-            if (VecteurVitesse.Y != 0)
-                Position += 0.1f * Vector3.Right;
-            else
-                Position += 0.1f * Vector3.Right;
+            if (VecteurVitesse.Y == 0)
+                ÉTAT_PERSO = ÉTAT.COURRIR;
+            Position += 0.1f * Vector3.Right;
         }
         protected override void Gauche()
         {
             DIRECTION = ORIENTATION.GAUCHE;
-            ÉTAT_PERSO = ÉTAT.COURRIR;
-            if (VecteurVitesse.Y != 0)
-                Position -= 0.1f * Vector3.Right;
-            else
-                Position -= 0.1f * Vector3.Right;
+            if (VecteurVitesse.Y == 0)
+                ÉTAT_PERSO = ÉTAT.COURRIR;
+            Position -= 0.1f * Vector3.Right;
         }
         private Node CalculerNodeLePlusProche(Vector3 position, List<Node> listeÀParcourir)
         {
