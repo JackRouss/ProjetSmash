@@ -1,16 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
 using AtelierXNA.Éléments_Tuile;
-using AtelierXNA.AI;
 using AtelierXNA.Autres;
+using Microsoft.Xna.Framework.Media;
 //using AtelierXNA.Autres;
 
 namespace AtelierXNA
@@ -20,7 +13,6 @@ namespace AtelierXNA
     {
         public const int NB_ANIMATIONS = 11;
         protected const float ÉCHELLE_PERSONNAGE = 4;
-
         //Données de base.
         string état;
         protected string État
@@ -93,6 +85,11 @@ namespace AtelierXNA
                 if (ÉTAT_PERSO == ÉTAT.COURRIR)
                 {
                     État = NomsSprites[8];
+                    if(FrameCourir <= 0)
+                    {
+                        GestionnaireDeSon.Find("Run").Play(); 
+                        FrameCourir = 15;
+                    }
                 }
                 else if (ÉTAT_PERSO == ÉTAT.BLOQUER)
                 {
@@ -112,13 +109,17 @@ namespace AtelierXNA
                             État = NomsSprites[9];
                         }
                     }
+                    if (TypePersonnage == "Ninja")
+                        GestionnaireDeSon.Find("steelsword").Play();
+                    else if (TypePersonnage == "Robot")
+                        GestionnaireDeSon.Find("ROBOTATTAQUE").Play();
                     EstEnAttaque = true;
                 }
                 else if (ÉTAT_PERSO == ÉTAT.IMMOBILE)
                 {
                     État = NomsSprites[4];
                 }
-                else if (ÉTAT_PERSO == ÉTAT.LANCER)
+                else if (ÉTAT_PERSO == ÉTAT.LANCER )
                 {
                     if (VecteurVitesse.Y != 0)
                     {
@@ -128,6 +129,11 @@ namespace AtelierXNA
                     {
                         État = NomsSprites[10];
                     }
+                    if (TypePersonnage == "Ninja")
+                        GestionnaireDeSon.Find("Arrow").Play();
+                    else if (TypePersonnage == "Robot")
+                        GestionnaireDeSon.Find("LaserBlasts").Play();
+               
                     EstEnAttaque = true;
                 }
                 else if (ÉTAT_PERSO == ÉTAT.MORT)
@@ -166,7 +172,6 @@ namespace AtelierXNA
         {
             Frame.DéplacerTuile(Position);
         }
-
         protected override bool EstDansIntervalleSurface(Vector3 intervalle, Vector3 position)
         {
             return (intervalle.X <= position.X) && (intervalle.Y >= position.X);

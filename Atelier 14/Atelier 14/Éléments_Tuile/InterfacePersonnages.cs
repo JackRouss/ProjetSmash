@@ -1,26 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
 
 
 namespace AtelierXNA.Éléments_Tuile
 {
-    
-    /// <summary>
-    /// This is a game component that implements IUpdateable.
-    /// </summary>
     public class InterfacePersonnages : Microsoft.Xna.Framework.DrawableGameComponent
     {
-        const int BORDURE_GAUCHE = 60;
-        const int ÉCART_ENTRE_INTERFACE = 600;
+        const int BORDURE_GAUCHE = 5;
+        const int BORDURE_BAS = 20;
+        const int ÉCART_ENTRE_INTERFACE = 1100;
         const int ÉCART_ENTRE_COPOSANT_INTERFACE = 90;
+        const int DIMENSION_TETE_PERSO_LONGUEUR = 50;
+        const int DIMENSION_TETE_PERSO_LARGEUR = 80;
+        const int DIMENSION_TETE_PERSO_LONGUEUR_TOTALE = DIMENSION_TETE_PERSO_LONGUEUR + BORDURE_GAUCHE;
+        const int DIMENSION_TETE_PERSO_LARGEUR_TOTALE = DIMENSION_TETE_PERSO_LARGEUR + BORDURE_BAS;
+
 
         string TypePersonnage { get; set; }
         PlayerIndex NumManette { get; set; }
@@ -38,17 +34,18 @@ namespace AtelierXNA.Éléments_Tuile
         TuileTexturée NomJoueur { get; set; }
 
 
+        int DécalementImagePerso { get; set; }
+        int DÉcalementPoucentageVie { get; set; }
+        Rectangle[] PositionTete { get; set; }
+        Vector2[] PositionTypePersonage { get; set; }
+
+
         public InterfacePersonnages(Game game, string typePersonnege, PlayerIndex numManette)
             : base(game)
         {
             TypePersonnage = typePersonnege;
             NumManette = numManette;
         }
-
-        /// <summary>
-        /// Allows the game component to perform any initialization it needs to before starting
-        /// to run.  This is where it can query for any required services and load content.
-        /// </summary>
         public override void Initialize()
         {
             DrawOrder = 6;
@@ -60,11 +57,14 @@ namespace AtelierXNA.Éléments_Tuile
             CouleurTexte = Color.White;
             ListesPerso = new List<PersonnageAnimé>();
             TetePersonnage = new List<Texture2D>();
+            PositionTete = new Rectangle[2];
+            PositionTypePersonage = new Vector2[2];
             RemplirListePerso();
             RemplirListeCamera();
             RemplirListeTetePersonage();
             ModifierImage();
-
+            Calculer();
+            CréerPosition();
             base.Initialize();
         }
 
@@ -97,7 +97,6 @@ namespace AtelierXNA.Éléments_Tuile
         {
             int nbTexels;
             Color[] texels;
-            //Image = new Texture2D(imagelocale.GraphicsDevice, imagelocale.Width, imagelocale.Height);
             nbTexels = ImageVie.Width * ImageVie.Height;
             texels = new Color[nbTexels];
             ImageVie.GetData<Color>(texels);
@@ -115,6 +114,28 @@ namespace AtelierXNA.Éléments_Tuile
             ImageVie.SetData<Color>(texels);
         }
 
+        void Calculer()
+        {
+            DécalementImagePerso = (int)(Atelier.GetDimensionÉcran(0) - (DIMENSION_TETE_PERSO_LONGUEUR_TOTALE));
+        }
+
+        void CréerPosition()
+        {
+            for (int i = 0; i < PositionTete.Length; i++)
+            {
+                PositionTete[i] = new Rectangle(BORDURE_GAUCHE + i * DécalementImagePerso,
+                                                            Game.Window.ClientBounds.Height - DIMENSION_TETE_PERSO_LARGEUR_TOTALE,
+                                                            DIMENSION_TETE_PERSO_LONGUEUR,
+                                                            DIMENSION_TETE_PERSO_LARGEUR);
+            }
+           
+
+
+            PositionTypePersonage[0] = new Vector2(DIMENSION_TETE_PERSO_LONGUEUR_TOTALE, Game.Window.ClientBounds.Height - ÉCART_ENTRE_COPOSANT_INTERFACE);
+            PositionTypePersonage[1] = new Vector2(DécalementImagePerso - DIMENSION_TETE_PERSO_LONGUEUR, Game.Window.ClientBounds.Height - ÉCART_ENTRE_COPOSANT_INTERFACE);
+
+        }
+
         public override void Update(GameTime gameTime)
         {       
             base.Update(gameTime);
@@ -122,30 +143,33 @@ namespace AtelierXNA.Éléments_Tuile
         
         public override void Draw(GameTime gameTime)
         {
-            int redneck = 0;
+            int rocket = 0;
             GestionSprites.Begin();
             foreach(PersonnageAnimé perso in ListesPerso)
             {
                 Vector3 positionPerso = perso.GetPositionPersonnage;
-                GestionSprites.Draw(TetePersonnage[redneck], new Rectangle(5 + redneck* ÉCART_ENTRE_INTERFACE + 100*redneck, Game.Window.ClientBounds.Height - 100, 50,80), CouleurTexte);
-                GestionSprites.DrawString(ArialFont, perso.TypePersonnage, new Vector2(BORDURE_GAUCHE + redneck * ÉCART_ENTRE_INTERFACE, Game.Window.ClientBounds.Height - ÉCART_ENTRE_COPOSANT_INTERFACE), CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
-                GestionSprites.DrawString(ArialFont, perso.VieEnPourcentage.ToString(), new Vector2(BORDURE_GAUCHE + redneck * ÉCART_ENTRE_INTERFACE, Game.Window.ClientBounds.Height - ArialFont.MeasureString(TypePersonnage).Y), CouleurTexte);
+                GestionSprites.Draw(TetePersonnage[rocket],PositionTete[rocket], CouleurTexte);
+                GestionSprites.DrawString(ArialFont, perso.TypePersonnage, PositionTypePersonage[rocket], CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
+                GestionSprites.DrawString(ArialFont, perso.VieEnPourcentage.ToString(), 
+                                            new Vector2(DIMENSION_TETE_PERSO_LONGUEUR_TOTALE + rocket * (DécalementImagePerso - ArialFont.MeasureString(perso.VieEnPourcentage.ToString()).X - DIMENSION_TETE_PERSO_LONGUEUR_TOTALE)
+                                          , Game.Window.ClientBounds.Height - ArialFont.MeasureString(TypePersonnage).Y), CouleurTexte);
                 for (int i = 0; i < perso.NbVies; i++)
                 {
-                    AfficherNombreVie(i, redneck);
+                    AfficherNombreVie(i, rocket, perso);
                 }
                 Vector3 PositionÉcran = GestionSprites.GraphicsDevice.Viewport.Project(positionPerso, Caméra.Projection, Caméra.Vue, Matrix.Identity);
-                GestionSprites.DrawString(ArialFont, perso.NumManette.ToString(), new Vector2(PositionÉcran.X - 15, PositionÉcran.Y - 80), CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
-                redneck++;
+                GestionSprites.DrawString(ArialFont, perso.NumManette.ToString(), new Vector2(PositionÉcran.X - 15, PositionÉcran.Y - 100), CouleurTexte, 0, new Vector2(0, 0), 0.3f, SpriteEffects.None, 0);
+                rocket++;
             }
             
             GestionSprites.End();
             base.Draw(gameTime);
         }
 
-       void AfficherNombreVie(int cptVie, int cptPerso)
+       void AfficherNombreVie(int cptVie, int cptPerso, PersonnageAnimé perso)
         {
-           GestionSprites.Draw(ImageVie, new Rectangle(100 + cptPerso * 460 + cptVie * 30, Game.Window.ClientBounds.Height - 50, 30, 30), CouleurTexte);
+            float Écart = DIMENSION_TETE_PERSO_LONGUEUR_TOTALE + ArialFont.MeasureString(perso.VieEnPourcentage.ToString()).X;
+            GestionSprites.Draw(ImageVie, new Rectangle((int)(Écart + cptPerso * (DécalementImagePerso - Écart - ArialFont.MeasureString(perso.VieEnPourcentage.ToString()).X - 30) + cptVie * (cptPerso == 1 ? -1 : 1) * 30), Game.Window.ClientBounds.Height - 50, 30, 30), CouleurTexte);
         }
        
     }

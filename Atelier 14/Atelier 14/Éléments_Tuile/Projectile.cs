@@ -12,7 +12,6 @@ namespace AtelierXNA.Éléments_Tuile
         public Vector3 Position { get; private set; }
         Vector2 Étendue { get; set; }
         public float Vitesse { get; private set; }
-        public Vector3 PositionInitiale { get; private set; }
         float TempsÉcouléDepuisMAJ { get; set; }
         float TempsÉcouléTotal { get; set; }
         float IntervalleMAJ { get; set; }

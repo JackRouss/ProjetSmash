@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
@@ -22,9 +17,9 @@ namespace AtelierXNA
         public const float INTERVALLE_CALCUL_FPS = 1f;
         public const float INTERVALLE_MAJ_STANDARD = 1f / 60f;
         const float INTERVALLE_MAJ_ANIMATION = 1f / 25f;
-        readonly string[] NomCartes = { "BackGround1", "BackGround2", "BackGround3", "BackGround4" };
-        readonly Vector2[] DimensionCarte = { new Vector2(843, 316),new Vector2(844, 358), new Vector2(844, 364), new Vector2(844, 362) };
-        public static readonly Color[] CouleurCartes = { Color.ForestGreen, Color.DeepSkyBlue, Color.Beige, Color.YellowGreen };
+        readonly string[] NomCartes = { "BackGround1", "BackGround2", "BackGround3", "BackGround4", "BackGround5", "BackGround6"};
+        readonly Vector2[] DimensionCarte = { new Vector2(843, 316),new Vector2(844, 358), new Vector2(844, 364), new Vector2(844, 362), new Vector2(844, 362) , new Vector2(844, 362) };
+        public static readonly Color[] CouleurCartes = { Color.ForestGreen, Color.DeepSkyBlue, Color.Beige, Color.YellowGreen, Color.AliceBlue, Color.Aquamarine };
         PlayerIndex[] Joueurs = { PlayerIndex.One, PlayerIndex.Two};
         bool[] ConnectionJoueur { get; set; }
         bool PvP { get; set; }
@@ -43,6 +38,9 @@ namespace AtelierXNA
         public int[] NB_FRAMES_SPRITES_ROBOT = { 8, 9, 10, 10, 10, 10, 8, 5, 8, 10, 4 };
         public int[] NB_FRAMES_SPRITES_NINJA = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
 
+        static int LongueurÉcran = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+        static int LargeurÉcran = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+
         const int NB_PLATEFORMES = 10;
         enum GameState { MENU_PRINCIPAL, MENU_PERSONNAGE, MENU_DIFFICULTÉ, MENU_CARTE, MENU_PAUSE, JEU , FIN_JEU, MENU_PvP}
 
@@ -58,6 +56,7 @@ namespace AtelierXNA
         RessourcesManager<SoundEffect> GestionnaireDeSons { get; set; }
         RessourcesManager<Song> GestionnaireDeChansons { get; set; }
         Générateur g { get; set; }
+        RessourcesManager<Effect> GestionnaireDeShaders { get; set; }
 
 
 
@@ -85,6 +84,7 @@ namespace AtelierXNA
         PersonnageAnimé Joueur2 { get; set; }
         PersonnageAnimé Bot { get; set; }
         Map Carte { get; set; }
+        TuileTexturéeAniméeJulia julia { get; set; }
         TuileTexturée BackGround { get; set; }
         ArrièrePlanDéroulant ArrièrePlan { get; set; }
         bool VieilÉtatCollisionPerso { get; set; }
@@ -97,7 +97,12 @@ namespace AtelierXNA
         #region Initialisation.
         public Atelier()
         {
+            
             PériphériqueGraphique = new GraphicsDeviceManager(this);
+           
+            this.PériphériqueGraphique.PreferredBackBufferWidth = this.Window.ClientBounds.Width + (LongueurÉcran - this.Window.ClientBounds.Width);
+            this.PériphériqueGraphique.PreferredBackBufferHeight = this.Window.ClientBounds.Height + (LargeurÉcran - this.Window.ClientBounds.Height);
+            //this.PériphériqueGraphique.IsFullScreen = true;
             Content.RootDirectory = "Content";
             PériphériqueGraphique.SynchronizeWithVerticalRetrace = false;
             IsFixedTimeStep = false;
@@ -106,16 +111,32 @@ namespace AtelierXNA
             Services.AddService(typeof(Générateur), g);
         }
 
+        public static float GetDimensionÉcran(int coté)
+        {
+            if(coté == 0)
+            {
+                return LongueurÉcran;
+            }
+            else
+            {
+                return LargeurÉcran;
+            }
+
+        }
 
         protected override void Initialize()
         {
             InitialiserServices();
-            Menu = new MenuPrincipal(this);
-            Components.Add(Menu);
-            ConnectionManette();
-            InitialiserJoueur();
+            Commencer();
             base.Initialize();
             MediaPlayer.Play(GestionnaireDeChansons.Find("Pixelland"));
+        }
+
+        void Commencer()
+        {
+            InitialiserMenuPrincipal();
+            ConnectionManette();
+            InitialiserJoueur();
         }
 
         void InitialiserJoueur()
@@ -146,10 +167,16 @@ namespace AtelierXNA
             GestionnaireDeChansons.Add("Pixelland", this.Content.Load<Song>("Sounds/Songs/Pixelland"));
             GestionnaireDeChansons.Add("MEME", this.Content.Load<Song>("Sounds/Songs/MEME"));
 
-            //GestionnaireDeSons.Add("gameover", this.Content.Load<SoundEffect>("Sounds/SoundEffects/gameover"));
-            //GestionnaireDeSons.Add("punch", this.Content.Load<SoundEffect>("Sounds/SoundEffects/punch"));
-            //GestionnaireDeSons.Add("screaminggoat", this.Content.Load<SoundEffect>("Sounds/SoundEffects/screaminggoat"));
-            //GestionnaireDeSons.Add("wilhelm", this.Content.Load<SoundEffect>("Sounds/SoundEffects/wilhelm"));
+            GestionnaireDeSons.Add("gameover", this.Content.Load<SoundEffect>("Sounds/SoundEffects/gameover"));
+            GestionnaireDeSons.Add("punch", this.Content.Load<SoundEffect>("Sounds/SoundEffects/punch"));
+            GestionnaireDeSons.Add("screaminggoat", this.Content.Load<SoundEffect>("Sounds/SoundEffects/screaminggoat"));
+            GestionnaireDeSons.Add("steelsword", this.Content.Load<SoundEffect>("Sounds/SoundEffects/steelsword"));
+            GestionnaireDeSons.Add("Arrow", this.Content.Load<SoundEffect>("Sounds/SoundEffects/Arrow"));
+            GestionnaireDeSons.Add("LaserBlasts", this.Content.Load<SoundEffect>("Sounds/SoundEffects/LaserBlasts"));
+            GestionnaireDeSons.Add("ROBOTATTAQUE", this.Content.Load<SoundEffect>("Sounds/SoundEffects/ROBOTATTAQUE"));
+            GestionnaireDeSons.Add("Run", this.Content.Load<SoundEffect>("Sounds/SoundEffects/Run"));
+            
+
         }
         private void ChargerModèles()
         {
@@ -198,10 +225,12 @@ namespace AtelierXNA
             GestionManettes = new InputControllerManager(this);
             GestionnaireDeChansons = new RessourcesManager<Song>(this, "Songs");
             GestionnaireDeSons = new RessourcesManager<SoundEffect>(this, "Sounds");
+            GestionnaireDeShaders = new RessourcesManager<Effect>(this, "Effets");
 
 
             Services.AddService(typeof(RessourcesManager<SoundEffect>), GestionnaireDeSons);
             Services.AddService(typeof(RessourcesManager<Song>), GestionnaireDeChansons);
+            Services.AddService(typeof(RessourcesManager<Effect>), GestionnaireDeShaders);
             Services.AddService(typeof(RessourcesManager<SpriteFont>), GestionnaireDeFonts);
             Services.AddService(typeof(RessourcesManager<Texture2D>), GestionnaireDeTextures);
             Services.AddService(typeof(RessourcesManager<Model>), GestionnaireDeModèles);
@@ -224,15 +253,29 @@ namespace AtelierXNA
             }
         }
 
+        void InitialiserMenuPrincipal()
+        {
+            Menu = new MenuPrincipal(this);
+            Components.Add(Menu);
+        }
+
         void InitialiserJeu()
         {
-            Components.Remove(MenuDiff);
-
 
 
             AjouterCaméra();
-            BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], NomCartes[MenuCa.ChoixCarte], 0);
-            Components.Add(BackGround);
+            if(MenuCa.ChoixCarte == 4)
+            {
+                julia = new TuileTexturéeAniméeJulia(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], "Fond_blanc.svg", 0);
+                Components.Add(julia);
+
+            }
+            else
+            {
+                BackGround = new TuileTexturée(this, 1, new Vector3(0, 0, 0), new Vector3(0, -60, -200), DimensionCarte[MenuCa.ChoixCarte], NomCartes[MenuCa.ChoixCarte], 0);
+                Components.Add(BackGround);
+
+            }
 
 
 
@@ -258,6 +301,7 @@ namespace AtelierXNA
         {
             Carte = new Map(this, 1, Vector3.Zero, Vector3.Zero, CouleurCartes[MenuCa.ChoixCarte],NB_PLATEFORMES);
             Components.Add(Carte);
+
         }
         void AjouterJoueursPvBot()
         {
@@ -374,7 +418,8 @@ namespace AtelierXNA
 
         void InitialiserFinJeux(PersonnageAnimé mort)
         {
-            Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 0.4f, mort.TypePersonnage);
+            GestionnaireDeSons.Find("gameover").Play();
+            Fin = new MenuFinJeu(this, INTERVALLE_MAJ_STANDARD, 0.4f, mort.NumManette.ToString());
 
             ÉtatJeu = GameState.FIN_JEU;
             ToggleComponentsUpdate();
@@ -411,30 +456,34 @@ namespace AtelierXNA
 
                     if (Menu.PasserMenuSuivant)
                     {
-                        //if (ConnectionJoueur[1])
-                        if(true)
+                        ÉtatJeu = GameState.MENU_PvP;
+                        Menu.PasserMenuSuivant = false;
+                        InitialiserMenuPvP();
+                        if (ConnectionJoueur[1])
                         {
-                            ÉtatJeu = GameState.MENU_PvP;
-                            Menu.PasserMenuSuivant = false;
-                            InitialiserMenuPvP();
+                            MenuJoueurs.multiplayer = true;
                         }
-                        else
-                        {
-                            ÉtatJeu = GameState.MENU_PERSONNAGE;
-                            Menu.PasserMenuSuivant = false;
-                            InitialiserMenuPersonnages(Joueurs[cptJoueur]);
-                        }
-                       
                     }
                     break;
 
                 case GameState.MENU_PvP:
-                    PvP = MenuJoueurs.PvPActiver;
+                    ConnectionManette();
+                    if (ConnectionJoueur[1])
+                    {
+                        MenuJoueurs.multiplayer = true;
+                    }
+                    else
+                    {
+                        MenuJoueurs.multiplayer = false;
+
+                    }
                     if (MenuJoueurs.PasserMenuSuivant)
                     {
+                        PvP = MenuJoueurs.PvPActiver;
                         ÉtatJeu = GameState.MENU_PERSONNAGE;
-                        Menu.PasserMenuSuivant = false;
+                        MenuJoueurs.PasserMenuSuivant = false;
                         InitialiserMenuPersonnages(Joueurs[cptJoueur]);
+                        Components.Remove(MenuJoueurs);
 
                     }
 
@@ -442,6 +491,8 @@ namespace AtelierXNA
                 case GameState.MENU_PERSONNAGE:
                     if (MenuPerso.PasserMenuSuivant)
                     {
+                        Components.Remove(MenuPerso);
+                        
                         ChoixJoueurs[cptJoueur] = MenuPerso.État;
                         cptJoueur++;
                         if (MenuJoueurs.PvPActiver)
@@ -464,9 +515,18 @@ namespace AtelierXNA
                 case GameState.MENU_CARTE:
                     if (MenuCa.PasserMenuSuivant)
                     {
-                        ÉtatJeu = GameState.MENU_DIFFICULTÉ;
-                        MenuPerso.PasserMenuSuivant = false;
-                        InitialiserMenuDifficulté();
+                        if (MenuJoueurs.PvBotActiver)
+                        {
+                            ÉtatJeu = GameState.MENU_DIFFICULTÉ;
+                            MenuCa.PasserMenuSuivant = false;
+                            InitialiserMenuDifficulté();
+                        }
+                        else
+                        {
+                            ÉtatJeu = GameState.JEU;
+                            MenuCa.PasserMenuSuivant = false;
+                            InitialiserJeu();
+                        }
                     }
                     break;
                 case GameState.MENU_DIFFICULTÉ:
@@ -474,6 +534,7 @@ namespace AtelierXNA
                     {
                         ÉtatJeu = GameState.JEU;
                         MenuDiff.PasserMenuSuivant = false;
+                        Components.Remove(MenuDiff);
                         InitialiserJeu();
                     }
                     break;
@@ -488,10 +549,12 @@ namespace AtelierXNA
                     if (Joueur.décédé)
                     {
                         InitialiserFinJeux(PersoEnJeux);
+                        Joueur.décédé = false;
                     }
                     if (PersoEnJeux.décédé)
                     {
                         InitialiserFinJeux(Joueur);
+                        PersoEnJeux.décédé = false;
                     }
                    
                     break;
@@ -520,6 +583,26 @@ namespace AtelierXNA
                     }
                     break;
                 case GameState.FIN_JEU:
+                    MediaPlayer.Stop();
+                    if (Fin.Recommencer)
+                    {
+                        Components.Remove(Fin);
+                        ÉtatJeu = GameState.MENU_DIFFICULTÉ;
+                        MenuDiff.PasserMenuSuivant = true;
+                        Components.Clear();
+                        EnleverServices();
+                        Initialize();
+                        Components.Remove(Menu);
+                        Fin.Recommencer = false;
+                    }
+                    if (Fin.RetournerMenuPrincipale)
+                    {
+                        ÉtatJeu = GameState.MENU_PRINCIPAL;
+                        Components.Clear();
+                        EnleverServices();
+                        Initialize();
+                        Fin.RetournerMenuPrincipale = false;
+                    }
                     break;
             }
             if (AncienÉtatJeu != ÉtatJeu)
@@ -535,15 +618,18 @@ namespace AtelierXNA
         void EnleverServices()
         {
             Services.RemoveService(typeof(RessourcesManager<SoundEffect>));
+            Services.RemoveService(typeof(RessourcesManager<Effect>));
             Services.RemoveService(typeof(RessourcesManager<Song>));
             Services.RemoveService(typeof(RessourcesManager<SpriteFont>));
             Services.RemoveService(typeof(RessourcesManager<Texture2D>));
             Services.RemoveService(typeof(RessourcesManager<Model>));
+            Services.RemoveService(typeof(RessourcesManager<Effect>));
             Services.RemoveService(typeof(InputControllerManager));
             Services.RemoveService(typeof(InputManager));
             Services.RemoveService(typeof(SpriteBatch));
             Services.RemoveService(typeof(Caméra));
         }
+
 
         void GérerMusique()
         {

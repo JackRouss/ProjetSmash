@@ -1,12 +1,11 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 
 namespace AtelierXNA
 {
-   public class ObjetDeBase : Microsoft.Xna.Framework.DrawableGameComponent
+    public class ObjetDeBase : Microsoft.Xna.Framework.DrawableGameComponent
    {
       string NomModèle { get; set; }
       RessourcesManager<Model> GestionnaireDeModèles { get; set; }

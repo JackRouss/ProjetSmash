@@ -1,10 +1,9 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace AtelierXNA
 {
-   public class Lumière
+    public class Lumière
    {
       Vector3 position;
       public Vector3 Position

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
 namespace AtelierXNA
 {
-   public class TuileTexturée : Tuile
+    public class TuileTexturée : Tuile
    {
       //const int NB_TRIANGLES = 2;
       RessourcesManager<Texture2D> gestionnaireDeTextures;
@@ -48,6 +46,7 @@ namespace AtelierXNA
                Sommets[++NoSommet] = new VertexPositionTexture(PtsSommets[i, j + 1], PtsTexture[i, j + 1]);
             }
          }
+            SetUpVertexBuffer();
       }
 
       protected override void LoadContent()
@@ -78,5 +77,16 @@ namespace AtelierXNA
             PtsSommets[1, 1] = buffer;
             InitialiserSommets();
         }
+        protected virtual void SetUpVertexBuffer()
+        {
+
+        }
+        
+       
+        protected override void SetVertexBuffer(GraphicsDevice device)
+        {
+
+        }
+
     }
 }

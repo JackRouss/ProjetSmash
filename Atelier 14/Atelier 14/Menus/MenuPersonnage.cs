@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
 
 namespace AtelierXNA
 {
@@ -145,17 +139,17 @@ namespace AtelierXNA
 
         private void GérerEntrées()//RAJOUTER POUR LA MANETTE.
         {
-            if(GestionInputClavier.EstClavierActivé || GestionInputManette.EstManetteActivée(PlayerIndex.One))
+            if(GestionInputClavier.EstClavierActivé || GestionInputManette.EstManetteActivée(NumJoueur))
             {
-                if (GestionInputClavier.EstNouvelleTouche(Keys.Right) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickRight))
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Right) || GestionInputManette.EstNouvelleTouche(NumJoueur, Buttons.LeftThumbstickRight))
                 {
                     État = ÉTAT.ROBOT;
                 }
-                else if (GestionInputClavier.EstNouvelleTouche(Keys.Left) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.LeftThumbstickLeft))
+                else if (GestionInputClavier.EstNouvelleTouche(Keys.Left) || GestionInputManette.EstNouvelleTouche(NumJoueur, Buttons.LeftThumbstickLeft))
                 {
                     État = ÉTAT.NINJA;
                 }
-                if (GestionInputClavier.EstNouvelleTouche(Keys.Enter) || GestionInputManette.EstNouvelleTouche(PlayerIndex.One, Buttons.A))
+                if (GestionInputClavier.EstNouvelleTouche(Keys.Enter) || GestionInputManette.EstNouvelleTouche(NumJoueur, Buttons.A))
                 {
                     PasserMenuSuivant = true;
                 }

@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
 using AtelierXNA.AI;
 using AtelierXNA.Autres;
 
@@ -59,19 +52,19 @@ namespace AtelierXNA
             
             if(Couleur == Atelier.CouleurCartes[0])
             {
-                g.ModifierSeed(1);
+                g.ModifierSeed(99);
             }
             else if(Couleur == Atelier.CouleurCartes[1])
             {
-                g.ModifierSeed(2);
+                g.ModifierSeed(67);
             }
             else if(Couleur == Atelier.CouleurCartes[2])
             {
-                g.ModifierSeed(3);
+                g.ModifierSeed(666);//Exemple si le bot.
             }
             else if(Couleur == Atelier.CouleurCartes[3])
             {
-                g.ModifierSeed(4);
+                g.ModifierSeed(5924725);
             }
         }
 
@@ -97,14 +90,11 @@ namespace AtelierXNA
             IntervallesSurfaces.Add(new Vector3(PtsSommets[0].X, PtsSommets[4].X, Origine.Y));
             Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
             Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 4, Origine.Y + hauteur, Origine.Z), Couleur));
-            foreach (Plaquette p in Plateformes)
-            {
-                p.Initialize();
-            }
-            GénérerPlateformes();
-            //Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X + Longueur / 2, Origine.Y + 2*hauteur, Origine.Z), Couleur));
-            //Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X - Longueur / 2, Origine.Y + 2 * hauteur, Origine.Z), Couleur));
-            //Plateformes.Add(new Plaquette(this.Game, 1, Vector3.Zero, new Vector3(Origine.X, Origine.Y + 2 * hauteur, Origine.Z), Couleur));
+                foreach (Plaquette p in Plateformes)
+                {
+                    p.Initialize();
+                }
+                GénérerPlateformes();
             foreach (Plaquette p in Plateformes)
             {
                 Game.Components.Add(p);
