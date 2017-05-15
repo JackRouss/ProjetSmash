@@ -24,6 +24,8 @@ namespace AtelierXNA
 
         string[,] convert { get; set; }
 
+        //PlayerIndex[] lesManettes { get; set; }
+
 
         public InputControllerManager(Game game)
             : base(game)
@@ -42,12 +44,19 @@ namespace AtelierXNA
             LesNouvelleTouche = new List<Buttons> { { new Buttons() }, { new Buttons() } };
 
             lesBouttons = new Buttons[] { Buttons.A, Buttons.B, Buttons.Back, Buttons.BigButton, Buttons.DPadDown, Buttons.DPadLeft, Buttons.DPadRight, Buttons.DPadUp, Buttons.LeftShoulder, Buttons.LeftStick, Buttons.LeftThumbstickDown, Buttons.LeftThumbstickLeft, Buttons.LeftThumbstickRight, Buttons.LeftThumbstickUp, Buttons.LeftTrigger, Buttons.RightShoulder, Buttons.RightStick, Buttons.RightThumbstickDown, Buttons.RightThumbstickLeft, Buttons.RightThumbstickRight, Buttons.RightThumbstickUp, Buttons.RightTrigger, Buttons.Start, Buttons.X, Buttons.Y };
-            
+
+            //lesManettes = new PlayerIndex[] { PlayerIndex.One, PlayerIndex.Two };
+
+
             base.Initialize();
         }
         public override void Update(GameTime gameTime)
         {
             LesAncinneTouche = new List<Buttons> { LesNouvelleTouche[0] ,  LesNouvelleTouche[1]  };
+            for (int i = 0; i < LesNouvelleTouche.Count; i++)
+            {
+                LesNouvelleTouche[i] = GottaChekThemAll(i);
+            }
             AncienÉtatManette = ÉtatManette;
         }
         public bool EstManetteActivée(PlayerIndex numManette)
@@ -60,13 +69,11 @@ namespace AtelierXNA
         public bool EstNouvelleTouche(PlayerIndex numManette, Buttons touche)
         {
             int Case = TrouverNumManette(numManette);
-            LesNouvelleTouche[0] = GottaChekThemAll(0);
             ÉtatManette[Case] = GamePad.GetState(numManette);
             bool estNouvelleTouche = ÉtatManette[Case].IsButtonDown(touche);
-            int i = 0;
             if (estNouvelleTouche)
             {
-                estNouvelleTouche = (Buttons)LesAncinneTouche[Case] != touche;
+                estNouvelleTouche = ((Buttons)LesAncinneTouche[Case] != touche);
             }
             return estNouvelleTouche;
 
