@@ -56,6 +56,7 @@ namespace AtelierXNA
             for (int i = 0; i < LesNouvelleTouche.Count; i++)
             {
                 LesNouvelleTouche[i] = GottaChekThemAll(i);
+                //Reset(i);
             }
             AncienÉtatManette = ÉtatManette;
         }
@@ -73,6 +74,7 @@ namespace AtelierXNA
             bool estNouvelleTouche = ÉtatManette[Case].IsButtonDown(touche);
             if (estNouvelleTouche)
             {
+                LesNouvelleTouche[Case] = touche; 
                 estNouvelleTouche = ((Buttons)LesAncinneTouche[Case] != touche);
             }
             return estNouvelleTouche;
@@ -106,6 +108,8 @@ namespace AtelierXNA
         {
             Buttons boutton = new Buttons();
             bool trouver = false;
+           
+
             int j = 0;
             while (j < lesBouttons.Length && !trouver)
             {
@@ -123,6 +127,14 @@ namespace AtelierXNA
             }
             return boutton;
         }
+        void Reset(int i)
+        {
+            if (LesNouvelleTouche[i].ToString() != null)
+            {
+                LesNouvelleTouche = new List<Buttons> { { new Buttons() }, { new Buttons() } };
+            }
+        }
+
 
 
 

@@ -30,7 +30,7 @@ namespace AtelierXNA.Éléments_Tuile
             GestionClavier = Game.Services.GetService(typeof(InputManager)) as InputManager;
             GestionnaireDeShaders = Game.Services.GetService(typeof(RessourcesManager<Effect>)) as RessourcesManager<Effect>;
 
-            julia = GestionnaireDeShaders.Find("Julia");
+            julia = GestionnaireDeShaders.Find("Julia - Copy");
             CaméraTuile = Game.Components.First(t => t is CaméraDePoursuite) as CaméraDePoursuite;
 
             base.LoadContent();
